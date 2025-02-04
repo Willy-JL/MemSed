@@ -19,62 +19,62 @@ namespace cimgui
 
 #ifndef IMGUI_DISABLE
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_opengl(cimgui::SDL_Window* window, void* sdl_gl_context)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForOpenGL(cimgui::SDL_Window* window, void* sdl_gl_context)
 {
     return ::ImGui_ImplSDL3_InitForOpenGL(reinterpret_cast<::SDL_Window*>(window), sdl_gl_context);
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_vulkan(cimgui::SDL_Window* window)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForVulkan(cimgui::SDL_Window* window)
 {
     return ::ImGui_ImplSDL3_InitForVulkan(reinterpret_cast<::SDL_Window*>(window));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_d3d(cimgui::SDL_Window* window)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForD3D(cimgui::SDL_Window* window)
 {
     return ::ImGui_ImplSDL3_InitForD3D(reinterpret_cast<::SDL_Window*>(window));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_metal(cimgui::SDL_Window* window)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForMetal(cimgui::SDL_Window* window)
 {
     return ::ImGui_ImplSDL3_InitForMetal(reinterpret_cast<::SDL_Window*>(window));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_sdlrenderer(cimgui::SDL_Window* window, cimgui::SDL_Renderer* renderer)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForSDLRenderer(cimgui::SDL_Window* window, cimgui::SDL_Renderer* renderer)
 {
     return ::ImGui_ImplSDL3_InitForSDLRenderer(reinterpret_cast<::SDL_Window*>(window), reinterpret_cast<::SDL_Renderer*>(renderer));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_sdlgpu(cimgui::SDL_Window* window)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForSDLGPU(cimgui::SDL_Window* window)
 {
     return ::ImGui_ImplSDL3_InitForSDLGPU(reinterpret_cast<::SDL_Window*>(window));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_init_for_other(cimgui::SDL_Window* window)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_InitForOther(cimgui::SDL_Window* window)
 {
     return ::ImGui_ImplSDL3_InitForOther(reinterpret_cast<::SDL_Window*>(window));
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_sdl3_shutdown(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplSDL3_Shutdown(void)
 {
     ::ImGui_ImplSDL3_Shutdown();
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_sdl3_new_frame(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplSDL3_NewFrame(void)
 {
     ::ImGui_ImplSDL3_NewFrame();
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_sdl3_process_event(const SDL_Event* event)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplSDL3_ProcessEvent(const SDL_Event* event)
 {
     return ::ImGui_ImplSDL3_ProcessEvent(event);
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_sdl3_set_gamepad_mode(cimgui::ImGui_ImplSDL3_GamepadMode mode)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplSDL3_SetGamepadMode(cimgui::ImGui_ImplSDL3_GamepadMode mode)
 {
     ::ImGui_ImplSDL3_SetGamepadMode(static_cast<::ImGui_ImplSDL3_GamepadMode>(mode));
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_sdl3_set_gamepad_mode_ex(cimgui::ImGui_ImplSDL3_GamepadMode mode, cimgui::SDL_Gamepad** manual_gamepads_array, int manual_gamepads_count)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplSDL3_SetGamepadModeEx(cimgui::ImGui_ImplSDL3_GamepadMode mode, cimgui::SDL_Gamepad** manual_gamepads_array, int manual_gamepads_count)
 {
     ::ImGui_ImplSDL3_SetGamepadMode(static_cast<::ImGui_ImplSDL3_GamepadMode>(mode), reinterpret_cast<::SDL_Gamepad**>(manual_gamepads_array), manual_gamepads_count);
 }

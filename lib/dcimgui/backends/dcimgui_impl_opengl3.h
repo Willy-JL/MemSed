@@ -10,7 +10,6 @@
 // Implemented features:
 //  [X] Renderer: User texture binding. Use 'GLuint' OpenGL texture identifier as void*/ImTextureID. Read the FAQ about ImTextureID!
 //  [x] Renderer: Large meshes support (64k+ vertices) even with 16-bit indices (ImGuiBackendFlags_RendererHasVtxOffset) [Desktop OpenGL only!]
-//  [X] Renderer: Multi-viewport support (multiple windows). Enable with 'io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable'.
 
 // About WebGL/ES:
 // - You need to '#define IMGUI_IMPL_OPENGL_ES2' or '#define IMGUI_IMPL_OPENGL_ES3' to use WebGL or OpenGL ES.
@@ -40,17 +39,17 @@ extern "C"
 #ifndef IMGUI_DISABLE
 typedef struct ImDrawData_t ImDrawData;
 // Follow "Getting Started" link and check examples/ folder to learn about using backends!
-CIMGUI_IMPL_API bool imgui_impl_opengl3_init(void);                                   // Implied glsl_version = nullptr
-CIMGUI_IMPL_API bool imgui_impl_opengl3_init_ex(const char* glsl_version /* = nullptr */);
-CIMGUI_IMPL_API void imgui_impl_opengl3_shutdown(void);
-CIMGUI_IMPL_API void imgui_impl_opengl3_new_frame(void);
-CIMGUI_IMPL_API void imgui_impl_opengl3_render_draw_data(ImDrawData* draw_data);
+CIMGUI_IMPL_API bool ImGui_ImplOpenGL3_Init(void);                                    // Implied glsl_version = nullptr
+CIMGUI_IMPL_API bool ImGui_ImplOpenGL3_InitEx(const char* glsl_version /* = nullptr */);
+CIMGUI_IMPL_API void ImGui_ImplOpenGL3_Shutdown(void);
+CIMGUI_IMPL_API void ImGui_ImplOpenGL3_NewFrame(void);
+CIMGUI_IMPL_API void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data);
 
 // (Optional) Called by Init/NewFrame/Shutdown
-CIMGUI_IMPL_API bool imgui_impl_opengl3_create_fonts_texture(void);
-CIMGUI_IMPL_API void imgui_impl_opengl3_destroy_fonts_texture(void);
-CIMGUI_IMPL_API bool imgui_impl_opengl3_create_device_objects(void);
-CIMGUI_IMPL_API void imgui_impl_opengl3_destroy_device_objects(void);
+CIMGUI_IMPL_API bool ImGui_ImplOpenGL3_CreateFontsTexture(void);
+CIMGUI_IMPL_API void ImGui_ImplOpenGL3_DestroyFontsTexture(void);
+CIMGUI_IMPL_API bool ImGui_ImplOpenGL3_CreateDeviceObjects(void);
+CIMGUI_IMPL_API void ImGui_ImplOpenGL3_DestroyDeviceObjects(void);
 
 // Configuration flags to add in your imconfig file:
 //#define IMGUI_IMPL_OPENGL_ES2     // Enable ES 2 (Auto-detected on Emscripten)

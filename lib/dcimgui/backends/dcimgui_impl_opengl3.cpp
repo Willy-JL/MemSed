@@ -19,47 +19,47 @@ namespace cimgui
 
 #ifndef IMGUI_DISABLE
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_opengl3_init(void)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplOpenGL3_Init(void)
 {
     return ::ImGui_ImplOpenGL3_Init();
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_opengl3_init_ex(const char* glsl_version)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplOpenGL3_InitEx(const char* glsl_version)
 {
     return ::ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_opengl3_shutdown(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplOpenGL3_Shutdown(void)
 {
     ::ImGui_ImplOpenGL3_Shutdown();
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_opengl3_new_frame(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplOpenGL3_NewFrame(void)
 {
     ::ImGui_ImplOpenGL3_NewFrame();
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_opengl3_render_draw_data(cimgui::ImDrawData* draw_data)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplOpenGL3_RenderDrawData(cimgui::ImDrawData* draw_data)
 {
     ::ImGui_ImplOpenGL3_RenderDrawData(reinterpret_cast<::ImDrawData*>(draw_data));
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_opengl3_create_fonts_texture(void)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplOpenGL3_CreateFontsTexture(void)
 {
     return ::ImGui_ImplOpenGL3_CreateFontsTexture();
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_opengl3_destroy_fonts_texture(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplOpenGL3_DestroyFontsTexture(void)
 {
     ::ImGui_ImplOpenGL3_DestroyFontsTexture();
 }
 
-CIMGUI_IMPL_API bool cimgui::imgui_impl_opengl3_create_device_objects(void)
+CIMGUI_IMPL_API bool cimgui::ImGui_ImplOpenGL3_CreateDeviceObjects(void)
 {
     return ::ImGui_ImplOpenGL3_CreateDeviceObjects();
 }
 
-CIMGUI_IMPL_API void cimgui::imgui_impl_opengl3_destroy_device_objects(void)
+CIMGUI_IMPL_API void cimgui::ImGui_ImplOpenGL3_DestroyDeviceObjects(void)
 {
     ::ImGui_ImplOpenGL3_DestroyDeviceObjects();
 }

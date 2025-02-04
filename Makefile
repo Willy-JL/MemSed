@@ -10,7 +10,6 @@ CC = gcc
 LIBS = -lstdc++ -lm
 C_FLAGS =
 CPP_FLAGS = -std=c++20
-SDL_CONFIG = pkg-config sdl3
 UNAME_S = $(shell uname -s)
 
 # OpenGL
@@ -22,6 +21,7 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 # SDL
+SDL_CONFIG = pkg-config sdl3
 CPP_FLAGS += `$(SDL_CONFIG) --cflags`
 C_FLAGS += `$(SDL_CONFIG) --cflags`
 LIBS += `$(SDL_CONFIG) --libs`
@@ -29,12 +29,13 @@ LIBS += `$(SDL_CONFIG) --libs`
 # ImGui bindings
 $(DEARBINDINGS_DIR)/venv:
 	python3 -m venv $(DEARBINDINGS_DIR)/venv
+$(DEARBINDINGS_DIR)/venv/.installed: $(DEARBINDINGS_DIR)/requirements.txt $(DEARBINDINGS_DIR)/venv
 	$(DEARBINDINGS_DIR)/venv/bin/pip install -r $(DEARBINDINGS_DIR)/requirements.txt
-# Broken: --case-style types=PascalCase --case-style enums=PascalCase
-DEARBINDINGS_ARGS = --replace-prefix cIm=Im --case-style fields=snake_case --case-style functions=snake_case --case-style macros=SHOUT_CASE
+	cp $(DEARBINDINGS_DIR)/requirements.txt $(DEARBINDINGS_DIR)/venv/.installed
+DEARBINDINGS_ARGS = --replace-prefix cIm=Im
 DEARBINDINGS_CMD = $(DEARBINDINGS_DIR)/venv/bin/python $(DEARBINDINGS_DIR)/dear_bindings.py $(DEARBINDINGS_ARGS)
 .PRECIOUS: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp
-$(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp: $(DEARBINDINGS_DIR)/venv
+$(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp: $(DEARBINDINGS_DIR)/venv/.installed $(IMGUI_DIR)/backends/imgui_impl_%.h
 	@mkdir -p $(DCIMGUI_DIR)/backends
 	$(DEARBINDINGS_CMD) \
 		--backend \
@@ -42,7 +43,7 @@ $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp: $(DEARBINDINGS_DIR)/venv
 		$(IMGUI_DIR)/backends/imgui_impl_$*.h
 	rm $(DCIMGUI_DIR)/backends/dcimgui_impl_$**.json
 .PRECIOUS: $(DCIMGUI_DIR)/dcim%.cpp
-$(DCIMGUI_DIR)/dcim%.cpp: $(DEARBINDINGS_DIR)/venv
+$(DCIMGUI_DIR)/dcim%.cpp: $(DEARBINDINGS_DIR)/venv/.installed $(IMGUI_DIR)/im%.h
 	@mkdir -p $(DCIMGUI_DIR)
 	$(DEARBINDINGS_CMD) \
 		-o $(DCIMGUI_DIR)/dcim$* \
@@ -56,13 +57,13 @@ DCIMGUI_OBJS = $(DCIMGUI_BASE_OBJS) $(DCIMGUI_SDL_OBJS)
 dcimgui: $(DCIMGUI_OBJS)
 CPP_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
 C_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
-$(OBJ_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp
+$(OBJ_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp
+$(OBJ_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp
+$(OBJ_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp
+$(OBJ_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
 
 # Main targets
