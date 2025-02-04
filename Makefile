@@ -1,4 +1,5 @@
 # Directories
+SRC_DIR = src
 BUILD_DIR = build
 IMGUI_DIR = lib/vendor/imgui
 DCIMGUI_DIR = lib/dcimgui
@@ -51,30 +52,33 @@ $(DCIMGUI_DIR)/dcim%.cpp: $(DEARBINDINGS_DIR)/venv/.installed $(IMGUI_DIR)/im%.h
 	rm $(DCIMGUI_DIR)/dcim$**.json
 
 # ImGui
-DCIMGUI_BASE_OBJS = $(BUILD_DIR)/dcimgui.o $(BUILD_DIR)/imgui.o $(BUILD_DIR)/imgui_demo.o $(BUILD_DIR)/imgui_draw.o $(BUILD_DIR)/imgui_tables.o $(BUILD_DIR)/imgui_widgets.o
-DCIMGUI_SDL_OBJS = $(BUILD_DIR)/dcimgui_impl_sdl3.o $(BUILD_DIR)/dcimgui_impl_opengl3.o $(BUILD_DIR)/imgui_impl_opengl3.o $(BUILD_DIR)/imgui_impl_sdl3.o
-DCIMGUI_OBJS = $(DCIMGUI_BASE_OBJS) $(DCIMGUI_SDL_OBJS)
+IMGUI_SRCS = $(wildcard $(IMGUI_DIR)/*.cpp)
+IMGUI_BACKENDS = impl_sdl3 impl_opengl3
+IMGUI_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(IMGUI_SRCS))
+IMGUI_BACKENDS_OBJS = $(patsubst %,$(BUILD_DIR)/$(IMGUI_DIR)/backends/imgui_%.o,$(IMGUI_BACKENDS))
+DCIMGUI_BACKENDS_OBJS = $(patsubst %,$(BUILD_DIR)/$(DCIMGUI_DIR)/backends/dcimgui_%.o,$(IMGUI_BACKENDS))
+DCIMGUI_OBJS = $(BUILD_DIR)/$(DCIMGUI_DIR)/dcimgui.o $(IMGUI_OBJS) $(DCIMGUI_BACKENDS_OBJS) $(IMGUI_BACKENDS_OBJS)
 dcimgui: $(DCIMGUI_OBJS)
 CPP_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
 C_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
-$(BUILD_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/$(IMGUI_DIR)/%.o: $(IMGUI_DIR)/%.cpp $(IMGUI_DIR)/imgui.h
+	@mkdir -p $(@D)
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(BUILD_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp $(IMGUI_DIR)/imgui.h
-	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(BUILD_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
-	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(BUILD_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/$(DCIMGUI_DIR)/%.o: $(DCIMGUI_DIR)/%.cpp $(IMGUI_DIR)/imgui.h
+	@mkdir -p $(@D)
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
 
 # Main targets
 run: memsed
 	./memsed
-memsed: dirs dcimgui $(BUILD_DIR)/main.o
-	$(CC) -o memsed $(BUILD_DIR)/main.o $(DCIMGUI_OBJS) $(LIBS)
-$(BUILD_DIR)/%.o: src/%.c
+MEMSED_SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/**/*.c)
+MEMSED_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(MEMSED_SRCS))
+memsed: dcimgui $(MEMSED_OBJS)
+	@mkdir -p $(@D)
+	$(CC) -o memsed $(MEMSED_OBJS) $(DCIMGUI_OBJS) $(LIBS)
+$(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(@D)
 	$(CC) $(C_FLAGS) -c -o $@ $<
-dirs:
-	@mkdir -p $(BUILD_DIR)
 clean:
 	rm -rf lib/vendor/dear_bindings/venv
 	rm -rf lib/dcimgui
