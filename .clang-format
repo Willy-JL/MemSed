@@ -186,7 +186,7 @@ RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
 SkipMacroDefinitionBody: false
-SortIncludes: Never
+SortIncludes: CaseInsensitive
 SortJavaStaticImport: Before
 SortUsingDeclarations: Never
 SpaceAfterCStyleCast: false
