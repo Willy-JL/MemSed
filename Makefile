@@ -33,7 +33,7 @@ $(DEARBINDINGS_DIR)/venv:
 $(DEARBINDINGS_DIR)/venv/.installed: $(DEARBINDINGS_DIR)/requirements.txt $(DEARBINDINGS_DIR)/venv
 	$(DEARBINDINGS_DIR)/venv/bin/pip install -r $(DEARBINDINGS_DIR)/requirements.txt
 	cp $(DEARBINDINGS_DIR)/requirements.txt $(DEARBINDINGS_DIR)/venv/.installed
-DEARBINDINGS_ARGS = --replace-prefix cIm=Im
+DEARBINDINGS_ARGS = --replace-prefix cIm=Im --replace-prefix CIM=IM
 DEARBINDINGS_CMD = $(DEARBINDINGS_DIR)/venv/bin/python $(DEARBINDINGS_DIR)/dear_bindings.py $(DEARBINDINGS_ARGS)
 .PRECIOUS: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp
 $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp: $(DEARBINDINGS_DIR)/venv/.installed $(IMGUI_DIR)/backends/imgui_impl_%.h
