@@ -1,6 +1,6 @@
 [submodule "lib/vendor/dear_bindings"]
 	path = lib/vendor/dear_bindings
-	url = https://github.com/Willy-JL/dear_bindings.git
+	url = https://github.com/dearimgui/dear_bindings.git
 [submodule "lib/vendor/imgui"]
 	path = lib/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
