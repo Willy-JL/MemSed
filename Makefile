@@ -1,5 +1,5 @@
 # Directories
-OBJ_DIR = obj
+BUILD_DIR = build
 IMGUI_DIR = lib/vendor/imgui
 DCIMGUI_DIR = lib/dcimgui
 DEARBINDINGS_DIR = lib/vendor/dear_bindings
@@ -51,32 +51,32 @@ $(DCIMGUI_DIR)/dcim%.cpp: $(DEARBINDINGS_DIR)/venv/.installed $(IMGUI_DIR)/im%.h
 	rm $(DCIMGUI_DIR)/dcim$**.json
 
 # ImGui
-DCIMGUI_BASE_OBJS = $(OBJ_DIR)/dcimgui.o $(OBJ_DIR)/imgui.o $(OBJ_DIR)/imgui_demo.o $(OBJ_DIR)/imgui_draw.o $(OBJ_DIR)/imgui_tables.o $(OBJ_DIR)/imgui_widgets.o
-DCIMGUI_SDL_OBJS = $(OBJ_DIR)/dcimgui_impl_sdl3.o $(OBJ_DIR)/dcimgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_opengl3.o $(OBJ_DIR)/imgui_impl_sdl3.o
+DCIMGUI_BASE_OBJS = $(BUILD_DIR)/dcimgui.o $(BUILD_DIR)/imgui.o $(BUILD_DIR)/imgui_demo.o $(BUILD_DIR)/imgui_draw.o $(BUILD_DIR)/imgui_tables.o $(BUILD_DIR)/imgui_widgets.o
+DCIMGUI_SDL_OBJS = $(BUILD_DIR)/dcimgui_impl_sdl3.o $(BUILD_DIR)/dcimgui_impl_opengl3.o $(BUILD_DIR)/imgui_impl_opengl3.o $(BUILD_DIR)/imgui_impl_sdl3.o
 DCIMGUI_OBJS = $(DCIMGUI_BASE_OBJS) $(DCIMGUI_SDL_OBJS)
 dcimgui: $(DCIMGUI_OBJS)
 CPP_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
 C_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
-$(OBJ_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(OBJ_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
 
 # Main targets
 run: memsed
 	./memsed
-memsed: dirs dcimgui $(OBJ_DIR)/main.o
-	$(CC) -o memsed $(OBJ_DIR)/main.o $(DCIMGUI_OBJS) $(LIBS)
-$(OBJ_DIR)/%.o: src/%.c
+memsed: dirs dcimgui $(BUILD_DIR)/main.o
+	$(CC) -o memsed $(BUILD_DIR)/main.o $(DCIMGUI_OBJS) $(LIBS)
+$(BUILD_DIR)/%.o: src/%.c
 	$(CC) $(C_FLAGS) -c -o $@ $<
 dirs:
-	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(BUILD_DIR)
 clean:
 	rm -rf lib/vendor/dear_bindings/venv
 	rm -rf lib/dcimgui
-	rm -rf $(OBJ_DIR)
+	rm -rf $(BUILD_DIR)
 	rm -f memsed
