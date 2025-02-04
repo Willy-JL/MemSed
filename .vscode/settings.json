@@ -1,0 +1,11 @@
+{
+    "editor.formatOnSave": true,
+    "clangd.arguments": [
+        "--clang-tidy",
+    ],
+    "clangd.fallbackFlags": [
+        "-I${workspaceFolder}/lib",
+        "-I${workspaceFolder}/lib/dcimgui",
+        "-I${workspaceFolder}/lib/vendor/imgui",
+    ]
+}

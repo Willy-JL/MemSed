@@ -6,10 +6,10 @@ DEARBINDINGS_DIR = lib/vendor/dear_bindings
 
 # Base config
 all: memsed
-CC = gcc
+CC = clang
 LIBS = -lstdc++ -lm
-C_FLAGS =
-CPP_FLAGS = -std=c++20
+C_FLAGS = -Ilib
+CPP_FLAGS = -Ilib -std=c++20
 UNAME_S = $(shell uname -s)
 
 # OpenGL
@@ -61,9 +61,9 @@ $(BUILD_DIR)/imgui_impl_%.o: $(IMGUI_DIR)/backends/imgui_impl_%.cpp $(IMGUI_DIR)
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
 $(BUILD_DIR)/im%.o: $(IMGUI_DIR)/im%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(BUILD_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/dcimgui_impl_%.o: $(DCIMGUI_DIR)/backends/dcimgui_impl_%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
-$(BUILD_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(DCIMGUI_DIR)/dcimgui.h $(IMGUI_DIR)/imgui.h
+$(BUILD_DIR)/dcim%.o: $(DCIMGUI_DIR)/dcim%.cpp $(IMGUI_DIR)/imgui.h
 	$(CC) $(CPP_FLAGS) -c -o $@ $<
 
 # Main targets
