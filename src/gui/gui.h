@@ -15,6 +15,7 @@ typedef struct {
         ImFont* small;
         ImFont* mono;
     } fonts;
+    ImGuiMouseCursor prev_cursor;
     bool should_close;
 } Gui;
 
