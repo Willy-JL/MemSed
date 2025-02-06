@@ -74,9 +74,10 @@ run: memsed
 	./memsed
 MEMSED_SRCS = $(wildcard $(SRC_DIR)/*.c) $(wildcard $(SRC_DIR)/**/*.c)
 MEMSED_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(MEMSED_SRCS))
+MEMSED_FLAGS = $(C_FLAGS)
 memsed: dcimgui $(MEMSED_OBJS)
 	@mkdir -p $(@D)
-	$(CC) -o memsed $(MEMSED_OBJS) $(DCIMGUI_OBJS) $(LIBS)
+	$(CC) $(MEMSED_FLAGS) -o memsed $(MEMSED_OBJS) $(DCIMGUI_OBJS) $(LIBS)
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(C_FLAGS) -c -o $@ $<
