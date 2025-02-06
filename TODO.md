@@ -1,3 +1,2 @@
-- Run properly under Wayland
 - Try to build as static executable
 - Actually implement the damn program

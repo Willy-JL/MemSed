@@ -6,6 +6,9 @@
 #include <stdio.h>
 
 bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t height) {
+    // Prefer Wayland when available
+    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland");
+
     if(!SDL_Init(SDL_INIT_VIDEO)) {
         printf("Error: SDL_Init(): %s\n", SDL_GetError());
         return false;
