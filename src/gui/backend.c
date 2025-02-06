@@ -2,6 +2,7 @@
 
 #include <dcimgui/backends/dcimgui_impl_opengl3.h>
 #include <dcimgui/backends/dcimgui_impl_sdl3.h>
+#include <dcimgui/dcimgui.h>
 #include <SDL3/SDL_opengl.h>
 #include <stdio.h>
 
@@ -40,6 +41,8 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     ImGui_CreateContext(NULL);
     gui->io = ImGui_GetIO();
     gui->io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    gui->io->IniFilename = NULL;
+    gui->io->LogFilename = NULL;
 
     ImGui_StyleColorsDark(NULL);
 
