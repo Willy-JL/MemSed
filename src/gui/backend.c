@@ -90,6 +90,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     gui->io = ImGui_GetIO();
     gui->style = ImGui_GetStyle();
     gui->prev_cursor = ImGuiMouseCursor_None;
+    gui->prev_size = (ImVec2){0, 0};
 
     ImGui_ImplSDL3_InitForOpenGL(gui->window, gui->gl);
     ImGui_ImplOpenGL3_Init();
