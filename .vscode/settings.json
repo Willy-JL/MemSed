@@ -2,6 +2,7 @@
     "editor.formatOnSave": true,
     "clangd.arguments": [
         "--clang-tidy",
+        "--header-insertion=never"
     ],
     "clangd.fallbackFlags": [
         "-I${workspaceFolder}/lib",
