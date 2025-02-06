@@ -7,6 +7,14 @@ typedef struct {
     SDL_Window* window;
     SDL_GLContext gl;
     ImGuiIO* io;
+    ImGuiStyle* style;
+    struct {
+        ImFont* base;
+        ImFont* bold;
+        ImFont* big;
+        ImFont* small;
+        ImFont* mono;
+    } fonts;
     bool should_close;
 } Gui;
 

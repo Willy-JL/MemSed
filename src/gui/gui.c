@@ -1,5 +1,6 @@
 #include "gui.h"
 #include "backend.h"
+#include "fonts.h"
 #include "window.h"
 
 #include <stdlib.h>
@@ -12,6 +13,18 @@ Gui* gui_init() {
         free(gui);
         return NULL;
     }
+
+    gui->io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    gui->io->IniFilename = NULL;
+    gui->io->LogFilename = NULL;
+    gui->io->ConfigDragClickToInputText = true;
+    ImGui_StyleColorsDark(NULL);
+    gui->style->ScrollbarSize = 12;
+    gui->style->FrameBorderSize = 1.6f;
+    gui->style->ItemSpacing.x = gui->style->ItemSpacing.y;
+    gui->style->Colors[ImGuiCol_ModalWindowDimBg] = (ImVec4){0, 0, 0, 0.5f};
+
+    gui_fonts_load(gui);
 
     return gui;
 }

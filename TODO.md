@@ -1,2 +1,3 @@
+- Use proper imconfig.h and enable `IMGUI_USE_WCHAR32` in it
 - Try to build as static executable
 - Actually implement the damn program

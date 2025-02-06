@@ -60,8 +60,8 @@ DCIMGUI_BACKENDS_OBJS = $(patsubst %,$(BUILD_DIR)/$(DCIMGUI_DIR)/backends/dcimgu
 DCIMGUI_OBJS = $(BUILD_DIR)/$(DCIMGUI_DIR)/dcimgui.o $(IMGUI_OBJS) $(DCIMGUI_BACKENDS_OBJS) $(IMGUI_BACKENDS_OBJS)
 DCIMGUI_FLAGS = $(CPP_FLAGS) -Wno-macro-redefined -Wno-unused-function
 dcimgui: $(DCIMGUI_OBJS)
-CPP_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
-C_FLAGS += -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
+CPP_FLAGS += -DIMGUI_USE_WCHAR32 -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
+C_FLAGS += -DIMGUI_USE_WCHAR32 -I$(DCIMGUI_DIR) -I$(IMGUI_DIR) -I$(DCIMGUI_DIR)/backends -I$(IMGUI_DIR)/backends
 $(BUILD_DIR)/$(IMGUI_DIR)/%.o: $(IMGUI_DIR)/%.cpp $(IMGUI_DIR)/imgui.h
 	@mkdir -p $(@D)
 	$(CC) $(CPP_FLAGS) -c -o $@ $<

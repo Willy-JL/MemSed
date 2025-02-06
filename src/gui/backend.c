@@ -1,3 +1,4 @@
+#include "backend.h"
 #include "gui.h"
 
 #include <dcimgui/backends/dcimgui_impl_opengl3.h>
@@ -40,11 +41,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     IMGUI_CHECKVERSION();
     ImGui_CreateContext(NULL);
     gui->io = ImGui_GetIO();
-    gui->io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    gui->io->IniFilename = NULL;
-    gui->io->LogFilename = NULL;
-
-    ImGui_StyleColorsDark(NULL);
+    gui->style = ImGui_GetStyle();
 
     ImGui_ImplSDL3_InitForOpenGL(gui->window, gui->gl);
     ImGui_ImplOpenGL3_Init();
@@ -77,8 +74,6 @@ void gui_backend_new_frame(Gui* gui) {
 void gui_backend_render(Gui* gui) {
     ImGui_Render();
     glViewport(0, 0, (int32_t)gui->io->DisplaySize.x, (int32_t)gui->io->DisplaySize.y);
-    // glClearColor(0.0, 0.0, 0.0, 1.0);
-    // glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui_GetDrawData());
     SDL_GL_SwapWindow(gui->window);
 }
