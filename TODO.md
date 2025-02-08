@@ -1,4 +1,3 @@
-- Vendor SDL3
 - Generate dcimgui bindings with CMake
 - Actually implement the damn program
 - Try to build as static executable

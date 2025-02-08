@@ -4,3 +4,6 @@
 [submodule "lib/vendor/imgui"]
 	path = lib/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "lib/vendor/sdl3"]
+	path = lib/vendor/sdl3
+	url = https://github.com/libsdl-org/SDL.git

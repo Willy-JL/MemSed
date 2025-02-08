@@ -11,6 +11,7 @@ set(MEMSED_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(SRC_DIR "${MEMSED_DIR}/src")
 set(LIB_DIR "${MEMSED_DIR}/lib")
 set(VENDOR_DIR "${LIB_DIR}/vendor")
+set(SDL3_DIR "${VENDOR_DIR}/sdl3")
 set(IMGUI_DIR "${VENDOR_DIR}/imgui")
 set(DCIMGUI_DIR "${LIB_DIR}/dcimgui")
 set(DEARBINDINGS_DIR "${VENDOR_DIR}/dear_bindings")
@@ -42,9 +43,9 @@ add_subdirectory("${DCIMGUI_DIR}")
 target_link_libraries(memsed PRIVATE dcimgui)
 
 # SDL3
-find_package(SDL3 REQUIRED)
-target_include_directories(memsed PRIVATE "${SDL3_INCLUDE_DIRS}")
-target_link_libraries(memsed PRIVATE "${SDL3_LIBRARIES}")
+set(SDL_STATIC ON)
+add_subdirectory("${SDL3_DIR}" EXCLUDE_FROM_ALL)
+target_link_libraries(memsed PRIVATE SDL3-static)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
