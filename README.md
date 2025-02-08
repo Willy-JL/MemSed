@@ -15,7 +15,7 @@ MEMory Search and EDit for Linux. NOT YET FUNCTIONAL!
 ## Build Instructions
 
 ```console
-git clone --recursive https://github.com/Willy-JL/MemSed
+git clone --jobs $(nproc) --recursive https://github.com/Willy-JL/MemSed
 cd MemSed
 mkdir build
 cd build
