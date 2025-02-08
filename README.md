@@ -20,6 +20,6 @@ cd MemSed
 mkdir build
 cd build
 cmake ..
-make
+make -j $(nproc)
 ./memsed
 ```
