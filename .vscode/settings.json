@@ -4,5 +4,6 @@
         "--compile-commands-dir=${workspaceFolder}/build",
         "--clang-tidy",
         "--header-insertion=never"
-    ]
+    ],
+    "cmake.revealLog": "error"
 }
