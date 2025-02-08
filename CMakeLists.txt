@@ -66,3 +66,10 @@ target_link_libraries(memsed PRIVATE dcimgui)
 # Build as (almost) static executable
 # Adding -static causes a segfault in SDL_CreateWindow()
 target_link_libraries(memsed PRIVATE -static-libgcc -static-libstdc++)
+
+# Add `make run` target
+add_custom_target(run
+    COMMAND memsed
+    DEPENDS memsed
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
