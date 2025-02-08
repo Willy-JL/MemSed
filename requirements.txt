@@ -1,1 +1,2 @@
+-r lib/vendor/dear_bindings/requirements.txt
 -r lib/vendor/glad/requirements.txt

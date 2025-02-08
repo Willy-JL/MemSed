@@ -1,3 +1,2 @@
-- Generate dcimgui bindings with CMake
 - Figure out SDL segfault when building as static exe
 - Actually implement the damn program

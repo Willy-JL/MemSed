@@ -1,14 +1,38 @@
-# Main sources
-file(GLOB dcimgui_sources "${DCIMGUI_DIR}/*.cpp" "${DCIMGUI_DIR}/*.h")
+# Condigure bindings generation
+set(DEARBINDINGS_ARG --replace-prefix cIm=Im --replace-prefix CIM=IM --imconfig-path "${DCIMGUI_DIR}/dcimconfig.h" --emit-combined-json-metadata)
+set(DEARBINDINGS_CMD "${Python_EXECUTABLE}" "${DEARBINDINGS_DIR}/dear_bindings.py" "${DEARBINDINGS_ARG}")
+
+# Library
+set(dcimgui_sources "${DCIMGUI_DIR}/dcimgui.cpp" "${DCIMGUI_DIR}/dcimgui.h")
+# Generate bindings
+add_custom_command(
+    OUTPUT ${dcimgui_sources}
+    COMMAND ${DEARBINDINGS_CMD} -o "${DCIMGUI_DIR}/dcimgui" "${IMGUI_DIR}/imgui.h"
+    DEPENDS "${IMGUI_DIR}/imgui.h"
+    COMMAND "${CMAKE_COMMAND}" -E rm "${DCIMGUI_DIR}/dcimgui.json"
+    COMMENT "Generating dcimgui bindings for imgui.h"
+    USES_TERMINAL
+)
+# Add sources
 file(GLOB imgui_sources "${IMGUI_DIR}/*.cpp" "${IMGUI_DIR}/*.h")
 set(sources "${dcimgui_sources}" "${imgui_sources}")
 
-# Backends sources
+# Backends
 foreach(backend IN LISTS DCIMGUI_BACKENDS)
-    list(APPEND sources "${DCIMGUI_DIR}/backends/dcimgui_impl_${backend}.cpp")
-    list(APPEND sources "${DCIMGUI_DIR}/backends/dcimgui_impl_${backend}.h")
-    list(APPEND sources "${IMGUI_DIR}/backends/imgui_impl_${backend}.cpp")
-    list(APPEND sources "${IMGUI_DIR}/backends/imgui_impl_${backend}.h")
+    set(backend_dst "${DCIMGUI_DIR}/backends/dcimgui_impl_${backend}")
+    set(backend_src "${IMGUI_DIR}/backends/imgui_impl_${backend}")
+    # Generate bindings
+    add_custom_command(
+        OUTPUT "${backend_dst}.cpp" "${backend_dst}.h"
+        COMMAND ${DEARBINDINGS_CMD} --backend -o "${backend_dst}" "${backend_src}.h"
+        DEPENDS "${backend_src}.h" "${IMGUI_DIR}/imgui.h"
+        COMMAND "${CMAKE_COMMAND}" -E rm "${backend_dst}.json"
+        COMMENT "Generating dcimgui bindings for backends/imgui_impl_${backend}.h"
+        USES_TERMINAL
+    )
+    # Add sources
+    list(APPEND sources "${backend_dst}.cpp" "${backend_dst}.h")
+    list(APPEND sources "${backend_src}.cpp" "${backend_src}.h")
 endforeach()
 
 # Build as static library
