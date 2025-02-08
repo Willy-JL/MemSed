@@ -4,7 +4,7 @@
 #include <dcimgui/dcimgui.h>
 #include <float.h>
 
-const ImFontConfig font_karla_config = {
+static const ImFontConfig font_karla_config = {
     .OversampleH = 2,
     .OversampleV = 2,
     .GlyphOffset.y = -0.5f,
@@ -15,7 +15,7 @@ const ImFontConfig font_karla_config = {
     .RasterizerDensity = 1.0f,
 };
 
-const ImFontConfig font_meslo_config = {
+static const ImFontConfig font_meslo_config = {
     .OversampleH = 2,
     .OversampleV = 2,
     .GlyphRanges = (ImWchar[]){0x1, 0x2e2e, 0},
@@ -25,7 +25,7 @@ const ImFontConfig font_meslo_config = {
     .RasterizerDensity = 1.0f,
 };
 
-const ImFontConfig font_mdi_config = {
+static const ImFontConfig font_mdi_config = {
     .MergeMode = true,
     .GlyphOffset.y = +1.0f,
     .GlyphRanges = (ImWchar[]){0xf0001, 0xf1d17, 0},
