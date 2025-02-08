@@ -4,11 +4,11 @@
     // List of extensions which should be recommended for users of this workspace.
     "recommendations": [
         "llvm-vs-code-extensions.vscode-clangd",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools"
     ],
     // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
     "unwantedRecommendations": [
-        "twxs.cmake",
-        "ms-vscode.cpptools",
-        "ms-vscode.cmake-tools"
+        "ms-vscode.cpptools"
     ]
 }

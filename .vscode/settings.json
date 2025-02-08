@@ -1,12 +1,8 @@
 {
     "editor.formatOnSave": true,
     "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build",
         "--clang-tidy",
         "--header-insertion=never"
-    ],
-    "clangd.fallbackFlags": [
-        "-I${workspaceFolder}/lib",
-        "-I${workspaceFolder}/lib/dcimgui",
-        "-I${workspaceFolder}/lib/vendor/imgui",
     ]
 }
