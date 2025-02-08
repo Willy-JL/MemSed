@@ -85,6 +85,15 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     SDL_GL_MakeCurrent(gui->window, gui->gl);
     SDL_GL_SetSwapInterval(1);
 
+    int32_t version = gladLoadGL(SDL_GL_GetProcAddress);
+    if(version == 0) {
+        printf("Error: gladLoadGL(): Failed to initialize OpenGL context\n");
+        SDL_GL_DestroyContext(gui->gl);
+        SDL_DestroyWindow(gui->window);
+        SDL_Quit();
+        return false;
+    }
+
     IMGUI_CHECKVERSION();
     ImGui_CreateContext(NULL);
     gui->io = ImGui_GetIO();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dcimgui/dcimgui.h>
+#include <glad/gl.h>
 #include <SDL3/SDL.h>
 
 typedef struct {

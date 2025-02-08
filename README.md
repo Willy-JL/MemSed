@@ -10,4 +10,4 @@ MEMory Search and EDit for Linux. NOT YET FUNCTIONAL!
 
 - Clang
 - CMake 3.20+
-- Python 3.10+ (optional, for dcimgui bindings generation)
+- Python 3.10+ (for dear_bindings and GLAD generation)

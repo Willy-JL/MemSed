@@ -11,6 +11,9 @@ set(MEMSED_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(SRC_DIR "${MEMSED_DIR}/src")
 set(LIB_DIR "${MEMSED_DIR}/lib")
 set(VENDOR_DIR "${LIB_DIR}/vendor")
+set(VENV_DIR "${CMAKE_CURRENT_BINARY_DIR}/venv")
+set(GLAD_DIR "${LIB_DIR}/glad")
+set(GLAD_GEN "${VENDOR_DIR}/glad")
 set(SDL3_DIR "${VENDOR_DIR}/sdl3")
 set(IMGUI_DIR "${VENDOR_DIR}/imgui")
 set(DCIMGUI_DIR "${LIB_DIR}/dcimgui")
@@ -37,17 +40,29 @@ target_compile_options(memsed PRIVATE -std=gnu23)  # Standard
 target_compile_options(memsed PRIVATE -Wall -Wextra -Wstrict-prototypes -Wredundant-decls -Wundef)  # Warnings
 target_compile_options(memsed PRIVATE -fdata-sections -ffunction-sections -fno-math-errno)  # Optimizations
 
-# ImGui
-set(DCIMGUI_BACKENDS sdl3 opengl3)
-add_subdirectory("${DCIMGUI_DIR}")
-target_link_libraries(memsed PRIVATE dcimgui)
+# Python (needed for GLAD and dear_bindings)
+find_package(Python COMPONENTS Interpreter REQUIRED)
+execute_process(COMMAND "${Python_EXECUTABLE}" -m venv "${VENV_DIR}")
+set(Python_EXECUTABLE "${VENV_DIR}/bin/python")
+execute_process(COMMAND "${Python_EXECUTABLE}" -m pip install -U -r "${MEMSED_DIR}/requirements.txt")
+configure_file("${MEMSED_DIR}/requirements.txt" "${VENV_DIR}/.installed")
+
+# OpenGL (via GLAD loader)
+add_subdirectory("${GLAD_GEN}/cmake")
+glad_add_library(glad STATIC EXCLUDE_FROM_ALL MERGE REPRODUCIBLE API gl:core=3.0 LOCATION "${GLAD_DIR}")
+target_link_libraries(memsed PRIVATE glad)
 
 # SDL3
 set(SDL_STATIC ON)
 add_subdirectory("${SDL3_DIR}" EXCLUDE_FROM_ALL)
 target_link_libraries(memsed PRIVATE SDL3-static)
 
-# OpenGL
-find_package(OpenGL REQUIRED)
-target_include_directories(memsed PRIVATE "${OPENGL_INCLUDE_DIRS}")
-target_link_libraries(memsed PRIVATE "${OPENGL_LIBRARIES}")
+# ImGui (via dcimgui bindings)
+set(DCIMGUI_BACKENDS sdl3 opengl3)
+add_subdirectory("${DCIMGUI_DIR}")
+target_link_libraries(dcimgui PRIVATE glad)
+target_link_libraries(memsed PRIVATE dcimgui)
+
+# Build as (almost) static executable
+# Adding -static causes a segfault in SDL_CreateWindow()
+target_link_libraries(memsed PRIVATE -static-libgcc -static-libstdc++)

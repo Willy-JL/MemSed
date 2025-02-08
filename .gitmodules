@@ -7,3 +7,6 @@
 [submodule "lib/vendor/sdl3"]
 	path = lib/vendor/sdl3
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "lib/vendor/glad"]
+	path = lib/vendor/glad
+	url = https://github.com/Dav1dde/glad.git

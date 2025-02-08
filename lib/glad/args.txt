@@ -1,0 +1,1 @@
+--out-path /home/user/Git/MemSed/lib/glad --api gl:core=3.0 --merge --reproducible c
