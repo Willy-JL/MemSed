@@ -24,6 +24,7 @@ foreach(backend IN LISTS DCIMGUI_BACKENDS)
     # Generate bindings
     add_custom_command(
         OUTPUT "${backend_dst}.cpp" "${backend_dst}.h"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${DCIMGUI_DIR}/backends"
         COMMAND ${DEARBINDINGS_CMD} --backend -o "${backend_dst}" "${backend_src}.h"
         DEPENDS "${backend_src}.h" "${IMGUI_DIR}/imgui.h"
         COMMAND "${CMAKE_COMMAND}" -E rm "${backend_dst}.json"
