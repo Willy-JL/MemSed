@@ -32,6 +32,17 @@ endforeach()
 file(WRITE "${FONTS_DIR}/fonts.h" "${header}")
 list(APPEND sources "${FONTS_DIR}/fonts.h")
 
+# Generate MaterialDesignIcons mapping
+file(GLOB mdi_font "${RESOURCES_DIR}/fonts/materialdesignicons-webfont.*.?tf")
+get_filename_component(mdi_name "${mdi_font}" NAME_WE)
+add_custom_command(
+    OUTPUT "${FONTS_DIR}/mdi.h"
+    COMMAND "${Python_EXECUTABLE}" "${FONTS_DIR}/mdi.py" "${mdi_font}" "${FONTS_DIR}/mdi.h"
+    DEPENDS "${mdi_font}"
+    COMMENT "Generating icon mapping for ${mdi_name}"
+)
+list(APPEND sources "${FONTS_DIR}/mdi.h")
+
 # Build as static library
 add_library(fonts STATIC "${sources}")
 

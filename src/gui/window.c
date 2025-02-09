@@ -18,7 +18,7 @@ void gui_window_draw(Gui* gui) {
             ImGuiWindowFlags_NoScrollWithMouse);
     ImGui_PopStyleVar();
 
-    ImGui_Text("FPS: %.1f", gui->io->Framerate);
+    ImGui_Text(mdi_rocket_launch " FPS: %.1f", gui->io->Framerate);
 
     ImGui_End();
 }
