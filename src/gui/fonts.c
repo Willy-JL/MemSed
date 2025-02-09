@@ -1,8 +1,8 @@
 #include "fonts.h"
-#include "font_data.h"
 
 #include <dcimgui/dcimgui.h>
 #include <float.h>
+#include <fonts/fonts.h>
 
 static const ImFontConfig font_karla_config = {
     .OversampleH = 2,
@@ -36,61 +36,70 @@ static const ImFontConfig font_mdi_config = {
 };
 
 void gui_fonts_load(Gui* gui) {
-    gui->fonts.base = ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    gui->fonts.base = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_karla_regular_compressed_data_base85,
+        font_karla_regular_compressed_data,
+        font_karla_regular_compressed_size,
         18,
         &font_karla_config,
         NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_mdi_compressed_data_base85,
+        font_materialdesignicons_webfont_compressed_data,
+        font_materialdesignicons_webfont_compressed_size,
         18,
         &font_mdi_config,
         NULL);
 
-    gui->fonts.bold = ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    gui->fonts.bold = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_karla_bold_compressed_data_base85,
+        font_karla_bold_compressed_data,
+        font_karla_bold_compressed_size,
         22,
         &font_karla_config,
         NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_mdi_compressed_data_base85,
+        font_materialdesignicons_webfont_compressed_data,
+        font_materialdesignicons_webfont_compressed_size,
         18,
         &font_mdi_config,
         NULL);
 
-    gui->fonts.big = ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    gui->fonts.big = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_karla_bold_compressed_data_base85,
+        font_karla_bold_compressed_data,
+        font_karla_bold_compressed_size,
         32,
         &font_karla_config,
         NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_mdi_compressed_data_base85,
+        font_materialdesignicons_webfont_compressed_data,
+        font_materialdesignicons_webfont_compressed_size,
         28,
         &font_mdi_config,
         NULL);
 
-    gui->fonts.small = ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    gui->fonts.small = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_karla_bold_compressed_data_base85,
+        font_karla_bold_compressed_data,
+        font_karla_bold_compressed_size,
         14,
         &font_karla_config,
         NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_mdi_compressed_data_base85,
+        font_materialdesignicons_webfont_compressed_data,
+        font_materialdesignicons_webfont_compressed_size,
         14,
         &font_mdi_config,
         NULL);
 
-    gui->fonts.mono = ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(
+    gui->fonts.mono = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_meslo_compressed_data_base85,
+        font_meslolgs_regular_compressed_data,
+        font_meslolgs_regular_compressed_size,
         17,
         &font_meslo_config,
         NULL);
