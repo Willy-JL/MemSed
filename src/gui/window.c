@@ -158,6 +158,7 @@ void gui_window_draw(Gui* gui) {
             // Description
             ImGui_TableNextColumn();
             char y[20] = "";
+            ImGui_SetNextItemWidth(-FLT_MIN);
             ImGui_InputText("###description", y, sizeof(y), ImGuiInputTextFlags_None);
             // Value
             ImGui_TableNextColumn();
