@@ -1,0 +1,60 @@
+#pragma once
+
+// IWYU pragma: begin_exports
+#include <assert.h>
+#include <ctype.h>
+#include <float.h>
+#include <inttypes.h>
+#include <limits.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+// IWYU pragma: end_exports
+
+#ifndef MAX
+#define MAX(a, b)               \
+    ({                          \
+        __typeof__(a) _a = (a); \
+        __typeof__(b) _b = (b); \
+        _a > _b ? _a : _b;      \
+    })
+#endif
+
+#ifndef MIN
+#define MIN(a, b)               \
+    ({                          \
+        __typeof__(a) _a = (a); \
+        __typeof__(b) _b = (b); \
+        _a < _b ? _a : _b;      \
+    })
+#endif
+
+#ifndef ABS
+#define ABS(a) ({ (a) < 0 ? -(a) : (a); })
+#endif
+
+#ifndef ROUND_UP_TO
+#define ROUND_UP_TO(a, b)       \
+    ({                          \
+        __typeof__(a) _a = (a); \
+        __typeof__(b) _b = (b); \
+        _a / _b + !!(_a % _b);  \
+    })
+#endif
+
+#ifndef CLAMP
+#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
+#endif
+
+#ifndef COUNT_OF
+#define COUNT_OF(x) (sizeof(x) / sizeof(x[0]))
+#endif
+
+#ifndef UNUSED
+#define UNUSED(X) (void)(X)
+#endif

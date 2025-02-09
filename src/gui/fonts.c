@@ -1,7 +1,6 @@
 #include "fonts.h"
 
 #include <dcimgui/dcimgui.h>
-#include <float.h>
 #include <fonts/fonts.h>
 
 static const ImFontConfig font_karla_config = {

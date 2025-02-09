@@ -5,7 +5,6 @@
 #include <dcimgui/backends/dcimgui_impl_sdl3.h>
 #include <dcimgui/dcimgui.h>
 #include <SDL3/SDL_opengl.h>
-#include <stdio.h>
 
 void gui_backend_update_cursor(Gui* gui) {
     if(ImGui_IsAnyItemHovered()) {

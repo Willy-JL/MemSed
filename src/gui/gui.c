@@ -3,8 +3,6 @@
 #include "fonts.h"
 #include "window.h"
 
-#include <stdlib.h>
-
 Gui* gui_init() {
     Gui* gui = malloc(sizeof(Gui));
     gui->should_close = false;

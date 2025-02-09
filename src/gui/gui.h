@@ -4,6 +4,7 @@
 #include <fonts/mdi.h>
 #include <glad/gl.h>
 #include <SDL3/SDL.h>
+#include <std.h>
 
 typedef struct {
     SDL_Window* window;
