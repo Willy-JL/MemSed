@@ -47,6 +47,7 @@ void gui_window_draw(Gui* gui) {
             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);
     ImGui_PopStyleVar();
+    const uint8_t pane_spacing_mult = 3;
 
     // Toolbar
 
@@ -60,9 +61,12 @@ void gui_window_draw(Gui* gui) {
     ImGui_ProgressBar(0.0f, (ImVec2){ImGui_GetContentRegionAvail().x, 0.0f}, "0%");
     ImGui_EndDisabled();
 
+    for(uint8_t i = 1; i < pane_spacing_mult; i++) {
+        ImGui_Spacing();
+    }
+
     // Main panes
 
-    const uint8_t pane_spacing_mult = 4;
     ImVec2 avail = ImGui_GetContentRegionAvail();
     const ImVec2 options_size = {500.0f, 600.0f};
     ImVec2 addresses_size = {
