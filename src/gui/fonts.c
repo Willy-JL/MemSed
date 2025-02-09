@@ -39,14 +39,14 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_karla_regular_compressed_data,
         font_karla_regular_compressed_size,
-        18,
+        18.0f,
         &font_karla_config,
         NULL);
     ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
         font_materialdesignicons_webfont_compressed_data,
         font_materialdesignicons_webfont_compressed_size,
-        18,
+        18.0f,
         &font_mdi_config,
         NULL);
 
@@ -54,14 +54,14 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_karla_bold_compressed_data,
         font_karla_bold_compressed_size,
-        22,
+        22.0f,
         &font_karla_config,
         NULL);
     ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
         font_materialdesignicons_webfont_compressed_data,
         font_materialdesignicons_webfont_compressed_size,
-        18,
+        18.0f,
         &font_mdi_config,
         NULL);
 
@@ -69,14 +69,14 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_karla_bold_compressed_data,
         font_karla_bold_compressed_size,
-        32,
+        32.0f,
         &font_karla_config,
         NULL);
     ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
         font_materialdesignicons_webfont_compressed_data,
         font_materialdesignicons_webfont_compressed_size,
-        28,
+        28.0f,
         &font_mdi_config,
         NULL);
 
@@ -84,14 +84,14 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_karla_bold_compressed_data,
         font_karla_bold_compressed_size,
-        14,
+        14.0f,
         &font_karla_config,
         NULL);
     ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
         font_materialdesignicons_webfont_compressed_data,
         font_materialdesignicons_webfont_compressed_size,
-        14,
+        14.0f,
         &font_mdi_config,
         NULL);
 
@@ -99,7 +99,7 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_meslolgs_regular_compressed_data,
         font_meslolgs_regular_compressed_size,
-        17,
+        17.0f,
         &font_meslo_config,
         NULL);
 }

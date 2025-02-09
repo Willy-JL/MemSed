@@ -1,7 +1,7 @@
 #include "window.h"
 
 void gui_window_draw(Gui* gui) {
-    ImGui_SetNextWindowPos((ImVec2){0, 0}, ImGuiCond_Once);
+    ImGui_SetNextWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Once);
     int32_t width, height;
     SDL_GetWindowSize(gui->window, &width, &height);
     ImVec2 size = {width, height};
