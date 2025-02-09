@@ -56,7 +56,7 @@ void gui_window_draw(Gui* gui) {
     }
     gui_window_select_process(gui);
 
-    ImGui_SameLine();
+    ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
     ImGui_BeginDisabled(true);
     ImGui_ProgressBar(0.0f, (ImVec2){ImGui_GetContentRegionAvail().x, 0.0f}, "0%");
     ImGui_EndDisabled();
