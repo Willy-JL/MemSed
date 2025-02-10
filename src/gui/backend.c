@@ -6,53 +6,6 @@
 #include <dcimgui/dcimgui.h>
 #include <SDL3/SDL_opengl.h>
 
-void gui_backend_update_cursor(Gui* gui) {
-    if(ImGui_IsAnyItemHovered()) {
-        ImGui_SetMouseCursor(ImGuiMouseCursor_Hand);
-    }
-    const ImGuiMouseCursor cursor = ImGui_GetMouseCursor();
-
-    if(cursor != gui->prev_cursor) {
-        SDL_SystemCursor system_cursor;
-        switch(cursor) {
-        case ImGuiMouseCursor_None:
-        case ImGuiMouseCursor_Arrow:
-            system_cursor = SDL_SYSTEM_CURSOR_DEFAULT;
-            break;
-        case ImGuiMouseCursor_TextInput:
-            system_cursor = SDL_SYSTEM_CURSOR_TEXT;
-            break;
-        case ImGuiMouseCursor_ResizeAll:
-            system_cursor = SDL_SYSTEM_CURSOR_MOVE;
-            break;
-        case ImGuiMouseCursor_ResizeNS:
-            system_cursor = SDL_SYSTEM_CURSOR_NS_RESIZE;
-            break;
-        case ImGuiMouseCursor_ResizeEW:
-            system_cursor = SDL_SYSTEM_CURSOR_EW_RESIZE;
-            break;
-        case ImGuiMouseCursor_ResizeNESW:
-            system_cursor = SDL_SYSTEM_CURSOR_NESW_RESIZE;
-            break;
-        case ImGuiMouseCursor_ResizeNWSE:
-            system_cursor = SDL_SYSTEM_CURSOR_NWSE_RESIZE;
-            break;
-        case ImGuiMouseCursor_Hand:
-            system_cursor = SDL_SYSTEM_CURSOR_POINTER;
-            break;
-        case ImGuiMouseCursor_NotAllowed:
-            system_cursor = SDL_SYSTEM_CURSOR_NOT_ALLOWED;
-            break;
-        }
-
-        SDL_Cursor* sdl_cursor = SDL_CreateSystemCursor(system_cursor);
-        SDL_SetCursor(sdl_cursor);
-        SDL_DestroyCursor(sdl_cursor);
-
-        gui->prev_cursor = cursor;
-    }
-}
-
 bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t height) {
     // Prefer Wayland when available
     SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland");
@@ -97,7 +50,6 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     ImGui_CreateContext(NULL);
     gui->io = ImGui_GetIO();
     gui->style = ImGui_GetStyle();
-    gui->prev_cursor = ImGuiMouseCursor_None;
     gui->prev_size = (ImVec2){0.0f, 0.0f};
 
     ImGui_ImplSDL3_InitForOpenGL(gui->window, gui->gl);
@@ -121,7 +73,11 @@ void gui_backend_process_events(Gui* gui) {
 }
 
 void gui_backend_new_frame(Gui* gui) {
-    gui_backend_update_cursor(gui);
+    UNUSED(gui);
+
+    if(ImGui_IsAnyItemHovered()) {
+        ImGui_SetMouseCursor(ImGuiMouseCursor_Hand);
+    }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
