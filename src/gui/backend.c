@@ -10,7 +10,7 @@ void gui_backend_update_cursor(Gui* gui) {
     if(ImGui_IsAnyItemHovered()) {
         ImGui_SetMouseCursor(ImGuiMouseCursor_Hand);
     }
-    ImGuiMouseCursor cursor = ImGui_GetMouseCursor();
+    const ImGuiMouseCursor cursor = ImGui_GetMouseCursor();
 
     if(cursor != gui->prev_cursor) {
         SDL_SystemCursor system_cursor;
@@ -72,8 +72,8 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    SDL_WindowFlags window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
-                                   SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    const SDL_WindowFlags window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE |
+                                         SDL_WINDOW_HIGH_PIXEL_DENSITY;
     gui->window = SDL_CreateWindow(title, width, height, window_flags);
     if(gui->window == NULL) {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -84,7 +84,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     SDL_GL_MakeCurrent(gui->window, gui->gl);
     SDL_GL_SetSwapInterval(1);
 
-    int32_t version = gladLoadGL(SDL_GL_GetProcAddress);
+    const int32_t version = gladLoadGL(SDL_GL_GetProcAddress);
     if(version == 0) {
         printf("Error: gladLoadGL(): Failed to initialize OpenGL context\n");
         SDL_GL_DestroyContext(gui->gl);
