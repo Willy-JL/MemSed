@@ -50,51 +50,6 @@ void gui_fonts_load(Gui* gui) {
         &font_mdi_config,
         NULL);
 
-    gui->fonts.bold = ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_karla_bold_compressed_data,
-        font_karla_bold_compressed_size,
-        22.0f,
-        &font_karla_config,
-        NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_materialdesignicons_webfont_compressed_data,
-        font_materialdesignicons_webfont_compressed_size,
-        18.0f,
-        &font_mdi_config,
-        NULL);
-
-    gui->fonts.big = ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_karla_bold_compressed_data,
-        font_karla_bold_compressed_size,
-        32.0f,
-        &font_karla_config,
-        NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_materialdesignicons_webfont_compressed_data,
-        font_materialdesignicons_webfont_compressed_size,
-        28.0f,
-        &font_mdi_config,
-        NULL);
-
-    gui->fonts.small = ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_karla_bold_compressed_data,
-        font_karla_bold_compressed_size,
-        14.0f,
-        &font_karla_config,
-        NULL);
-    ImFontAtlas_AddFontFromMemoryCompressedTTF(
-        gui->io->Fonts,
-        font_materialdesignicons_webfont_compressed_data,
-        font_materialdesignicons_webfont_compressed_size,
-        14.0f,
-        &font_mdi_config,
-        NULL);
-
     gui->fonts.mono = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
         font_meslolgs_regular_compressed_data,
