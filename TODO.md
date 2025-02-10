@@ -1,2 +1,8 @@
+- Actually implement the memory searching and editing
+- Add more search options:
+  - Endianness
+  - Memory flags (write, execute, ...)
+  - Pause process?
+  - Boundaries?
+  - More value options?
 - Figure out SDL segfault when building as static exe
-- Actually implement the damn program

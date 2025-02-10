@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../memory/search.h"
+
 #include <dcimgui/dcimgui.h>
 #include <fonts/mdi.h>
 #include <glad/gl.h>
@@ -21,6 +23,8 @@ typedef struct {
     ImGuiMouseCursor prev_cursor;
     ImVec2 prev_size;
     bool should_close;
+
+    MemorySearch* memory_search;
 } Gui;
 
 Gui* gui_init();
