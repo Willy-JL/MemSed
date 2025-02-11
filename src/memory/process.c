@@ -28,19 +28,21 @@ static void load_uid_usernames() {
         while(temp_str[pos] != '\0' && temp_str[pos] != ':') {
             pos++;
         }
-        if(temp_str[pos] == ':') {
-            uint32_t uid;
-            if(sscanf(&temp_str[pos + 3], "%u", &uid) == 1) {
-                temp_str[pos] = '\0';
-                if(capacity == count) {
-                    capacity *= 2;
-                    new_uid_usernames = realloc(new_uid_usernames, sizeof(UidUsername) * capacity);
-                }
-                new_uid_usernames[count].uid = uid;
-                new_uid_usernames[count].username = strdup(temp_str);
-                count++;
-            }
+        if(temp_str[pos] != ':') {
+            continue;
         }
+        uint32_t uid;
+        if(sscanf(&temp_str[pos + 3], "%u", &uid) != 1) {
+            continue;
+        }
+        temp_str[pos] = '\0';
+        if(count == capacity) {
+            capacity *= 2;
+            new_uid_usernames = realloc(new_uid_usernames, sizeof(UidUsername) * capacity);
+        }
+        new_uid_usernames[count].uid = uid;
+        new_uid_usernames[count].username = strdup(temp_str);
+        count++;
     }
     fclose(passwd);
     if(count > 0) {
@@ -69,21 +71,27 @@ static char* memory_process_read_proc_file(MemoryProcess* memory_process, const 
         perror(temp_str);
         return NULL;
     }
-    fgets(temp_str, sizeof(temp_str), file);
+    if(fgets(temp_str, sizeof(temp_str), file) == NULL) {
+        temp_str[0] = '\0';
+    }
     fclose(file);
 
+    size_t len = strlen(temp_str);
     if(strcmp(name, "comm") == 0) {
-        temp_str[strlen(temp_str) - 1] = '\0'; // Remove trailing newline
+        if(len > 1) {
+            len--;
+            temp_str[len] = '\0'; // Remove trailing newline
+        }
     }
 
-    return strdup(temp_str);
+    return len ? strdup(temp_str) : NULL;
 }
 
 MemoryProcess* memory_process_init(MemoryProcessPid pid) {
     MemoryProcess* memory_process = malloc(sizeof(MemoryProcess));
     memory_process->pid = pid;
     if(!memory_process_is_alive(memory_process)) {
-        memory_process_free(memory_process);
+        free(memory_process);
         return NULL;
     }
     memory_process->name = memory_process_read_proc_file(memory_process, "comm");
@@ -124,11 +132,15 @@ bool memory_process_is_alive(MemoryProcess* memory_process) {
         return true;
     }
     if(res == -1) {
-        if(errno == ESRCH) {
+        switch(errno) {
+        case ESRCH:
+            return false;
+        case EPERM:
+            return true;
+        default:
+            perror("Unknown result checking if process is alive");
             return false;
         }
-        perror("Unknown result checking if process is alive");
-        return false;
     }
     unreachable();
 }
