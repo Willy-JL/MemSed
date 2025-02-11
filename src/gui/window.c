@@ -74,9 +74,9 @@ static void gui_window_draw_toolbar(Gui* gui) {
                     label,
                     sizeof(label),
                     "%s (%i, %s)",
-                    process->name,
+                    process->name ? process->name : "unknown exe",
                     process->pid,
-                    process->user);
+                    process->user ? process->user : "unknown user");
                 command = process->command;
             }
         }
