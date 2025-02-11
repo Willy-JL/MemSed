@@ -32,8 +32,9 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
         if(process_list == NULL) {
             process_list = memory_process_list_init();
         }
-        static size_t selected = (size_t)-1;
+        static MemoryProcessPid selected = 0;
         static char search[129] = "";
+        bool any_selected = false;
 
         ImGui_SetNextItemWidth(-FLT_MIN);
         ImGui_InputTextWithHint(
@@ -62,12 +63,13 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
                 if(search[0] != '\0' && strstr(label, search) == NULL) {
                     continue;
                 }
-                ImGui_PushIDInt(i);
-                bool is_selected = i == selected;
+                ImGui_PushIDInt(process->pid);
+                bool is_selected = process->pid == selected;
                 if(ImGui_SelectableBoolPtr(label, &is_selected, ImGuiSelectableFlags_None)) {
-                    selected = i;
+                    selected = process->pid;
                 }
                 if(is_selected) {
+                    any_selected = true;
                     ImGui_SetItemDefaultFocus();
                 }
                 ImGui_PopID();
@@ -75,13 +77,11 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
             ImGui_EndListBox();
         }
 
-        ImGui_BeginDisabled(selected == (size_t)-1);
+        ImGui_BeginDisabled(!any_selected);
         if(ImGui_Button(ok)) {
-            memory_search_process_attach(
-                gui->memory_search,
-                process_list->processes[selected]->pid);
             memory_process_list_free(process_list);
             process_list = NULL;
+            memory_search_process_attach(gui->memory_search, selected);
             ImGui_CloseCurrentPopup();
         }
         ImGui_EndDisabled();
