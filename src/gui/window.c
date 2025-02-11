@@ -37,6 +37,9 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
         bool any_selected = false;
 
         ImGui_SetNextItemWidth(-FLT_MIN);
+        if(ImGui_IsWindowAppearing()) {
+            ImGui_SetKeyboardFocusHere();
+        }
         ImGui_InputTextWithHint(
             "###search",
             "Search...",
