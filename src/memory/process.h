@@ -14,6 +14,13 @@ typedef struct {
     char* user;
 } MemoryProcess;
 
+typedef struct {
+    size_t processes_count;
+    MemoryProcess* processes[];
+} MemoryProcessList;
+
 MemoryProcess* memory_process_init(MemoryProcessPid pid);
 bool memory_process_is_alive(MemoryProcess* memory_process);
 void memory_process_free(MemoryProcess* memory_process);
+MemoryProcessList* memory_process_list_init();
+void memory_process_list_free(MemoryProcessList* list);

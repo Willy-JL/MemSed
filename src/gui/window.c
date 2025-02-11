@@ -14,22 +14,82 @@ const uint8_t pane_spacing_mult = 3;
 const ImVec2 options_min_size = {378.0f, 250.0f};
 
 static void gui_window_draw_select_process_popup(Gui* gui) {
+    ImVec2 display = gui->io->DisplaySize;
+    ImVec2 size = display;
+    size.x *= 0.8f;
+    size.y *= 0.8f;
+    ImGui_SetNextWindowSize(size, ImGuiCond_Always);
+    ImGui_SetNextWindowPosEx(
+        (ImVec2){display.x / 2.0f, display.y / 2.0f},
+        ImGuiCond_Always,
+        (ImVec2){0.5f, 0.5f});
     if(ImGui_BeginPopupModal(
            select_process,
            NULL,
-           ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
-        // FIXME: process picker
-        ImGui_Text("Such Empty");
+           ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+               ImGuiWindowFlags_AlwaysAutoResize)) {
+        static MemoryProcessList* process_list = NULL;
+        if(process_list == NULL) {
+            process_list = memory_process_list_init();
+        }
+        static size_t selected = (size_t)-1;
+        static char search[129] = "";
 
-        ImGui_BeginDisabled(false);
+        ImGui_SetNextItemWidth(-FLT_MIN);
+        ImGui_InputTextWithHint(
+            "###search",
+            "Search...",
+            search,
+            sizeof(search),
+            ImGuiInputTextFlags_None);
+
+        ImVec2 avail = ImGui_GetContentRegionAvail();
+        avail.y -= ImGui_GetFrameHeightWithSpacing();
+        if(ImGui_BeginListBox("###processes", avail)) {
+            // FIXME: use clipper
+            char label[257];
+            for(size_t i = 0; i < process_list->processes_count; i++) {
+                MemoryProcess* process = process_list->processes[i];
+                snprintf(
+                    label,
+                    sizeof(label),
+                    "%s (%i, %s)%s%s",
+                    process->name ? process->name : "unknown exe",
+                    process->pid,
+                    process->user ? process->user : "unknown user",
+                    process->command ? ": " : "",
+                    process->command ? process->command : "");
+                if(search[0] != '\0' && strstr(label, search) == NULL) {
+                    continue;
+                }
+                ImGui_PushIDInt(i);
+                bool is_selected = i == selected;
+                if(ImGui_SelectableBoolPtr(label, &is_selected, ImGuiSelectableFlags_None)) {
+                    selected = i;
+                }
+                if(is_selected) {
+                    ImGui_SetItemDefaultFocus();
+                }
+                ImGui_PopID();
+            }
+            ImGui_EndListBox();
+        }
+
+        ImGui_BeginDisabled(selected == (size_t)-1);
         if(ImGui_Button(ok)) {
-            memory_search_process_attach(gui->memory_search, 1);
+            memory_search_process_attach(
+                gui->memory_search,
+                process_list->processes[selected]->pid);
+            memory_process_list_free(process_list);
+            process_list = NULL;
             ImGui_CloseCurrentPopup();
         }
         ImGui_EndDisabled();
 
         ImGui_SameLine();
         if(ImGui_Button(cancel)) {
+            memory_process_list_free(process_list);
+            process_list = NULL;
             ImGui_CloseCurrentPopup();
         }
 
@@ -116,6 +176,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
 
         MemorySearchResults results = memory_search_get_results(gui->memory_search);
         if(!is_searching && results.batches_count >= 1) {
+            // FIXME: use clipper
             MemorySearchResultBatch* batch = &results.batches[results.batches_count - 1];
             MemorySearchResultBatch* prev_batch =
                 results.batches_count >= 2 ? &results.batches[results.batches_count - 2] : NULL;
@@ -323,6 +384,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableHeadersRow();
         // FIXME: use data from memory search
+        // FIXME: use clipper
         const ImVec2* example_addresses[] = {&size, &gui->prev_size, &gui->io->DisplaySize};
         for(size_t i = 0; i < COUNT_OF(example_addresses); i++) {
             ImGui_PushIDInt(i);
