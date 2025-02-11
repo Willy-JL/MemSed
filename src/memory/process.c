@@ -4,12 +4,69 @@
 #include <signal.h>
 #include <sys/stat.h>
 
+typedef struct {
+    uint32_t uid;
+    char* username;
+} UidUsername;
+
+static UidUsername* uid_usernames = NULL;
+static size_t uid_usernames_count = 0;
+
+static void load_uid_usernames() {
+    char temp_str[257];
+    size_t capacity = 1;
+    size_t count = 0;
+    UidUsername* new_uid_usernames = malloc(sizeof(UidUsername) * capacity);
+    FILE* passwd = fopen("/etc/passwd", "r");
+    if(passwd == NULL) {
+        perror("/etc/passwd");
+        goto bail;
+    }
+    while(fgets(temp_str, sizeof(temp_str), passwd) != NULL) {
+        // "username:x:uid:..."
+        size_t pos = 0;
+        while(temp_str[pos] != '\0' && temp_str[pos] != ':') {
+            pos++;
+        }
+        if(temp_str[pos] == ':') {
+            uint32_t uid;
+            if(sscanf(&temp_str[pos + 3], "%u", &uid) == 1) {
+                temp_str[pos] = '\0';
+                if(capacity == count) {
+                    capacity *= 2;
+                    new_uid_usernames = realloc(new_uid_usernames, sizeof(UidUsername) * capacity);
+                }
+                new_uid_usernames[count].uid = uid;
+                new_uid_usernames[count].username = strdup(temp_str);
+                count++;
+            }
+        }
+    }
+    fclose(passwd);
+    if(count > 0) {
+        new_uid_usernames = realloc(new_uid_usernames, sizeof(UidUsername) * count);
+    }
+
+bail:
+    UidUsername* old_uid_usernames = uid_usernames;
+    size_t old_count = uid_usernames_count;
+    uid_usernames = new_uid_usernames;
+    uid_usernames_count = count;
+    if(old_uid_usernames) {
+        for(size_t i = 0; i < old_count; i++) {
+            free(old_uid_usernames[i].username);
+        }
+        free(old_uid_usernames);
+    }
+}
+
 static char* memory_process_read_proc_file(MemoryProcess* memory_process, const char* name) {
     char temp_str[257];
 
     snprintf(temp_str, sizeof(temp_str), "/proc/%i/%s", memory_process->pid, name);
     FILE* file = fopen(temp_str, "r");
     if(file == NULL) {
+        perror(temp_str);
         return NULL;
     }
     fgets(temp_str, sizeof(temp_str), file);
@@ -26,7 +83,7 @@ MemoryProcess* memory_process_init(MemoryProcessPid pid) {
     MemoryProcess* memory_process = malloc(sizeof(MemoryProcess));
     memory_process->pid = pid;
     if(!memory_process_is_alive(memory_process)) {
-        free(memory_process);
+        memory_process_free(memory_process);
         return NULL;
     }
     memory_process->name = memory_process_read_proc_file(memory_process, "comm");
@@ -35,19 +92,45 @@ MemoryProcess* memory_process_init(MemoryProcessPid pid) {
     char temp_str[33];
     snprintf(temp_str, sizeof(temp_str), "/proc/%i", memory_process->pid);
     struct stat process_stat;
-    stat(temp_str, &process_stat);
-    // FIXME: convert UID to username
-    snprintf(temp_str, sizeof(temp_str), "%i", process_stat.st_uid);
-    memory_process->user = strdup(temp_str);
+    int32_t res = stat(temp_str, &process_stat);
+    if(res != 0) {
+        if(res == -1) {
+            perror(temp_str);
+            memory_process_free(memory_process);
+            return NULL;
+        }
+        unreachable();
+    }
+    if(uid_usernames == NULL) {
+        load_uid_usernames();
+    }
+    for(size_t i = 0; i < uid_usernames_count; i++) {
+        if(uid_usernames[i].uid == process_stat.st_uid) {
+            memory_process->user = strdup(uid_usernames[i].username);
+            break;
+        }
+    }
+    if(memory_process->user == NULL) {
+        snprintf(temp_str, sizeof(temp_str), "%i", process_stat.st_uid);
+        memory_process->user = strdup(temp_str);
+    }
 
     return memory_process;
 }
 
 bool memory_process_is_alive(MemoryProcess* memory_process) {
-    if(kill(memory_process->pid, 0) == 0 || errno == ESRCH) {
+    int32_t res = kill(memory_process->pid, 0);
+    if(res == 0) {
+        return true;
+    }
+    if(res == -1) {
+        if(errno == ESRCH) {
+            return false;
+        }
+        perror("Unknown result checking if process is alive");
         return false;
     }
-    return true;
+    unreachable();
 }
 
 void memory_process_free(MemoryProcess* memory_process) {
