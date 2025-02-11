@@ -98,10 +98,8 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
 }
 
 static void gui_window_draw_toolbar(Gui* gui) {
-    bool is_attached = memory_search_process_is_attached(gui->memory_search);
-    bool is_searching = memory_search_is_searching(gui->memory_search);
-    ImGui_BeginDisabled(is_searching);
-    if(is_attached) {
+    ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
+    if(memory_search_process_is_attached(gui->memory_search)) {
         if(ImGui_Button(detach_process)) {
             memory_search_process_detach(gui->memory_search);
         }
@@ -116,9 +114,9 @@ static void gui_window_draw_toolbar(Gui* gui) {
 
     ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
 
-    ImGui_BeginDisabled(!is_attached);
+    ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
     const ImVec2 progressbar_size = {ImGui_GetContentRegionAvail().x, 0.0f};
-    if(is_searching) {
+    if(memory_search_is_searching(gui->memory_search)) {
         flt32_t progress = memory_search_get_search_progress(gui->memory_search);
         char progress_str[5];
         snprintf(progress_str, sizeof(progress_str), "%.0f%%", progress);
@@ -127,7 +125,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
         // FIXME: use process commandline
         char label[257] = "No Process Selected";
         const char* command = NULL;
-        if(is_attached) {
+        if(memory_search_process_is_attached(gui->memory_search)) {
             MemoryProcess* process = memory_search_get_process(gui->memory_search);
             if(process != NULL) {
                 snprintf(
@@ -153,8 +151,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
 }
 
 static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
-    bool is_searching = memory_search_is_searching(gui->memory_search);
-    ImGui_BeginDisabled(is_searching);
+    ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
     if(ImGui_BeginTableEx(
            "###addresses",
            4,
@@ -175,7 +172,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
         ImGui_PopFont();
 
         MemorySearchResults results = memory_search_get_results(gui->memory_search);
-        if(!is_searching && results.batches_count >= 1) {
+        if(!memory_search_is_searching(gui->memory_search) && results.batches_count >= 1) {
             // FIXME: use clipper
             MemorySearchResultBatch* batch = &results.batches[results.batches_count - 1];
             MemorySearchResultBatch* prev_batch =
@@ -227,11 +224,10 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
     if(ImGui_BeginChild("###options", size, ImGuiChildFlags_Borders, ImGuiWindowFlags_None)) {
         ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
         MemorySearchParams params = memory_search_get_params(gui->memory_search);
-        bool is_searching = memory_search_is_searching(gui->memory_search);
 
         // FIXME: make the search buttons work
         static uint32_t search_count = 0;
-        ImGui_BeginDisabled(is_searching);
+        ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
         if(search_count == 0) {
             if(ImGui_Button(first_search)) {
                 search_count = 1;
@@ -245,7 +241,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         ImGui_SameLine();
 
-        if(is_searching) {
+        if(memory_search_is_searching(gui->memory_search)) {
             flt32_t width = ImGui_CalcTextSize(undo_search).x + gui->style->FramePadding.x * 2;
             if(ImGui_ButtonEx(stop_search, (ImVec2){width, 0.0f})) {
             }
@@ -259,7 +255,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         ImGui_SameLine();
 
-        ImGui_BeginDisabled(is_searching || search_count < 1);
+        ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search) || search_count < 1);
         if(ImGui_Button(reset_search)) {
             search_count = 0;
         }
