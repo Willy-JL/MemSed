@@ -76,7 +76,7 @@ target_link_libraries(memsed PRIVATE -static-libgcc -static-libstdc++)
 
 # Add `make run` target
 add_custom_target(run
-    COMMAND memsed
+    COMMAND sudo ./memsed
     DEPENDS memsed
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
