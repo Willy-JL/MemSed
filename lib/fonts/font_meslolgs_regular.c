@@ -1,5 +1,5 @@
-// File: '/home/user/Git/MemSed/resources/fonts/MesloLGS-Regular.1.2.ttf' (499236 bytes)
-// Exported using binary_to_compressed_c.exe -u8 "/home/user/Git/MemSed/resources/fonts/MesloLGS-Regular.1.2.ttf" font_meslolgs_regular
+// File: 'resources/fonts/MesloLGS-Regular.1.2.ttf' (499236 bytes)
+// Exported using binary_to_compressed_c.exe -u8 "resources/fonts/MesloLGS-Regular.1.2.ttf" font_meslolgs_regular
 const unsigned int font_meslolgs_regular_compressed_size = 309054;
 const unsigned char font_meslolgs_regular_compressed_data[309054] =
 {

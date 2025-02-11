@@ -1,5 +1,5 @@
-// File: '/home/user/Git/MemSed/resources/fonts/Karla-Regular.27.09.2023.ttf' (44048 bytes)
-// Exported using binary_to_compressed_c.exe -u8 "/home/user/Git/MemSed/resources/fonts/Karla-Regular.27.09.2023.ttf" font_karla_regular
+// File: 'resources/fonts/Karla-Regular.27.09.2023.ttf' (44048 bytes)
+// Exported using binary_to_compressed_c.exe -u8 "resources/fonts/Karla-Regular.27.09.2023.ttf" font_karla_regular
 const unsigned int font_karla_regular_compressed_size = 33130;
 const unsigned char font_karla_regular_compressed_data[33130] =
 {

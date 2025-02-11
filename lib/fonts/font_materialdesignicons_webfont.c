@@ -1,5 +1,5 @@
-// File: '/home/user/Git/MemSed/resources/fonts/materialdesignicons-webfont.7.4.47.ttf' (1307660 bytes)
-// Exported using binary_to_compressed_c.exe -u8 "/home/user/Git/MemSed/resources/fonts/materialdesignicons-webfont.7.4.47.ttf" font_materialdesignicons_webfont
+// File: 'resources/fonts/materialdesignicons-webfont.7.4.47.ttf' (1307660 bytes)
+// Exported using binary_to_compressed_c.exe -u8 "resources/fonts/materialdesignicons-webfont.7.4.47.ttf" font_materialdesignicons_webfont
 const unsigned int font_materialdesignicons_webfont_compressed_size = 867331;
 const unsigned char font_materialdesignicons_webfont_compressed_data[867331] =
 {
