@@ -62,6 +62,7 @@ target_link_libraries(memsed PRIVATE SDL3-static)
 # ImGui (via dcimgui bindings)
 set(DCIMGUI_BACKENDS sdl3 opengl3)
 add_subdirectory("${DCIMGUI_DIR}")
+target_link_libraries(dcimgui PRIVATE SDL3-static)
 target_link_libraries(dcimgui PRIVATE glad)
 target_link_libraries(memsed PRIVATE dcimgui)
 
