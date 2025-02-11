@@ -66,20 +66,28 @@ static void gui_window_draw_toolbar(Gui* gui) {
     } else {
         // FIXME: use process commandline
         char label[257] = "No Process Selected";
+        const char* command = NULL;
         if(is_attached) {
             MemoryProcess* process = memory_search_get_process(gui->memory_search);
             if(process != NULL) {
                 snprintf(
                     label,
                     sizeof(label),
-                    "%s (%i, %s): %s",
+                    "%s (%i, %s)",
                     process->name,
                     process->pid,
-                    process->user,
-                    process->command);
+                    process->user);
+                command = process->command;
             }
         }
         ImGui_ProgressBar(0.0f, progressbar_size, label);
+        if(command && ImGui_IsItemHovered(ImGuiHoveredFlags_ForTooltip)) {
+            ImGui_BeginItemTooltip();
+            ImGui_PushTextWrapPos(progressbar_size.x);
+            ImGui_Text("Commandline:\n%s", command);
+            ImGui_PopTextWrapPos();
+            ImGui_EndTooltip();
+        }
     }
     ImGui_EndDisabled();
 }
