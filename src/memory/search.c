@@ -3,7 +3,7 @@
 struct MemorySearch {
     MemorySearchParams params;
     char* process_description;
-    MemoryPid pid;
+    MemoryProcessPid pid;
     bool is_searching;
     flt32_t search_progress;
     MemorySearchResults results;
@@ -24,32 +24,8 @@ MemorySearch* memory_search_init() {
     return memory_search;
 }
 
-void memory_search_process_attach(MemorySearch* memory_search, MemoryPid pid) {
-    char temp_str[257];
-    char process_description[513];
-    FILE* file;
-
-    snprintf(temp_str, sizeof(temp_str), "/proc/%i/comm", pid);
-    file = fopen(temp_str, "r");
-    if(file == NULL) {
-        return;
-    }
-    fgets(temp_str, sizeof(temp_str), file);
-    fclose(file);
-    temp_str[strlen(temp_str) - 1] = '\0'; // Remove trailing newline
-    snprintf(process_description, sizeof(process_description), "%s (", temp_str);
-
-    snprintf(temp_str, sizeof(temp_str), "/proc/%i/cmdline", pid);
-    file = fopen(temp_str, "r");
-    if(file == NULL) {
-        return;
-    }
-    fgets(temp_str, sizeof(temp_str), file);
-    fclose(file);
-    strlcat(process_description, temp_str, sizeof(process_description));
-    strlcat(process_description, ")", sizeof(process_description));
-
-    memory_search->process_description = strdup(process_description);
+void memory_search_process_attach(MemorySearch* memory_search, MemoryProcessPid pid) {
+    memory_search->process_description = memory_process_get_description(pid);
     memory_search->pid = pid;
 
     // Example results for testing
@@ -94,7 +70,8 @@ bool memory_search_process_is_attached(MemorySearch* memory_search) {
 }
 
 const char* memory_search_process_get_description(MemorySearch* memory_search) {
-    return memory_search->process_description;
+    return memory_search->process_description ? memory_search->process_description :
+                                                "Unknown process";
 }
 
 void memory_search_process_detach(MemorySearch* memory_search) {
