@@ -2,6 +2,7 @@
 
 struct MemorySearch {
     MemorySearchParams params;
+    char* process_description;
     MemoryPid pid;
     bool is_searching;
     flt32_t search_progress;
@@ -24,7 +25,31 @@ MemorySearch* memory_search_init() {
 }
 
 void memory_search_process_attach(MemorySearch* memory_search, MemoryPid pid) {
-    // FIXME: does this need to do anything else, or all done when searching?
+    char temp_str[257];
+    char process_description[513];
+    FILE* file;
+
+    snprintf(temp_str, sizeof(temp_str), "/proc/%i/comm", pid);
+    file = fopen(temp_str, "r");
+    if(file == NULL) {
+        return;
+    }
+    fgets(temp_str, sizeof(temp_str), file);
+    fclose(file);
+    temp_str[strlen(temp_str) - 1] = '\0'; // Remove trailing newline
+    snprintf(process_description, sizeof(process_description), "%s (", temp_str);
+
+    snprintf(temp_str, sizeof(temp_str), "/proc/%i/cmdline", pid);
+    file = fopen(temp_str, "r");
+    if(file == NULL) {
+        return;
+    }
+    fgets(temp_str, sizeof(temp_str), file);
+    fclose(file);
+    strlcat(process_description, temp_str, sizeof(process_description));
+    strlcat(process_description, ")", sizeof(process_description));
+
+    memory_search->process_description = strdup(process_description);
     memory_search->pid = pid;
 
     // Example results for testing
@@ -68,8 +93,16 @@ bool memory_search_process_is_attached(MemorySearch* memory_search) {
     return memory_search->pid != 0;
 }
 
+const char* memory_search_process_get_description(MemorySearch* memory_search) {
+    return memory_search->process_description;
+}
+
 void memory_search_process_detach(MemorySearch* memory_search) {
     memory_search->pid = 0;
+    char* process_description = memory_search->process_description;
+    memory_search->process_description = NULL;
+    free(process_description);
+
     size_t batches_count = memory_search->results.batches_count;
     MemorySearchResultBatch* batches = memory_search->results.batches;
     memory_search->results.current_results_count = 0;
