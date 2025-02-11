@@ -87,7 +87,7 @@ typedef struct MemorySearch MemorySearch;
 MemorySearch* memory_search_init();
 void memory_search_process_attach(MemorySearch* memory_search, MemoryProcessPid pid);
 bool memory_search_process_is_attached(MemorySearch* memory_search);
-const char* memory_search_process_get_description(MemorySearch* memory_search);
+MemoryProcess* memory_search_get_process(MemorySearch* memory_search);
 void memory_search_process_detach(MemorySearch* memory_search);
 MemorySearchParams memory_search_get_params(MemorySearch* memory_search);
 void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams params);

@@ -2,8 +2,7 @@
 
 struct MemorySearch {
     MemorySearchParams params;
-    char* process_description;
-    MemoryProcessPid pid;
+    MemoryProcess* process;
     bool is_searching;
     flt32_t search_progress;
     MemorySearchResults results;
@@ -15,7 +14,7 @@ MemorySearch* memory_search_init() {
     memory_search->params.alignment = 4;
     memory_search->params.value = 0.0l;
     memory_search->params.precision = 0.1l;
-    memory_search->pid = 0;
+    memory_search->process = NULL;
     memory_search->is_searching = false;
     memory_search->search_progress = 0.0f;
     memory_search->results.current_results_count = 0;
@@ -25,10 +24,12 @@ MemorySearch* memory_search_init() {
 }
 
 void memory_search_process_attach(MemorySearch* memory_search, MemoryProcessPid pid) {
-    memory_search->process_description = memory_process_get_description(pid);
-    memory_search->pid = pid;
+    memory_search->process = memory_process_init(pid);
 
     // Example results for testing
+    if(memory_search->process == NULL) {
+        return;
+    }
     memory_search->results.batches = malloc(sizeof(MemorySearchResultBatch) * 2);
     memory_search->results.batches[0].sets = malloc(sizeof(MemorySearchResultSet) * 2);
     memory_search->results.batches[0].sets[0].type = MemoryTypeI8;
@@ -66,19 +67,17 @@ void memory_search_process_attach(MemorySearch* memory_search, MemoryProcessPid 
 
 bool memory_search_process_is_attached(MemorySearch* memory_search) {
     // FIXME: periodically check if process is still alive
-    return memory_search->pid != 0;
+    return memory_search->process != NULL;
 }
 
-const char* memory_search_process_get_description(MemorySearch* memory_search) {
-    return memory_search->process_description ? memory_search->process_description :
-                                                "Unknown process";
+MemoryProcess* memory_search_get_process(MemorySearch* memory_search) {
+    return memory_search->process;
 }
 
 void memory_search_process_detach(MemorySearch* memory_search) {
-    memory_search->pid = 0;
-    char* process_description = memory_search->process_description;
-    memory_search->process_description = NULL;
-    free(process_description);
+    MemoryProcess* process = memory_search->process;
+    memory_search->process = NULL;
+    memory_process_free(process);
 
     size_t batches_count = memory_search->results.batches_count;
     MemorySearchResultBatch* batches = memory_search->results.batches;

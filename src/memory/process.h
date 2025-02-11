@@ -7,4 +7,13 @@
 // Invalid PID is 0
 typedef int32_t MemoryProcessPid;
 
-char* memory_process_get_description(MemoryProcessPid pid);
+typedef struct {
+    MemoryProcessPid pid;
+    char* name;
+    char* command;
+    char* user;
+} MemoryProcess;
+
+MemoryProcess* memory_process_init(MemoryProcessPid pid);
+bool memory_process_is_alive(MemoryProcess* memory_process);
+void memory_process_free(MemoryProcess* memory_process);

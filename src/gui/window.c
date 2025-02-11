@@ -65,9 +65,20 @@ static void gui_window_draw_toolbar(Gui* gui) {
         ImGui_ProgressBar(progress, progressbar_size, progress_str);
     } else {
         // FIXME: use process commandline
-        const char* label = is_attached ?
-                                memory_search_process_get_description(gui->memory_search) :
-                                "No Process Selected";
+        char label[257] = "No Process Selected";
+        if(is_attached) {
+            MemoryProcess* process = memory_search_get_process(gui->memory_search);
+            if(process != NULL) {
+                snprintf(
+                    label,
+                    sizeof(label),
+                    "%s (%i, %s): %s",
+                    process->name,
+                    process->pid,
+                    process->user,
+                    process->command);
+            }
+        }
         ImGui_ProgressBar(0.0f, progressbar_size, label);
     }
     ImGui_EndDisabled();
