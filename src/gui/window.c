@@ -7,7 +7,7 @@ const char* detach_process = mdi_exit_run " Detach Process";
 const char* first_search = mdi_magnify_plus " First Search";
 const char* next_search = mdi_magnify_expand " Next Search";
 const char* undo_search = mdi_magnify_minus " Undo Search";
-const char* cancel_search = mdi_magnify_close " Cancel Search";
+const char* stop_search = mdi_magnify_remove_cursor " Stop Search";
 const char* reset_search = mdi_magnify_close " Reset Search";
 
 const uint8_t pane_spacing_mult = 3;
@@ -46,7 +46,8 @@ static void gui_window_draw_toolbar(Gui* gui) {
             memory_search_process_detach(gui->memory_search);
         }
     } else {
-        if(ImGui_Button(select_process)) {
+        flt32_t width = ImGui_CalcTextSize(detach_process).x + gui->style->FramePadding.x * 2;
+        if(ImGui_ButtonEx(select_process, (ImVec2){width, 0.0f})) {
             ImGui_OpenPopup(select_process, ImGuiPopupFlags_None);
         }
     }
@@ -163,7 +164,8 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
         ImGui_SameLine();
 
         if(is_searching) {
-            if(ImGui_Button(cancel_search)) {
+            flt32_t width = ImGui_CalcTextSize(undo_search).x + gui->style->FramePadding.x * 2;
+            if(ImGui_ButtonEx(stop_search, (ImVec2){width, 0.0f})) {
             }
         } else {
             ImGui_BeginDisabled(search_count < 1);
