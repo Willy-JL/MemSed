@@ -15,9 +15,6 @@ typedef struct {
     ImGuiStyle* style;
     struct {
         ImFont* base;
-        ImFont* bold;
-        ImFont* big;
-        ImFont* small;
         ImFont* mono;
     } fonts;
     ImVec2 prev_size;
