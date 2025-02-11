@@ -25,4 +25,5 @@ typedef enum {
 extern const char* memory_type_names[MemoryTypeMAX];
 
 const char* memory_type_get_name(MemoryType type);
+const char* memory_type_get_short_name(MemoryType type);
 size_t memory_type_get_size(MemoryType type);

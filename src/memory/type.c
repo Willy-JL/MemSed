@@ -24,6 +24,28 @@ const char* memory_type_get_name(MemoryType type) {
     return memory_type_names[type];
 }
 
+const char* memory_type_short_names[MemoryTypeMAX] = {
+    [MemoryTypeU8] = "u8",
+    [MemoryTypeU16] = "u16",
+    [MemoryTypeU32] = "u32",
+    [MemoryTypeU64] = "u64",
+    [MemoryTypeI8] = "i8",
+    [MemoryTypeI16] = "i16",
+    [MemoryTypeI32] = "i32",
+    [MemoryTypeI64] = "i64",
+    [MemoryTypeF32] = "f32",
+    [MemoryTypeF64] = "f64",
+    [MemoryTypeF128] = "f128",
+};
+
+const char* memory_type_get_short_name(MemoryType type) {
+    assert(type < MemoryTypeMAX);
+    assert(
+        type != MemoryTypeUnsigned && type != MemoryTypeSigned && type != MemoryTypeInteger &&
+        type != MemoryTypeFloating && type != MemoryTypeNumber);
+    return memory_type_short_names[type];
+}
+
 static const size_t memory_type_sizes[MemoryTypeMAX] = {
     [MemoryTypeU8] = 1,
     [MemoryTypeU16] = 2,
