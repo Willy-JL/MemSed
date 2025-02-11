@@ -32,6 +32,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return false;
     }
+    SDL_SetWindowMinimumSize(gui->window, 720, 400);
 
     gui->gl = SDL_GL_CreateContext(gui->window);
     SDL_GL_MakeCurrent(gui->window, gui->gl);

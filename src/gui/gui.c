@@ -7,7 +7,7 @@ Gui* gui_init() {
     Gui* gui = malloc(sizeof(Gui));
     gui->should_close = false;
 
-    if(!gui_backend_init(gui, "MemSed", 1000, 1000)) {
+    if(!gui_backend_init(gui, "MemSed", 800, 800)) {
         free(gui);
         return NULL;
     }
