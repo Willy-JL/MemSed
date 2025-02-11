@@ -19,9 +19,20 @@ typedef struct {
     MemoryProcess* processes[];
 } MemoryProcessList;
 
+typedef void* MemoryProcessHandleImpl;
+
+typedef struct {
+    MemoryProcess* process;
+    MemoryProcessHandleImpl impl;
+} MemoryProcessHandle;
+
 MemoryProcess* memory_process_init(MemoryProcessPid pid);
 bool memory_process_is_alive(MemoryProcess* memory_process);
 void memory_process_free(MemoryProcess* memory_process);
 
 MemoryProcessList* memory_process_list_init();
 void memory_process_list_free(MemoryProcessList* list);
+
+MemoryProcessHandle* memory_process_handle_init(MemoryProcess* process);
+bool memory_process_handle_is_valid(MemoryProcessHandle* handle);
+void memory_process_handle_free(MemoryProcessHandle* handle);

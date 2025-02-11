@@ -221,3 +221,26 @@ void memory_process_list_free(MemoryProcessList* list) {
     }
     free(list);
 }
+
+MemoryProcessHandle* memory_process_handle_init(MemoryProcess* process) {
+    MemoryProcessHandle* handle = malloc(sizeof(MemoryProcessHandle));
+    handle->process = process;
+    char path[31];
+    snprintf(path, sizeof(path), "/proc/%i/mem", process->pid);
+    handle->impl = fopen(path, "r+");
+    if(handle->impl == NULL) {
+        perror(path);
+        free(handle);
+        return NULL;
+    }
+    return handle;
+}
+
+bool memory_process_handle_is_valid(MemoryProcessHandle* handle) {
+    return ftell(handle->impl) >= 0;
+}
+
+void memory_process_handle_free(MemoryProcessHandle* handle) {
+    fclose(handle->impl);
+    free(handle);
+}
