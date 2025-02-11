@@ -3,7 +3,7 @@ MEMory Search and EDit for Linux. NOT YET FUNCTIONAL!
 
 ## System Requirements
 
-- Linux (other platforms might be supported in the future)
+- Linux (other platforms might be supported in the future) with `/proc` fs
 - OpenGL 3.0+ capable GPU driver
 
 ## Building
