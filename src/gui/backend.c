@@ -11,8 +11,18 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "wayland");
 
     if(!SDL_Init(SDL_INIT_VIDEO)) {
-        printf("Error: SDL_Init(): %s\n", SDL_GetError());
-        return false;
+        const char* sdl_init_error = SDL_GetError();
+        printf("Error: SDL_Init(): %s\n", sdl_init_error);
+
+        if(strcmp(sdl_init_error, "wayland not available") == 0) {
+            SDL_ResetHint(SDL_HINT_VIDEO_DRIVER);
+            if(!SDL_Init(SDL_INIT_VIDEO)) {
+                printf("Error: SDL_Init(): %s\n", SDL_GetError());
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     // From 2.0.18: Enable native IME.
