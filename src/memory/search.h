@@ -54,6 +54,7 @@ typedef struct {
     MemoryType type;
     size_t results_count;
     union {
+        void* results;
         MemorySearchResult8* results_8;
         MemorySearchResult16* results_16;
         MemorySearchResult32* results_32;

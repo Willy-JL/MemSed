@@ -70,7 +70,28 @@ bool memory_search_process_is_attached(MemorySearch* memory_search) {
 
 void memory_search_process_detach(MemorySearch* memory_search) {
     memory_search->pid = 0;
-    // FIXME: cleanup
+    size_t batches_count = memory_search->results.batches_count;
+    MemorySearchResultBatch* batches = memory_search->results.batches;
+    memory_search->results.current_results_count = 0;
+    memory_search->results.batches_count = 0;
+    memory_search->results.batches = NULL;
+    if(batches_count >= 1) {
+        for(size_t batch_i = 0; batch_i < batches_count; batch_i++) {
+            MemorySearchResultBatch* batch = &batches[batch_i];
+            size_t sets_count = batch->sets_count;
+            MemorySearchResultSet* sets = batch->sets;
+            batch->total_results_count = 0;
+            batch->sets_count = 0;
+            batch->sets = NULL;
+            for(size_t set_i = 0; set_i < sets_count; set_i++) {
+                MemorySearchResultSet* set = &sets[set_i];
+                set->results_count = 0;
+                free(set->results);
+            }
+            free(sets);
+        }
+        free(batches);
+    }
 }
 
 MemorySearchParams memory_search_get_params(MemorySearch* memory_search) {

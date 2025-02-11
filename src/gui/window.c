@@ -94,7 +94,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
         ImGui_PopFont();
 
         MemorySearchResults results = memory_search_get_results(gui->memory_search);
-        if(!is_searching && results.batches_count >= 1 && results.batches != NULL) {
+        if(!is_searching && results.batches_count >= 1) {
             MemorySearchResultBatch* batch = &results.batches[results.batches_count - 1];
             MemorySearchResultBatch* prev_batch =
                 results.batches_count >= 2 ? &results.batches[results.batches_count - 2] : NULL;
