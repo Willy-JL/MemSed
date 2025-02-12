@@ -14,10 +14,10 @@ static const ImFontConfig font_karla_config = {
     .RasterizerDensity = 1.0f,
 };
 
-static const ImFontConfig font_meslo_config = {
+static const ImFontConfig font_jetbrainsmono_config = {
     .OversampleH = 2,
     .OversampleV = 2,
-    .GlyphRanges = (ImWchar[]){0x1, 0x2e2e, 0},
+    .GlyphRanges = (ImWchar[]){0x1, 0x2b58, 0},
     .GlyphMinAdvanceX = 0.0f,
     .GlyphMaxAdvanceX = FLT_MAX,
     .RasterizerMultiply = 1.0f,
@@ -52,9 +52,9 @@ void gui_fonts_load(Gui* gui) {
 
     gui->fonts.mono = ImFontAtlas_AddFontFromMemoryCompressedTTF(
         gui->io->Fonts,
-        font_meslolgs_regular_compressed_data,
-        font_meslolgs_regular_compressed_size,
-        17.0f,
-        &font_meslo_config,
+        font_jetbrainsmono_regular_compressed_data,
+        font_jetbrainsmono_regular_compressed_size,
+        18.0f,
+        &font_jetbrainsmono_config,
         NULL);
 }
