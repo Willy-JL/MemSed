@@ -120,8 +120,8 @@ static void gui_window_draw_toolbar(Gui* gui) {
     ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
 
     ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
+    const ImVec2 progressbar_size = {ImGui_GetContentRegionAvail().x, ImGui_GetFrameHeight()};
     ImGui_PushFont(gui->fonts.mono);
-    const ImVec2 progressbar_size = {ImGui_GetContentRegionAvail().x, 0.0f};
     if(memory_search_is_searching(gui->memory_search)) {
         flt32_t progress = memory_search_get_search_progress(gui->memory_search);
         char progress_str[5];
@@ -360,6 +360,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_Text("Type:");
             ImGui_TableNextColumn();
             temp_int = params.type;
+            ImGui_PushFont(gui->fonts.mono);
             ImGui_SetNextItemWidth(-FLT_MIN);
             if(ImGui_ComboChar(
                    "###type",
@@ -369,6 +370,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 params.type = temp_int;
                 memory_search_set_params(gui->memory_search, params);
             }
+            ImGui_PopFont();
             ImGui_EndDisabled();
 
             ImGui_EndTable();

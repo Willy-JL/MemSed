@@ -54,7 +54,7 @@ void gui_fonts_load(Gui* gui) {
         gui->io->Fonts,
         font_jetbrainsmono_regular_compressed_data,
         font_jetbrainsmono_regular_compressed_size,
-        18.0f,
+        17.0f,
         &font_jetbrainsmono_config,
         NULL);
 }
