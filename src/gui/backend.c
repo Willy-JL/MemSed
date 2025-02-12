@@ -95,14 +95,16 @@ void gui_backend_new_frame(Gui* gui) {
     ImGui_ImplSDL3_NewFrame();
 
     // ImGui backend processes inputs, usually ImGui::NewFrame() consolidates them
-    // Here we consolidate inputs earlier, so we can then modify the value of ImGuiIO->MouseWheel
-    // Otherwise, modifying ImGuiIO->MouseWheel after ImGui::NewFrame() has no effect for that frame
+    // Here we consolidate inputs earlier, so we can then modify the value of ImGuiIO.MouseWheel
+    // Otherwise, modifying ImGuiIO.MouseWheel after ImGui::NewFrame() has no effect for that frame
     ImGui_UpdateInputEvents(gui->io->ConfigInputTrickleEventQueue);
+
+    // Apply smooth scrolling
     const flt32_t scroll_multiplier = 2.0f;
     const flt32_t scroll_smoothing = 8.0f;
     static flt32_t scroll_energy = 0.0f;
     gui->io->MouseWheel *= scroll_multiplier;
-    if(scroll_energy * gui->io->MouseWheel < 0) {
+    if(scroll_energy * gui->io->MouseWheel < 0.0f) {
         // Immediately stop if direction changes
         scroll_energy = 0.0f;
     }
