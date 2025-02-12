@@ -261,7 +261,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_stop(gui->memory_search);
             }
         } else {
-            ImGui_BeginDisabled(results->batches_count < 1);
+            ImGui_BeginDisabled(results->batches_count < 2);
             if(ImGui_Button(undo_search)) {
                 memory_search_undo(gui->memory_search);
             }
