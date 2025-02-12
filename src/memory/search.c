@@ -72,7 +72,6 @@ void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid) {
 }
 
 bool memory_search_process_is_attached(MemorySearch* memory_search) {
-    // FIXME: periodically check if process is still alive
     return memory_search->handle != NULL;
 }
 
@@ -290,6 +289,16 @@ MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet
     snprintf(display.address_str, sizeof(display.address_str), "0x%" PRIXPTR, (uintptr_t)address);
 
     return display;
+}
+
+void memory_search_tick(MemorySearch* memory_search) {
+    if(memory_search_is_searching(memory_search)) {
+        // FIXME: update progress
+    } else if(memory_search_process_is_attached(memory_search)) {
+        if(!process_handle_is_valid(memory_search->handle)) {
+            memory_search_process_detach(memory_search);
+        }
+    }
 }
 
 void memory_search_free(MemorySearch* memory_search) {
