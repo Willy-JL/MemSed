@@ -131,7 +131,6 @@ static void gui_window_draw_toolbar(Gui* gui) {
         snprintf(progress_str, sizeof(progress_str), "%.0f%%", progress);
         ImGui_ProgressBar(progress, progressbar_size, progress_str);
     } else {
-        // FIXME: use process commandline
         char label[257] = "No Process Selected";
         const char* command = NULL;
         if(memory_search_process_is_attached(gui->memory_search)) {
@@ -235,18 +234,17 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
 static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
     if(ImGui_BeginChild("###options", size, ImGuiChildFlags_Borders, ImGuiWindowFlags_None)) {
         ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
+        MemorySearchResults results = memory_search_get_results(gui->memory_search);
         MemorySearchParams params = memory_search_get_params(gui->memory_search);
 
-        // FIXME: make the search buttons work
-        static uint32_t search_count = 0;
         ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
-        if(search_count == 0) {
+        if(results.batches_count == 0) {
             if(ImGui_Button(first_search)) {
-                search_count = 1;
+                memory_search_begin(gui->memory_search);
             }
         } else {
             if(ImGui_Button(next_search)) {
-                search_count++;
+                memory_search_next(gui->memory_search);
             }
         }
         ImGui_EndDisabled();
@@ -256,27 +254,28 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
         if(memory_search_is_searching(gui->memory_search)) {
             flt32_t width = ImGui_CalcTextSize(undo_search).x + gui->style->FramePadding.x * 2;
             if(ImGui_ButtonEx(stop_search, (ImVec2){width, 0.0f})) {
+                memory_search_stop(gui->memory_search);
             }
         } else {
-            ImGui_BeginDisabled(search_count < 1);
+            ImGui_BeginDisabled(results.batches_count < 1);
             if(ImGui_Button(undo_search)) {
-                search_count--;
+                memory_search_undo(gui->memory_search);
             }
             ImGui_EndDisabled();
         }
 
         ImGui_SameLine();
 
-        ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search) || search_count < 1);
+        ImGui_BeginDisabled(
+            memory_search_is_searching(gui->memory_search) || results.batches_count < 1);
         if(ImGui_Button(reset_search)) {
-            search_count = 0;
+            memory_search_reset(gui->memory_search);
         }
         ImGui_EndDisabled();
 
         if(memory_search_is_searching(gui->memory_search)) {
             ImGui_Text("Searching...");
         } else {
-            MemorySearchResults results = memory_search_get_results(gui->memory_search);
             ImGui_Text(
                 "Search Depth: %zu\tCurrent Results: %zu",
                 results.batches_count,
@@ -333,7 +332,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_PopFont();
             ImGui_EndDisabled();
 
-            ImGui_BeginDisabled(search_count != 0);
+            ImGui_BeginDisabled(results.batches_count != 0);
             // Alignment
             ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
             // ImGui_SameLine();

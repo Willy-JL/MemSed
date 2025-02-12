@@ -86,6 +86,84 @@ void memory_search_process_detach(MemorySearch* memory_search) {
     process_handle_free(handle);
     process_free(process);
 
+    memory_search_reset(memory_search);
+}
+
+MemorySearchParams memory_search_get_params(MemorySearch* memory_search) {
+    return memory_search->params;
+}
+
+void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams params) {
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+    if(memory_search->results.batches_count > 0) {
+        return;
+    }
+
+    if(params.type <= MemoryTypeInteger) {
+        params.value = round(params.value);
+    }
+    if(params.type <= MemoryTypeUnsigned) {
+        params.value = ABS(params.value);
+    }
+    memory_search->params = params;
+}
+
+void memory_search_begin(MemorySearch* memory_search) {
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+    memory_search->is_searching = true;
+    // FIXME: start searching
+}
+
+void memory_search_next(MemorySearch* memory_search) {
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+    memory_search->is_searching = true;
+    // FIXME: start searching
+}
+
+bool memory_search_is_searching(MemorySearch* memory_search) {
+    return memory_search->is_searching;
+}
+
+flt32_t memory_search_get_search_progress(MemorySearch* memory_search) {
+    return memory_search->search_progress;
+}
+
+void memory_search_stop(MemorySearch* memory_search) {
+    if(!memory_search_is_searching(memory_search)) {
+        return;
+    }
+    memory_search->is_searching = false;
+    // FIXME: stop searching
+}
+
+void memory_search_undo(MemorySearch* memory_search) {
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+    if(memory_search->results.batches_count < 2) {
+        return;
+    }
+
+    memory_search->results.batches_count--;
+    memory_search->results.current_results_count =
+        memory_search->results.batches[memory_search->results.batches_count - 1]
+            .total_results_count;
+    memory_search->results.batches = realloc(
+        memory_search->results.batches,
+        sizeof(MemorySearchResultBatch) * memory_search->results.batches_count);
+}
+
+void memory_search_reset(MemorySearch* memory_search) {
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+
     size_t batches_count = memory_search->results.batches_count;
     MemorySearchResultBatch* batches = memory_search->results.batches;
     memory_search->results.current_results_count = 0;
@@ -108,29 +186,6 @@ void memory_search_process_detach(MemorySearch* memory_search) {
         }
         free(batches);
     }
-}
-
-MemorySearchParams memory_search_get_params(MemorySearch* memory_search) {
-    return memory_search->params;
-}
-
-void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams params) {
-    // FIXME: reject if already searching
-    if(params.type <= MemoryTypeInteger) {
-        params.value = round(params.value);
-    }
-    if(params.type <= MemoryTypeUnsigned) {
-        params.value = ABS(params.value);
-    }
-    memory_search->params = params;
-}
-
-bool memory_search_is_searching(MemorySearch* memory_search) {
-    return memory_search->is_searching;
-}
-
-flt32_t memory_search_get_search_progress(MemorySearch* memory_search) {
-    return memory_search->search_progress;
 }
 
 MemorySearchResults memory_search_get_results(MemorySearch* memory_search) {
@@ -302,6 +357,11 @@ void memory_search_tick(MemorySearch* memory_search) {
 }
 
 void memory_search_free(MemorySearch* memory_search) {
-    // FIXME: cleanup
+    if(memory_search_is_searching(memory_search)) {
+        memory_search_stop(memory_search);
+    }
+    if(memory_search_process_is_attached(memory_search)) {
+        memory_search_process_detach(memory_search);
+    }
     free(memory_search);
 }
