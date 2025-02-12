@@ -43,6 +43,7 @@ ProcessList* process_list_init() {
         list->processes[count] = process;
         count++;
     }
+    closedir(dir);
     list = realloc(list, sizeof(ProcessList) + sizeof(Process*) * count);
     list->processes_count = count;
 
