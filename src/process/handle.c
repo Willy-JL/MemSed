@@ -15,7 +15,7 @@ ProcessHandle* process_handle_init(Process* process) {
 }
 
 bool process_handle_is_valid(ProcessHandle* handle) {
-    return ftell(handle->impl) >= 0;
+    return ftell(handle->impl) >= 0 && process_is_alive(handle->process);
 }
 
 void process_handle_free(ProcessHandle* handle) {
