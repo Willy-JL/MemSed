@@ -270,8 +270,8 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         ImGui_SameLine();
 
-        ImGui_BeginDisabled(
-            memory_search_is_searching(gui->memory_search) || results->batches_count < 1);
+        ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
+        ImGui_BeginDisabled(results->batches_count < 1);
         if(ImGui_Button(reset_search)) {
             memory_search_reset(gui->memory_search);
         }
@@ -383,6 +383,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
             ImGui_EndTable();
         }
+        ImGui_EndDisabled();
 
         ImGui_EndDisabled();
     }
