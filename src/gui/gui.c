@@ -17,8 +17,8 @@ Gui* gui_init() {
     gui->io->LogFilename = NULL;
     gui->io->ConfigDragClickToInputText = true;
     ImGui_StyleColorsDark(NULL);
-    gui->style->ScrollbarSize = 12.0f;
-    gui->style->FrameBorderSize = 1.6f;
+    gui->style->ScrollbarSize = 10.0f;
+    gui->style->FrameBorderSize = 1.0f;
     gui->style->ItemSpacing.x = gui->style->ItemSpacing.y;
     gui->style->Colors[ImGuiCol_ModalWindowDimBg] = (ImVec4){0.0f, 0.0f, 0.0f, 0.5f};
 
