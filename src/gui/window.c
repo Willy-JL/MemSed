@@ -1,4 +1,5 @@
 #include "window.h"
+#include "../process/list.h"
 
 const char* ok = mdi_check " Ok";
 const char* cancel = mdi_cancel " Cancel";
@@ -28,11 +29,11 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
            NULL,
            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_AlwaysAutoResize)) {
-        static MemoryProcessList* process_list = NULL;
-        if(process_list == NULL) {
-            process_list = memory_process_list_init();
+        static ProcessList* list = NULL;
+        if(list == NULL) {
+            list = process_list_init();
         }
-        static MemoryProcessPid selected = 0;
+        static ProcessPid selected = 0;
         static char search[129] = "";
         bool any_selected = false;
 
@@ -53,15 +54,16 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
         if(ImGui_BeginListBox("###processes", avail)) {
             // FIXME: use clipper
             char label[257];
-            for(size_t i = 0; i < process_list->processes_count; i++) {
-                MemoryProcess* process = process_list->processes[i];
+            for(size_t i = 0; i < list->processes_count; i++) {
+                Process* process = list->processes[i];
                 snprintf(
                     label,
                     sizeof(label),
-                    "%s (%i, %s)%s%s",
-                    process->name ? process->name : "unknown exe",
+                    "%s (%i, %s, %s)%s%s",
+                    process->name[0] ? process->name : "unknown process",
                     process->pid,
                     process->user ? process->user : "unknown user",
+                    process->executable ? process->executable : "unknown exe",
                     process->command ? ": " : "",
                     process->command ? process->command : "");
                 if(search[0] != '\0' && strstr(label, search) == NULL) {
@@ -84,8 +86,8 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
 
         ImGui_BeginDisabled(!any_selected);
         if(ImGui_Button(ok)) {
-            memory_process_list_free(process_list);
-            process_list = NULL;
+            process_list_free(list);
+            list = NULL;
             memory_search_process_attach(gui->memory_search, selected);
             ImGui_CloseCurrentPopup();
         }
@@ -93,8 +95,8 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
 
         ImGui_SameLine();
         if(ImGui_Button(cancel)) {
-            memory_process_list_free(process_list);
-            process_list = NULL;
+            process_list_free(list);
+            list = NULL;
             ImGui_CloseCurrentPopup();
         }
 
@@ -132,15 +134,16 @@ static void gui_window_draw_toolbar(Gui* gui) {
         char label[257] = "No Process Selected";
         const char* command = NULL;
         if(memory_search_process_is_attached(gui->memory_search)) {
-            MemoryProcess* process = memory_search_get_process(gui->memory_search);
+            Process* process = memory_search_get_process(gui->memory_search);
             if(process != NULL) {
                 snprintf(
                     label,
                     sizeof(label),
-                    "%s (%i, %s)",
-                    process->name ? process->name : "unknown exe",
+                    "%s (%i, %s, %s)",
+                    process->name[0] ? process->name : "unknown process",
                     process->pid,
-                    process->user ? process->user : "unknown user");
+                    process->user ? process->user : "unknown user",
+                    process->executable ? process->executable : "unknown exe");
                 command = process->command;
             }
         }

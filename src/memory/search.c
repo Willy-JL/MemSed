@@ -1,8 +1,9 @@
 #include "search.h"
+#include "../process/handle.h"
 
 struct MemorySearch {
     MemorySearchParams params;
-    MemoryProcessHandle* handle;
+    ProcessHandle* handle;
     bool is_searching;
     flt32_t search_progress;
     MemorySearchResults results;
@@ -23,14 +24,14 @@ MemorySearch* memory_search_init() {
     return memory_search;
 }
 
-void memory_search_process_attach(MemorySearch* memory_search, MemoryProcessPid pid) {
-    MemoryProcess* process = memory_process_init(pid);
+void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid) {
+    Process* process = process_init(pid);
     if(process == NULL) {
         return;
     }
-    memory_search->handle = memory_process_handle_init(process);
+    memory_search->handle = process_handle_init(process);
     if(memory_search->handle == NULL) {
-        memory_process_free(process);
+        process_free(process);
         return;
     }
 
@@ -75,16 +76,16 @@ bool memory_search_process_is_attached(MemorySearch* memory_search) {
     return memory_search->handle != NULL;
 }
 
-MemoryProcess* memory_search_get_process(MemorySearch* memory_search) {
+Process* memory_search_get_process(MemorySearch* memory_search) {
     return memory_search->handle->process;
 }
 
 void memory_search_process_detach(MemorySearch* memory_search) {
-    MemoryProcessHandle* handle = memory_search->handle;
-    MemoryProcess* process = memory_search->handle->process;
+    ProcessHandle* handle = memory_search->handle;
+    Process* process = memory_search->handle->process;
     memory_search->handle = NULL;
-    memory_process_handle_free(handle);
-    memory_process_free(process);
+    process_handle_free(handle);
+    process_free(process);
 
     size_t batches_count = memory_search->results.batches_count;
     MemorySearchResultBatch* batches = memory_search->results.batches;
