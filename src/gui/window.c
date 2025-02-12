@@ -49,6 +49,7 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
 
         ImVec2 avail = ImGui_GetContentRegionAvail();
         avail.y -= ImGui_GetFrameHeightWithSpacing();
+        ImGui_PushFont(gui->fonts.mono);
         if(ImGui_BeginListBox("###processes", avail)) {
             // FIXME: use clipper
             char label[257];
@@ -79,6 +80,7 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
             }
             ImGui_EndListBox();
         }
+        ImGui_PopFont();
 
         ImGui_BeginDisabled(!any_selected);
         if(ImGui_Button(ok)) {
@@ -118,6 +120,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
     ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
 
     ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
+    ImGui_PushFont(gui->fonts.mono);
     const ImVec2 progressbar_size = {ImGui_GetContentRegionAvail().x, 0.0f};
     if(memory_search_is_searching(gui->memory_search)) {
         flt32_t progress = memory_search_get_search_progress(gui->memory_search);
@@ -150,6 +153,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
             ImGui_EndTooltip();
         }
     }
+    ImGui_PopFont();
     ImGui_EndDisabled();
 }
 
@@ -287,6 +291,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_Text("Value:");
             ImGui_TableNextColumn();
             snprintf(temp_str, sizeof(temp_str), "%.*Lg", LDBL_DIG, params.value);
+            ImGui_PushFont(gui->fonts.mono);
             ImGui_SetNextItemWidth(-FLT_MIN);
             if(ImGui_InputText(
                    "###value",
@@ -296,6 +301,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 params.value = strtold(temp_str, NULL);
                 memory_search_set_params(gui->memory_search, params);
             }
+            ImGui_PopFont();
 
             ImGui_BeginDisabled(params.type <= MemoryTypeInteger);
             // Precision
@@ -309,6 +315,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                  (pane_spacing_mult + 1) * gui->style->ItemSpacing.x) /
                 2.0f;
             snprintf(temp_str, sizeof(temp_str), "%.*Lg", LDBL_DIG, params.precision);
+            ImGui_PushFont(gui->fonts.mono);
             ImGui_SetNextItemWidth(precision_alignment_width);
             if(ImGui_InputText(
                    "###precision",
@@ -318,6 +325,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 params.precision = ABS(strtold(temp_str, NULL));
                 memory_search_set_params(gui->memory_search, params);
             }
+            ImGui_PopFont();
             ImGui_EndDisabled();
 
             ImGui_BeginDisabled(search_count != 0);
@@ -327,6 +335,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_Text("Alignment:");
             ImGui_SameLine();
             snprintf(temp_str, sizeof(temp_str), "%u", params.alignment);
+            ImGui_PushFont(gui->fonts.mono);
             ImGui_SetNextItemWidth(precision_alignment_width);
             if(ImGui_BeginCombo("###alignment", temp_str, ImGuiComboFlags_None)) {
                 for(uint8_t i = 1; i <= 16; i *= 2) {
@@ -342,6 +351,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 }
                 ImGui_EndCombo();
             }
+            ImGui_PopFont();
 
             // Type
             ImGui_TableNextRow();
