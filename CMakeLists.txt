@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(MemSed)
 
-# Use clang
-set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE STRING "C compiler" FORCE)
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE STRING "C++ compiler" FORCE)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 # Directories
 set(MEMSED_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(BUILD_DIR "${MEMSED_DIR}/build")
 set(SRC_DIR "${MEMSED_DIR}/src")
 set(LIB_DIR "${MEMSED_DIR}/lib")
 set(FONTS_DIR "${LIB_DIR}/fonts")
@@ -21,7 +17,14 @@ set(IMGUI_DIR "${VENDOR_DIR}/imgui")
 set(DCIMGUI_DIR "${LIB_DIR}/dcimgui")
 set(DEARBINDINGS_DIR "${VENDOR_DIR}/dear_bindings")
 
+# Export Clang DB
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+file(CREATE_LINK "${CMAKE_CURRENT_BINARY_DIR}" "${BUILD_DIR}/current" SYMBOLIC)
+
 # Global compiler flags
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-O0)  # Better debugging experience
+endif()
 add_compile_options(-Werror)  # Fail on any warning
 
 # Global includes
@@ -74,9 +77,14 @@ target_link_libraries(memsed PRIVATE fonts)
 # Adding -static causes a segfault in SDL_CreateWindow()
 target_link_libraries(memsed PRIVATE -static-libgcc -static-libstdc++)
 
-# Add `make run` target
+# Add run targets
 add_custom_target(run
     COMMAND sudo ./memsed
+    DEPENDS memsed
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
+add_custom_target(gdb
+    COMMAND sudo gdb ./memsed
     DEPENDS memsed
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )

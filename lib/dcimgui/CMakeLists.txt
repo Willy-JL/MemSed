@@ -9,16 +9,16 @@ set(dcimgui_internal_sources "${DCIMGUI_DIR}/dcimgui_internal.cpp" "${DCIMGUI_DI
 add_custom_command(
     OUTPUT ${dcimgui_sources}
     COMMAND ${DEARBINDINGS_CMD} -o "${DCIMGUI_DIR}/dcimgui" "${IMGUI_DIR}/imgui.h"
-    DEPENDS "${IMGUI_DIR}/imgui.h"
     COMMAND "${CMAKE_COMMAND}" -E rm "${DCIMGUI_DIR}/dcimgui.json"
+    DEPENDS "${IMGUI_DIR}/imgui.h"
     COMMENT "Generating dcimgui bindings for imgui.h"
     USES_TERMINAL
 )
 add_custom_command(
     OUTPUT ${dcimgui_internal_sources}
     COMMAND ${DEARBINDINGS_CMD} -o "${DCIMGUI_DIR}/dcimgui_internal" --include "${IMGUI_DIR}/imgui.h" "${IMGUI_DIR}/imgui_internal.h"
-    DEPENDS "${IMGUI_DIR}/imgui_internal.h" "${IMGUI_DIR}/imgui.h"
     COMMAND "${CMAKE_COMMAND}" -E rm "${DCIMGUI_DIR}/dcimgui_internal.json"
+    DEPENDS "${IMGUI_DIR}/imgui_internal.h" "${IMGUI_DIR}/imgui.h"
     COMMENT "Generating dcimgui bindings for imgui_internal.h"
     USES_TERMINAL
 )
@@ -35,8 +35,8 @@ foreach(backend IN LISTS DCIMGUI_BACKENDS)
         OUTPUT "${backend_dst}.cpp" "${backend_dst}.h"
         COMMAND "${CMAKE_COMMAND}" -E make_directory "${DCIMGUI_DIR}/backends"
         COMMAND ${DEARBINDINGS_CMD} --backend -o "${backend_dst}" "${backend_src}.h"
-        DEPENDS "${backend_src}.h" "${IMGUI_DIR}/imgui.h"
         COMMAND "${CMAKE_COMMAND}" -E rm "${backend_dst}.json"
+        DEPENDS "${backend_src}.h" "${IMGUI_DIR}/imgui.h"
         COMMENT "Generating dcimgui bindings for backends/imgui_impl_${backend}.h"
         USES_TERMINAL
     )
