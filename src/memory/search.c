@@ -188,8 +188,8 @@ void memory_search_reset(MemorySearch* memory_search) {
     }
 }
 
-MemorySearchResults memory_search_get_results(MemorySearch* memory_search) {
-    return memory_search->results;
+MemorySearchResults* memory_search_get_results(MemorySearch* memory_search) {
+    return &memory_search->results;
 }
 
 MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_t i) {

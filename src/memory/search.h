@@ -98,7 +98,7 @@ flt32_t memory_search_get_search_progress(MemorySearch* memory_search);
 void memory_search_stop(MemorySearch* memory_search);
 void memory_search_undo(MemorySearch* memory_search);
 void memory_search_reset(MemorySearch* memory_search);
-MemorySearchResults memory_search_get_results(MemorySearch* memory_search);
+MemorySearchResults* memory_search_get_results(MemorySearch* memory_search);
 MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_t i);
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
 void memory_search_tick(MemorySearch* memory_search);

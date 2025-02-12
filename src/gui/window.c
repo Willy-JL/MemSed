@@ -182,12 +182,12 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
         ImGui_TableHeadersRow();
         ImGui_PopFont();
 
-        MemorySearchResults results = memory_search_get_results(gui->memory_search);
-        if(!memory_search_is_searching(gui->memory_search) && results.batches_count >= 1) {
+        MemorySearchResults* results = memory_search_get_results(gui->memory_search);
+        if(!memory_search_is_searching(gui->memory_search) && results->batches_count >= 1) {
             // FIXME: use clipper
-            MemorySearchResultBatch* batch = &results.batches[results.batches_count - 1];
+            MemorySearchResultBatch* batch = &results->batches[results->batches_count - 1];
             MemorySearchResultBatch* prev_batch =
-                results.batches_count >= 2 ? &results.batches[results.batches_count - 2] : NULL;
+                results->batches_count >= 2 ? &results->batches[results->batches_count - 2] : NULL;
             for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
                 MemorySearchResultSet* set = &batch->sets[set_i];
                 MemorySearchResultSet* prev_set = NULL;
@@ -238,11 +238,11 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
 static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
     if(ImGui_BeginChild("###options", size, ImGuiChildFlags_Borders, ImGuiWindowFlags_None)) {
         ImGui_BeginDisabled(!memory_search_process_is_attached(gui->memory_search));
-        MemorySearchResults results = memory_search_get_results(gui->memory_search);
+        MemorySearchResults* results = memory_search_get_results(gui->memory_search);
         MemorySearchParams params = memory_search_get_params(gui->memory_search);
 
         ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
-        if(results.batches_count == 0) {
+        if(results->batches_count == 0) {
             if(ImGui_Button(first_search)) {
                 memory_search_begin(gui->memory_search);
             }
@@ -261,7 +261,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_stop(gui->memory_search);
             }
         } else {
-            ImGui_BeginDisabled(results.batches_count < 1);
+            ImGui_BeginDisabled(results->batches_count < 1);
             if(ImGui_Button(undo_search)) {
                 memory_search_undo(gui->memory_search);
             }
@@ -271,7 +271,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
         ImGui_SameLine();
 
         ImGui_BeginDisabled(
-            memory_search_is_searching(gui->memory_search) || results.batches_count < 1);
+            memory_search_is_searching(gui->memory_search) || results->batches_count < 1);
         if(ImGui_Button(reset_search)) {
             memory_search_reset(gui->memory_search);
         }
@@ -282,8 +282,8 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
         } else {
             ImGui_Text(
                 "Search Depth: %zu\tCurrent Results: %zu",
-                results.batches_count,
-                results.current_results_count);
+                results->batches_count,
+                results->current_results_count);
         }
 
         if(ImGui_BeginTable("###columns", 2, ImGuiTableFlags_None)) {
@@ -336,7 +336,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_PopFont();
             ImGui_EndDisabled();
 
-            ImGui_BeginDisabled(results.batches_count != 0);
+            ImGui_BeginDisabled(results->batches_count != 0);
             // Alignment
             ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
             // ImGui_SameLine();
