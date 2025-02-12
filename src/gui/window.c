@@ -191,10 +191,12 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
                 MemorySearchResultSet* set = &batch->sets[set_i];
                 MemorySearchResultSet* prev_set = NULL;
-                for(size_t prev_set_i = 0; prev_set_i < prev_batch->sets_count; prev_set_i++) {
-                    prev_set = &prev_batch->sets[prev_set_i];
-                    if(prev_set->type == set->type) {
-                        break;
+                if(prev_batch) {
+                    for(size_t prev_set_i = 0; prev_set_i < prev_batch->sets_count; prev_set_i++) {
+                        prev_set = &prev_batch->sets[prev_set_i];
+                        if(prev_set->type == set->type) {
+                            break;
+                        }
                     }
                 }
                 const char* type_str = memory_type_get_short_name(set->type);
