@@ -108,6 +108,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
     ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
     if(memory_search_process_is_attached(gui->memory_search)) {
         if(ImGui_Button(detach_process)) {
+            // FIXME: confirm button if search/scratchpad in use
             memory_search_process_detach(gui->memory_search);
         }
     } else {
@@ -177,6 +178,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
         ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupColumn("Previous", ImGuiTableColumnFlags_WidthStretch);
+        ImGui_TableSetupScrollFreeze(0, 1);
         ImGui_PushFont(gui->fonts.base);
         ImGui_TableHeadersRow();
         ImGui_PopFont();
