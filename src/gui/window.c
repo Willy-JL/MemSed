@@ -66,7 +66,7 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
                     process->executable ? process->executable : "unknown exe",
                     process->command ? ": " : "",
                     process->command ? process->command : "");
-                if(search[0] != '\0' && strstr(label, search) == NULL) {
+                if(search[0] != '\0' && strcasestr(label, search) == NULL) {
                     continue;
                 }
                 ImGui_PushIDInt(process->pid);
