@@ -12,6 +12,7 @@ MEMory Search and EDit for Linux. NOT YET FUNCTIONAL!
 
 - Clang
 - CMake 3.20+
+- GNU Make
 - Python 3.10+ (for dear_bindings and GLAD generation)
 
 ### Build Instructions
