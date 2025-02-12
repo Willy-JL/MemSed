@@ -4,6 +4,7 @@ set(DEARBINDINGS_CMD "${Python_EXECUTABLE}" "${DEARBINDINGS_DIR}/dear_bindings.p
 
 # Library
 set(dcimgui_sources "${DCIMGUI_DIR}/dcimgui.cpp" "${DCIMGUI_DIR}/dcimgui.h")
+set(dcimgui_internal_sources "${DCIMGUI_DIR}/dcimgui_internal.cpp" "${DCIMGUI_DIR}/dcimgui_internal.h")
 # Generate bindings
 add_custom_command(
     OUTPUT ${dcimgui_sources}
@@ -13,9 +14,17 @@ add_custom_command(
     COMMENT "Generating dcimgui bindings for imgui.h"
     USES_TERMINAL
 )
+add_custom_command(
+    OUTPUT ${dcimgui_internal_sources}
+    COMMAND ${DEARBINDINGS_CMD} -o "${DCIMGUI_DIR}/dcimgui_internal" --include "${IMGUI_DIR}/imgui.h" "${IMGUI_DIR}/imgui_internal.h"
+    DEPENDS "${IMGUI_DIR}/imgui_internal.h" "${IMGUI_DIR}/imgui.h"
+    COMMAND "${CMAKE_COMMAND}" -E rm "${DCIMGUI_DIR}/dcimgui_internal.json"
+    COMMENT "Generating dcimgui bindings for imgui_internal.h"
+    USES_TERMINAL
+)
 # Add sources
 file(GLOB imgui_sources "${IMGUI_DIR}/*.cpp" "${IMGUI_DIR}/*.h")
-set(sources "${dcimgui_sources}" "${imgui_sources}")
+set(sources "${dcimgui_sources}" "${dcimgui_internal_sources}" "${imgui_sources}")
 
 # Backends
 foreach(backend IN LISTS DCIMGUI_BACKENDS)
