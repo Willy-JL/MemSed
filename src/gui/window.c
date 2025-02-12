@@ -213,13 +213,15 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     // Value
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(display.value_str);
-                    if(prev_set != NULL) {
-                        // Previous
+                    // Previous
+                    ImGui_TableNextColumn();
+                    if(prev_set == NULL) {
+                        ImGui_TextDisabled("N/A");
+                    } else {
                         MemoryAddress address = memory_search_get_result_address(set, result_i);
                         for(size_t prev_i = 0; prev_i < prev_set->results_count; prev_i++) {
                             if(memory_search_get_result_address(prev_set, prev_i) == address) {
                                 display = memory_search_get_result_display(prev_set, prev_i);
-                                ImGui_TableNextColumn();
                                 ImGui_TextUnformatted(display.value_str);
                             }
                         }
