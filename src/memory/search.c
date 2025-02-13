@@ -1,10 +1,11 @@
 #include "search.h"
 #include "../process/handle.h"
+#include "../thread/thread.h"
 
 struct MemorySearch {
     MemorySearchParams params;
     ProcessHandle* handle;
-    bool is_searching;
+    Thread* search_thread;
     flt32_t search_progress;
     MemorySearchResults results;
 };
@@ -16,7 +17,7 @@ MemorySearch* memory_search_init() {
     memory_search->params.value = 0.0l;
     memory_search->params.precision = 0.1l;
     memory_search->handle = NULL;
-    memory_search->is_searching = false;
+    memory_search->search_thread = NULL;
     memory_search->search_progress = 0.0f;
     memory_search->results.current_results_count = 0;
     memory_search->results.batches_count = 0;
@@ -97,6 +98,7 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
     if(memory_search_is_searching(memory_search)) {
         return;
     }
+    // FIXME: allow updating value
     if(memory_search->results.batches_count > 0) {
         return;
     }
@@ -110,24 +112,34 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
     memory_search->params = params;
 }
 
+static void* memory_search_begin_callback(void* context) {
+    MemorySearch* memory_search = context;
+    UNUSED(memory_search);
+    return NULL;
+}
+
+static void* memory_search_next_callback(void* context) {
+    MemorySearch* memory_search = context;
+    UNUSED(memory_search);
+    return NULL;
+}
+
 void memory_search_begin(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         return;
     }
-    memory_search->is_searching = true;
-    // FIXME: start searching
+    memory_search->search_thread = thread_start(memory_search_begin_callback, memory_search);
 }
 
 void memory_search_next(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         return;
     }
-    memory_search->is_searching = true;
-    // FIXME: start searching
+    memory_search->search_thread = thread_start(memory_search_next_callback, memory_search);
 }
 
 bool memory_search_is_searching(MemorySearch* memory_search) {
-    return memory_search->is_searching;
+    return memory_search->search_thread != NULL;
 }
 
 flt32_t memory_search_get_search_progress(MemorySearch* memory_search) {
@@ -138,8 +150,7 @@ void memory_search_stop(MemorySearch* memory_search) {
     if(!memory_search_is_searching(memory_search)) {
         return;
     }
-    memory_search->is_searching = false;
-    // FIXME: stop searching
+    thread_stop(memory_search->search_thread);
 }
 
 void memory_search_undo(MemorySearch* memory_search) {
@@ -348,7 +359,9 @@ MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet
 
 void memory_search_tick(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
-        // FIXME: update progress
+        if(thread_tryjoin(memory_search->search_thread, NULL)) {
+            memory_search->search_thread = NULL;
+        }
     } else if(memory_search_process_is_attached(memory_search)) {
         if(!process_handle_is_valid(memory_search->handle)) {
             memory_search_process_detach(memory_search);
