@@ -14,7 +14,7 @@ Thread* thread_start(ThreadCallback callback, void* context) {
     int32_t res = pthread_create(&thread->tid, NULL, callback, context);
     if(res != 0) {
         errno = res;
-        perror("pthread_create");
+        perror("pthread_create()");
         free(thread);
         return NULL;
     }
@@ -25,7 +25,7 @@ void thread_stop(Thread* thread) {
     int32_t res = pthread_cancel(thread->tid);
     if(res != 0) {
         errno = res;
-        perror("pthread_cancel");
+        perror("pthread_cancel()");
     }
 }
 
@@ -37,7 +37,7 @@ bool thread_tryjoin(Thread* thread, void** result) {
             return false;
         }
         errno = res;
-        perror("pthread_tryjoin_np");
+        perror("pthread_tryjoin_np()");
         return false;
     }
     if(ret == PTHREAD_CANCELED) {
@@ -55,7 +55,7 @@ void thread_join(Thread* thread, void** result) {
     int32_t res = pthread_join(thread->tid, &ret);
     if(res != 0) {
         errno = res;
-        perror("pthread_join");
+        perror("pthread_join()");
         *result = NULL;
         return;
     }
