@@ -25,7 +25,7 @@ cmake --build -j $(nproc) --preset release
 ```
 The executable will be located at `./build/release/memsed`
 
-### Development Tips
+## Development Tips
 
 While developing, it is best to first configure with the `debug` preset:
 ```console
@@ -52,3 +52,15 @@ Configuration files are provided for VS Code
 You will need to run a full build process atleast once before `clangd` picks up the compile DB
 
 Press `Ctrl+Shift+P` and run `clangd: Restart language server` if things ever go wrong
+
+### Project Structure
+
+- `build/`: output and working directory for compilation
+- `build/current/`: symlink to `build/debug/` or `build/release/`
+- `lib/`: mostly generated code that the project depends on
+- `lib/vendor/`: submodules used to generate code in `lib/`, or compiled as is
+- `resources/`: assets used by the program, converted to C code in `lib/`
+- `src/`: code specific to this project
+- `src/process/`: platform-specific implementation of basic process primitives
+- `src/thread/`: platform-specific implementation of basic thread primitives
+- everything else in `src/` should be fairly platform-agnostic
