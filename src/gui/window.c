@@ -3,7 +3,7 @@
 
 const char* ok = mdi_check " Ok";
 const char* cancel = mdi_cancel " Cancel";
-const char* select_process = mdi_select_search " Select Process";
+const char* attach_process = mdi_application_import " Attach Process";
 const char* detach_process = mdi_exit_run " Detach Process";
 const char* first_search = mdi_magnify_plus " First Search";
 const char* next_search = mdi_magnify_expand " Next Search";
@@ -14,7 +14,7 @@ const char* reset_search = mdi_magnify_close " Reset Search";
 const uint8_t pane_spacing_mult = 3;
 const ImVec2 options_min_size = {378.0f, 250.0f};
 
-static void gui_window_draw_select_process_popup(Gui* gui) {
+static void gui_window_draw_attach_process_popup(Gui* gui) {
     ImVec2 display = gui->io->DisplaySize;
     ImVec2 size = display;
     size.x *= 0.8f;
@@ -25,7 +25,7 @@ static void gui_window_draw_select_process_popup(Gui* gui) {
         ImGuiCond_Always,
         (ImVec2){0.5f, 0.5f});
     if(ImGui_BeginPopupModal(
-           select_process,
+           attach_process,
            NULL,
            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -113,12 +113,12 @@ static void gui_window_draw_toolbar(Gui* gui) {
         }
     } else {
         flt32_t width = ImGui_CalcTextSize(detach_process).x + gui->style->FramePadding.x * 2;
-        if(ImGui_ButtonEx(select_process, (ImVec2){width, 0.0f})) {
-            ImGui_OpenPopup(select_process, ImGuiPopupFlags_None);
+        if(ImGui_ButtonEx(attach_process, (ImVec2){width, 0.0f})) {
+            ImGui_OpenPopup(attach_process, ImGuiPopupFlags_None);
         }
     }
     ImGui_EndDisabled();
-    gui_window_draw_select_process_popup(gui);
+    gui_window_draw_attach_process_popup(gui);
 
     ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
 
