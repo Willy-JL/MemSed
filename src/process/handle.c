@@ -1,12 +1,18 @@
 #include "handle.h"
 
-ProcessHandle* process_handle_init(Process* process) {
+// Linux: file handle to /proc/pid/mem
+struct ProcessHandle {
+    ProcessPid pid;
+    FILE* mem;
+};
+
+ProcessHandle* process_handle_init(ProcessPid pid) {
     ProcessHandle* handle = malloc(sizeof(ProcessHandle));
-    handle->process = process;
+    handle->pid = pid;
     char path[31];
-    snprintf(path, sizeof(path), "/proc/%i/mem", process->pid);
-    handle->impl = fopen(path, "r+");
-    if(handle->impl == NULL) {
+    snprintf(path, sizeof(path), "/proc/%i/mem", pid);
+    handle->mem = fopen(path, "r+");
+    if(handle->mem == NULL) {
         perror(path);
         free(handle);
         return NULL;
@@ -15,10 +21,10 @@ ProcessHandle* process_handle_init(Process* process) {
 }
 
 bool process_handle_is_valid(ProcessHandle* handle) {
-    return ftell(handle->impl) >= 0 && process_is_alive(handle->process);
+    return ftell(handle->mem) >= 0 && process_pid_is_alive(handle->pid);
 }
 
 void process_handle_free(ProcessHandle* handle) {
-    fclose(handle->impl);
+    fclose(handle->mem);
     free(handle);
 }

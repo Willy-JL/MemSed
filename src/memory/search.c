@@ -4,6 +4,7 @@
 
 struct MemorySearch {
     MemorySearchParams params;
+    Process* process;
     ProcessHandle* handle;
     Thread* search_thread;
     flt32_t search_progress;
@@ -16,6 +17,7 @@ MemorySearch* memory_search_init() {
     memory_search->params.alignment = 4;
     memory_search->params.value = 0.0l;
     memory_search->params.precision = 0.1l;
+    memory_search->process = NULL;
     memory_search->handle = NULL;
     memory_search->search_thread = NULL;
     memory_search->search_progress = 0.0f;
@@ -26,13 +28,18 @@ MemorySearch* memory_search_init() {
 }
 
 void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid) {
-    Process* process = process_init(pid);
-    if(process == NULL) {
+    if(memory_search_process_is_attached(memory_search)) {
         return;
     }
-    memory_search->handle = process_handle_init(process);
+
+    memory_search->process = process_init(pid);
+    if(memory_search->process == NULL) {
+        return;
+    }
+    memory_search->handle = process_handle_init(pid);
     if(memory_search->handle == NULL) {
-        process_free(process);
+        process_free(memory_search->process);
+        memory_search->process = NULL;
         return;
     }
 
@@ -77,13 +84,14 @@ bool memory_search_process_is_attached(MemorySearch* memory_search) {
 }
 
 Process* memory_search_get_process(MemorySearch* memory_search) {
-    return memory_search->handle->process;
+    return memory_search->process;
 }
 
 void memory_search_process_detach(MemorySearch* memory_search) {
     ProcessHandle* handle = memory_search->handle;
-    Process* process = memory_search->handle->process;
+    Process* process = memory_search->process;
     memory_search->handle = NULL;
+    memory_search->process = NULL;
     process_handle_free(handle);
     process_free(process);
 
@@ -371,12 +379,14 @@ void memory_search_tick(MemorySearch* memory_search) {
         if(!process_handle_is_valid(memory_search->handle)) {
             memory_search_process_detach(memory_search);
         }
+        // FIXME: periodically update latest result values
     }
 }
 
 void memory_search_free(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         memory_search_stop(memory_search);
+        // FIXME: join thread
     }
     if(memory_search_process_is_attached(memory_search)) {
         memory_search_process_detach(memory_search);

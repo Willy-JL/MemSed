@@ -1,15 +1,9 @@
 #pragma once
 
-#include "process.h"
+#include "pid.h"
 
-// Linux: file handle to /proc/pid/mem
-typedef FILE* ProcessHandleImpl;
+typedef struct ProcessHandle ProcessHandle;
 
-typedef struct {
-    Process* process;
-    ProcessHandleImpl impl;
-} ProcessHandle;
-
-ProcessHandle* process_handle_init(Process* process);
+ProcessHandle* process_handle_init(ProcessPid pid);
 bool process_handle_is_valid(ProcessHandle* handle);
 void process_handle_free(ProcessHandle* handle);

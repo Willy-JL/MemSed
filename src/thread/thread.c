@@ -4,9 +4,14 @@
 #include <errno.h>
 #include <pthread.h>
 
+// Linux: pthreads
+struct Thread {
+    pthread_t tid;
+};
+
 Thread* thread_start(ThreadCallback callback, void* context) {
     Thread* thread = malloc(sizeof(Thread));
-    int32_t res = pthread_create(&thread->impl, NULL, callback, context);
+    int32_t res = pthread_create(&thread->tid, NULL, callback, context);
     if(res != 0) {
         errno = res;
         perror("pthread_create");
@@ -17,7 +22,7 @@ Thread* thread_start(ThreadCallback callback, void* context) {
 }
 
 void thread_stop(Thread* thread) {
-    int32_t res = pthread_cancel(thread->impl);
+    int32_t res = pthread_cancel(thread->tid);
     if(res != 0) {
         errno = res;
         perror("pthread_cancel");
@@ -26,7 +31,7 @@ void thread_stop(Thread* thread) {
 
 bool thread_tryjoin(Thread* thread, void** result) {
     void* ret;
-    int32_t res = pthread_tryjoin_np(thread->impl, &ret);
+    int32_t res = pthread_tryjoin_np(thread->tid, &ret);
     if(res != 0) {
         if(res == EBUSY) {
             return false;

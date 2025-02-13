@@ -1,7 +1,6 @@
 #include "process.h"
 
 #include <errno.h>
-#include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -88,12 +87,12 @@ static char* process_read_proc_file(Process* process, const char* name) {
 }
 
 Process* process_init(ProcessPid pid) {
-    Process* process = malloc(sizeof(Process));
-    process->pid = pid;
-    if(!process_is_alive(process)) {
-        free(process);
+    if(!process_pid_is_alive(pid)) {
         return NULL;
     }
+
+    Process* process = malloc(sizeof(Process));
+    process->pid = pid;
     char temp_str[31];
     int32_t res;
 
@@ -161,25 +160,6 @@ Process* process_init(ProcessPid pid) {
     return process;
 }
 
-bool process_is_alive(Process* process) {
-    int32_t res = kill(process->pid, 0);
-    if(res == 0) {
-        return true;
-    }
-    if(res == -1) {
-        switch(errno) {
-        case ESRCH:
-            return false;
-        case EPERM:
-            return true;
-        default:
-            perror("Unknown result checking if process is alive");
-            return false;
-        }
-    }
-    unreachable();
-}
-
 void process_free(Process* process) {
     char* executable = process->executable;
     char* command = process->command;
@@ -187,13 +167,13 @@ void process_free(Process* process) {
     process->executable = NULL;
     process->command = NULL;
     process->user = NULL;
-    if(executable) {
+    if(executable != NULL) {
         free(executable);
     }
-    if(command) {
+    if(command != NULL) {
         free(command);
     }
-    if(user) {
+    if(user != NULL) {
         free(user);
     }
     free(process);

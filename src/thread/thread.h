@@ -2,12 +2,7 @@
 
 #include <std.h>
 
-// Linux: pthreads
-typedef pthread_t ThreadImpl;
-
-typedef struct {
-    ThreadImpl impl;
-} Thread;
+typedef struct Thread Thread;
 
 typedef void* (*ThreadCallback)(void* context);
 
