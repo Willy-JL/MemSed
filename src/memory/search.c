@@ -2,6 +2,8 @@
 #include "../process/handle.h"
 #include "../thread/thread.h"
 
+const size_t chunk_size = 1024 * 1024;
+
 struct MemorySearch {
     MemorySearchParams params;
     Process* process;
@@ -127,13 +129,125 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
     memory_search->params = params;
 }
 
+static size_t memory_search_get_result_size(MemoryType type) {
+    switch(memory_type_get_size(type)) {
+    case 1:
+        return sizeof(MemorySearchResult8);
+    case 2:
+        return sizeof(MemorySearchResult16);
+    case 4:
+        return sizeof(MemorySearchResult32);
+    case 8:
+        return sizeof(MemorySearchResult64);
+    case 16:
+        return sizeof(MemorySearchResult128);
+    }
+    unreachable();
+}
+
+static bool memory_search_should_process_type(MemoryType param, MemoryType type) {
+    if(type >= MemoryTypeMAX) {
+        return false;
+    }
+    if(type == MemoryTypeUnsigned || type == MemoryTypeSigned || type == MemoryTypeInteger ||
+       type == MemoryTypeFloating || type == MemoryTypeNumber) {
+        return false;
+    }
+
+    if(type == param) {
+        return true;
+    }
+
+    switch(param) {
+    case MemoryTypeUnsigned:
+        return type < MemoryTypeUnsigned;
+    case MemoryTypeSigned:
+        return type < MemoryTypeSigned && type > MemoryTypeUnsigned;
+    case MemoryTypeInteger:
+        return type < MemoryTypeInteger;
+    case MemoryTypeFloating:
+        return type < MemoryTypeFloating && type > MemoryTypeInteger;
+    case MemoryTypeNumber:
+        return type < MemoryTypeNumber;
+    default:
+        unreachable();
+    }
+}
+
 static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
 
-    memory_search->results.regions = process_regions_init(memory_search->process->pid);
-    if(memory_search->results.regions == NULL) {
+    ProcessRegions* regions = process_regions_init(memory_search->process->pid);
+    if(regions == NULL) {
         return NULL;
     }
+
+    MemorySearchResultBatch* batch = malloc(sizeof(MemorySearchResultBatch) * 1);
+    batch->total_results_count = 0;
+    batch->sets_count = 0;
+    batch->sets = malloc(sizeof(MemorySearchResultSet) * MemoryTypeMAX);
+    size_t capacities[MemoryTypeMAX];
+    size_t max_type_size = 0;
+
+    for(MemoryType type = 0; type < MemoryTypeMAX; type++) {
+        if(!memory_search_should_process_type(memory_search->params.type, type)) {
+            continue;
+        }
+        MemorySearchResultSet* set = &batch->sets[batch->sets_count];
+        set->type = type;
+        set->results_count = 0;
+        capacities[batch->sets_count] = 1;
+        set->results = malloc(memory_search_get_result_size(type) * capacities[batch->sets_count]);
+        max_type_size = MAX(max_type_size, memory_type_get_size(type));
+        batch->sets_count++;
+    }
+    batch->sets = realloc(batch->sets, sizeof(MemorySearchResultSet) * batch->sets_count);
+
+    void* chunk_buf = malloc(chunk_size);
+    ProcessHandle* handle = memory_search->handle;
+    uint8_t alignment = memory_search->params.alignment;
+    for(size_t region_i = 0; region_i < regions->regions_count; region_i++) {
+        ProcessRegion* region = &regions->regions[region_i];
+        MemoryAddress addr = region->start;
+        MemoryAddress chunk_addr = 0;
+        size_t chunk_len = 0;
+        void* chunk_cur;
+        while(addr < region->end) {
+            // FIXME: show progress
+            if(addr + max_type_size > chunk_addr + chunk_len) {
+                chunk_addr = addr;
+                chunk_len = process_handle_read(handle, chunk_addr, chunk_buf, chunk_size);
+                if(chunk_len == 0) {
+                    break;
+                }
+                chunk_cur = chunk_buf;
+            }
+            size_t chunk_avail = chunk_len - (addr - chunk_addr);
+
+            // FIXME: check values and save results
+            UNUSED(chunk_cur);
+            UNUSED(chunk_avail);
+
+            addr += alignment;
+            chunk_cur += alignment;
+        }
+    }
+    free(chunk_buf);
+
+    for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
+        MemorySearchResultSet* set = &batch->sets[set_i];
+        batch->total_results_count += set->results_count;
+        if(set->results_count > 0) {
+            set->results = realloc(
+                set->results,
+                memory_search_get_result_size(set->type) * set->results_count);
+        }
+    }
+
+    memory_search->results.batches = batch;
+    memory_search->results.batches_count = 1;
+    memory_search->results.current_results_count = batch->total_results_count;
+    memory_search->results.regions = regions;
 
     return NULL;
 }
