@@ -206,6 +206,7 @@ static void* memory_search_begin_callback(void* context) {
     void* chunk_buf = malloc(chunk_size);
     ProcessHandle* handle = memory_search->handle;
     uint8_t alignment = memory_search->params.alignment;
+    size_t regions_progress = 0;
     for(size_t region_i = 0; region_i < regions->regions_count; region_i++) {
         ProcessRegion* region = &regions->regions[region_i];
         MemoryAddress addr = region->start;
@@ -213,7 +214,10 @@ static void* memory_search_begin_callback(void* context) {
         size_t chunk_len = 0;
         void* chunk_cur;
         while(addr < region->end) {
-            // FIXME: show progress
+            // FIXME: check if this is slowing down the search and make it faster
+            memory_search->search_progress =
+                (flt32_t)(regions_progress + (addr - region->start)) / regions->total_size;
+
             if(addr + max_type_size > chunk_addr + chunk_len) {
                 chunk_addr = addr;
                 chunk_len = process_handle_read(handle, chunk_addr, chunk_buf, chunk_size);
@@ -231,6 +235,7 @@ static void* memory_search_begin_callback(void* context) {
             addr += alignment;
             chunk_cur += alignment;
         }
+        regions_progress += region->end - region->start;
     }
     free(chunk_buf);
 
@@ -244,6 +249,7 @@ static void* memory_search_begin_callback(void* context) {
         }
     }
 
+    // FIXME: somehow free these if search is interrupted
     memory_search->results.batches = batch;
     memory_search->results.batches_count = 1;
     memory_search->results.current_results_count = batch->total_results_count;

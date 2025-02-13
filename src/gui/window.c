@@ -128,7 +128,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
     if(memory_search_is_searching(gui->memory_search)) {
         flt32_t progress = memory_search_get_search_progress(gui->memory_search);
         char progress_str[5];
-        snprintf(progress_str, sizeof(progress_str), "%.0f%%", progress);
+        snprintf(progress_str, sizeof(progress_str), "%.0f%%", progress * 100);
         ImGui_ProgressBar(progress, progressbar_size, progress_str);
     } else {
         char label[257] = "No Process Selected";

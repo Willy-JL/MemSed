@@ -13,6 +13,7 @@ ProcessRegions* process_regions_init(ProcessPid pid) {
     size_t capacity = 1;
     size_t count = 0;
     ProcessRegions* regions = malloc(sizeof(ProcessRegions) + sizeof(ProcessRegion) * capacity);
+    regions->total_size = 0;
     regions->regions_count = count;
 
     while(fgets(line, sizeof(line), maps) != NULL) {
@@ -41,6 +42,7 @@ ProcessRegions* process_regions_init(ProcessPid pid) {
                 regions =
                     realloc(regions, sizeof(ProcessRegions) + sizeof(ProcessRegion) * capacity);
             }
+            regions->total_size += (end - start);
             ProcessRegion* region = &regions->regions[count];
 
             region->start = start;

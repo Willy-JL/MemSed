@@ -27,6 +27,7 @@ typedef struct {
 } ProcessRegion;
 
 typedef struct {
+    size_t total_size;
     size_t regions_count;
     ProcessRegion regions[];
 } ProcessRegions;
