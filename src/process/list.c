@@ -3,17 +3,16 @@
 #include <dirent.h>
 
 ProcessList* process_list_init() {
+    DIR* dir = opendir("/proc");
+    if(dir == NULL) {
+        perror("/proc");
+        return 0;
+    }
+
     size_t capacity = 1;
     size_t count = 0;
     ProcessList* list = malloc(sizeof(ProcessList) + sizeof(Process*) * capacity);
     list->processes_count = count;
-
-    DIR* dir = opendir("/proc");
-    if(dir == NULL) {
-        perror("/proc");
-        process_list_free(list);
-        return 0;
-    }
 
     struct dirent* item;
     while((item = readdir(dir)) != NULL) {
