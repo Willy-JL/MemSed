@@ -49,3 +49,22 @@ bool thread_tryjoin(Thread* thread, void** result) {
     free(thread);
     return true;
 }
+
+void thread_join(Thread* thread, void** result) {
+    void* ret;
+    int32_t res = pthread_join(thread->tid, &ret);
+    if(res != 0) {
+        errno = res;
+        perror("pthread_join");
+        *result = NULL;
+        return;
+    }
+    if(ret == PTHREAD_CANCELED) {
+        ret = NULL;
+    }
+    if(result != NULL) {
+        *result = ret;
+    }
+    free(thread);
+    return;
+}

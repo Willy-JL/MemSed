@@ -398,7 +398,7 @@ void memory_search_tick(MemorySearch* memory_search) {
 void memory_search_free(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         memory_search_stop(memory_search);
-        // FIXME: join thread
+        thread_join(memory_search->search_thread, NULL);
     }
     if(memory_search_process_is_attached(memory_search)) {
         memory_search_process_detach(memory_search);
