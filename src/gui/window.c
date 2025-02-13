@@ -330,7 +330,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                    temp_str,
                    sizeof(temp_str),
                    ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsDecimal)) {
-                params.precision = ABS(strtold(temp_str, NULL));
+                params.precision = strtold(temp_str, NULL);
                 memory_search_set_params(gui->memory_search, params);
             }
             ImGui_PopFont();

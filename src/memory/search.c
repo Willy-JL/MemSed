@@ -98,17 +98,22 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
     if(memory_search_is_searching(memory_search)) {
         return;
     }
-    // FIXME: allow updating value
     if(memory_search->results.batches_count > 0) {
-        return;
+        // Can't change some values after first scan
+        params.type = memory_search->params.type;
+        params.alignment = memory_search->params.alignment;
     }
 
+    params.type = CLAMP(params.type, MemoryTypeMAX - 1, 0);
+    params.alignment = MAX(params.alignment, 1);
     if(params.type <= MemoryTypeInteger) {
         params.value = round(params.value);
     }
     if(params.type <= MemoryTypeUnsigned) {
         params.value = ABS(params.value);
     }
+    params.precision = ABS(params.precision);
+
     memory_search->params = params;
 }
 
