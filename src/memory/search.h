@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../process/process.h"
+#include "../process/regions.h"
 #include "address.h"
 #include "type.h"
 
@@ -70,6 +71,7 @@ typedef struct {
 } MemorySearchResultBatch;
 
 typedef struct {
+    ProcessRegions* regions;
     size_t current_results_count;
     size_t batches_count;
     MemorySearchResultBatch* batches;

@@ -21,6 +21,7 @@ MemorySearch* memory_search_init() {
     memory_search->handle = NULL;
     memory_search->search_thread = NULL;
     memory_search->search_progress = 0.0f;
+    memory_search->results.regions = NULL;
     memory_search->results.current_results_count = 0;
     memory_search->results.batches_count = 0;
     memory_search->results.batches = NULL;
@@ -43,7 +44,8 @@ void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid) {
         return;
     }
 
-    // Example results for testing
+    // Example results for reference
+    return;
     memory_search->results.batches = malloc(sizeof(MemorySearchResultBatch) * 2);
     memory_search->results.batches[0].sets = malloc(sizeof(MemorySearchResultSet) * 2);
     memory_search->results.batches[0].sets[0].type = MemoryTypeI8;
@@ -127,7 +129,12 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
 
 static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
-    UNUSED(memory_search);
+
+    memory_search->results.regions = process_regions_init(memory_search->process->pid);
+    if(memory_search->results.regions == NULL) {
+        return NULL;
+    }
+
     return NULL;
 }
 
@@ -186,6 +193,11 @@ void memory_search_undo(MemorySearch* memory_search) {
 void memory_search_reset(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         return;
+    }
+
+    if(memory_search->results.regions != NULL) {
+        process_regions_free(memory_search->results.regions);
+        memory_search->results.regions = NULL;
     }
 
     size_t batches_count = memory_search->results.batches_count;
