@@ -205,6 +205,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         memory_search_get_result_display(set, result_i);
                     ImGui_TableNextRow();
                     // Address
+                    // FIXME: if address is in region mapped from file, show filename+offset
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(display.address_str);
                     // Type

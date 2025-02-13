@@ -6,3 +6,4 @@
   - Boundaries?
   - More value options?
 - Figure out SDL segfault when building as static exe
+- Sleep GUI when inactive/minimized
