@@ -4,8 +4,10 @@
 #include <dcimgui/backends/dcimgui_impl_opengl3.h>
 #include <dcimgui/backends/dcimgui_impl_sdl3.h>
 #include <dcimgui/dcimgui.h>
-#include <dcimgui/dcimgui_internal.h>
 #include <SDL3/SDL_opengl.h>
+
+const flt32_t scroll_multiplier = 2.0f;
+const flt32_t scroll_smoothing = 8.0f;
 
 bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t height) {
     // Prefer Wayland when available
@@ -63,6 +65,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
     gui->io = ImGui_GetIO();
     gui->style = ImGui_GetStyle();
     gui->prev_size = (ImVec2){0.0f, 0.0f};
+    gui->scroll_energy = (ImVec2){0.0f, 0.0f};
 
     ImGui_ImplSDL3_InitForOpenGL(gui->window, gui->gl);
     ImGui_ImplOpenGL3_Init();
@@ -73,7 +76,24 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
 void gui_backend_process_events(Gui* gui) {
     SDL_Event event;
     while(SDL_PollEvent(&event)) {
-        ImGui_ImplSDL3_ProcessEvent(&event);
+        if(event.type == SDL_EVENT_MOUSE_WHEEL &&
+           event.window.windowID == SDL_GetWindowID(gui->window)) {
+            // Handle wheel events locally to apply smooth scrolling
+            event.wheel.x *= scroll_multiplier;
+            event.wheel.y *= scroll_multiplier;
+            // Immediately stop if direction changes
+            if(gui->scroll_energy.x * event.wheel.x < 0.0f) {
+                gui->scroll_energy.x = 0.0f;
+            }
+            if(gui->scroll_energy.y * event.wheel.y < 0.0f) {
+                gui->scroll_energy.y = 0.0f;
+            }
+            gui->scroll_energy.x += event.wheel.x;
+            gui->scroll_energy.y += event.wheel.y;
+        } else {
+            ImGui_ImplSDL3_ProcessEvent(&event);
+        }
+
         if(event.type == SDL_EVENT_QUIT) {
             gui->should_close = true;
         }
@@ -87,39 +107,34 @@ void gui_backend_process_events(Gui* gui) {
 void gui_backend_new_frame(Gui* gui) {
     UNUSED(gui);
 
+    // Apply smooth scrolling
+    ImVec2 scroll_now;
+    if(ABS(gui->scroll_energy.x) > 0.01f) {
+        scroll_now.x = gui->scroll_energy.x * gui->io->DeltaTime * scroll_smoothing;
+        gui->scroll_energy.x -= scroll_now.x;
+    } else {
+        // Cutoff smoothing when it's basically stopped
+        scroll_now.x = 0.0f;
+        gui->scroll_energy.x = 0.0f;
+    }
+    if(ABS(gui->scroll_energy.y) > 0.01f) {
+        scroll_now.y = gui->scroll_energy.y * gui->io->DeltaTime * scroll_smoothing;
+        gui->scroll_energy.y -= scroll_now.y;
+    } else {
+        // Cutoff smoothing when it's basically stopped
+        scroll_now.y = 0.0f;
+        gui->scroll_energy.y = 0.0f;
+    }
+    gui->io->MouseWheel = scroll_now.y;
+    gui->io->MouseWheelH = -scroll_now.x;
+
+    // Hand cursor when hovering buttons and similar
     if(ImGui_IsAnyItemHovered()) {
         ImGui_SetMouseCursor(ImGuiMouseCursor_Hand);
     }
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
-
-    // ImGui backend processes inputs, usually ImGui::NewFrame() consolidates them
-    // Here we consolidate inputs earlier, so we can then modify the value of ImGuiIO.MouseWheel
-    // Otherwise, modifying ImGuiIO.MouseWheel after ImGui::NewFrame() has no effect for that frame
-    ImGui_UpdateInputEvents(gui->io->ConfigInputTrickleEventQueue);
-
-    // Apply smooth scrolling
-    const flt32_t scroll_multiplier = 2.0f;
-    const flt32_t scroll_smoothing = 8.0f;
-    static flt32_t scroll_energy = 0.0f;
-    gui->io->MouseWheel *= scroll_multiplier;
-    if(scroll_energy * gui->io->MouseWheel < 0.0f) {
-        // Immediately stop if direction changes
-        scroll_energy = 0.0f;
-    }
-    scroll_energy += gui->io->MouseWheel;
-    flt32_t scroll_now;
-    if(ABS(scroll_energy) > 0.01f) {
-        scroll_now = scroll_energy * gui->io->DeltaTime * scroll_smoothing;
-        scroll_energy -= scroll_now;
-    } else {
-        // Cutoff smoothing when it's basically stopped
-        scroll_now = 0.0f;
-        scroll_energy = 0.0f;
-    }
-    gui->io->MouseWheel = scroll_now;
-
     ImGui_NewFrame();
 }
 

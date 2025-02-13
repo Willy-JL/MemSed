@@ -18,6 +18,7 @@ typedef struct {
         ImFont* mono;
     } fonts;
     ImVec2 prev_size;
+    ImVec2 scroll_energy;
     bool should_close;
 
     MemorySearch* memory_search;
