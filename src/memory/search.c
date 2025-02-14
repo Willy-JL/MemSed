@@ -281,30 +281,30 @@ static void* memory_search_begin_callback(void* context) {
         ProcessRegion* region = &regions->regions[region_i];
         MemoryAddress addr = region->start;
         MemoryAddress chunk_addr = 0;
-        size_t chunk_len = 0;
+        MemoryAddress chunk_end = 0;
         void* chunk_cur;
         while(addr < region->end) {
-            if(addr + max_type_size > chunk_addr + chunk_len) {
+            if(addr + max_type_size > chunk_end) {
                 thread_self_quit_if_canceled();
                 memory_search->search_progress =
                     (flt32_t)(regions_progress + (addr - region->start)) / regions->total_size;
                 chunk_addr = addr;
-                chunk_len = process_handle_read(handle, chunk_addr, chunk_buf, chunk_size);
+                size_t chunk_len = process_handle_read(handle, chunk_addr, chunk_buf, chunk_size);
                 if(chunk_len == 0) {
                     break;
                 }
+                chunk_end = chunk_addr + chunk_len;
                 chunk_cur = chunk_buf;
             }
-            size_t chunk_avail = chunk_len - (addr - chunk_addr);
 
             for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
                 MemorySearchResultSet* set = &batch->sets[set_i];
                 switch(set->type) {
                 case MemoryTypeU8:
-                    if(chunk_avail < 1) {
+                    if(*(uint8_t*)chunk_cur != value_u8) {
                         continue;
                     }
-                    if(*(uint8_t*)chunk_cur != value_u8) {
+                    if(chunk_end - addr < 1) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -313,10 +313,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU16:
-                    if(chunk_avail < 2) {
+                    if(*(uint16_t*)chunk_cur != value_u16) {
                         continue;
                     }
-                    if(*(uint16_t*)chunk_cur != value_u16) {
+                    if(chunk_end - addr < 2) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -325,10 +325,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU32:
-                    if(chunk_avail < 4) {
+                    if(*(uint32_t*)chunk_cur != value_u32) {
                         continue;
                     }
-                    if(*(uint32_t*)chunk_cur != value_u32) {
+                    if(chunk_end - addr < 4) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -337,10 +337,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU64:
-                    if(chunk_avail < 8) {
+                    if(*(uint64_t*)chunk_cur != value_u64) {
                         continue;
                     }
-                    if(*(uint64_t*)chunk_cur != value_u64) {
+                    if(chunk_end - addr < 8) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -349,10 +349,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI8:
-                    if(chunk_avail < 1) {
+                    if(*(int8_t*)chunk_cur != value_i8) {
                         continue;
                     }
-                    if(*(int8_t*)chunk_cur != value_i8) {
+                    if(chunk_end - addr < 1) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -361,10 +361,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI16:
-                    if(chunk_avail < 2) {
+                    if(*(int16_t*)chunk_cur != value_i16) {
                         continue;
                     }
-                    if(*(int16_t*)chunk_cur != value_i16) {
+                    if(chunk_end - addr < 2) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -373,10 +373,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI32:
-                    if(chunk_avail < 4) {
+                    if(*(int32_t*)chunk_cur != value_i32) {
                         continue;
                     }
-                    if(*(int32_t*)chunk_cur != value_i32) {
+                    if(chunk_end - addr < 4) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -385,10 +385,10 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI64:
-                    if(chunk_avail < 8) {
+                    if(*(int64_t*)chunk_cur != value_i64) {
                         continue;
                     }
-                    if(*(int64_t*)chunk_cur != value_i64) {
+                    if(chunk_end - addr < 8) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -397,11 +397,11 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeF32:
-                    if(chunk_avail < 4) {
-                        continue;
-                    }
                     if(isnanf(*(flt32_t*)chunk_cur) || *(flt32_t*)chunk_cur < (value_f32_min) ||
                        *(flt32_t*)chunk_cur > (value_f32_max)) {
+                        continue;
+                    }
+                    if(chunk_end - addr < 4) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -410,11 +410,11 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeF64:
-                    if(chunk_avail < 8) {
-                        continue;
-                    }
                     if(isnan(*(flt64_t*)chunk_cur) || *(flt64_t*)chunk_cur < (value_f64_min) ||
                        *(flt64_t*)chunk_cur > (value_f64_max)) {
+                        continue;
+                    }
+                    if(chunk_end - addr < 8) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -423,11 +423,11 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeF128:
-                    if(chunk_avail < 16) {
-                        continue;
-                    }
                     if(isnanl(*(flt128_t*)chunk_cur) || *(flt128_t*)chunk_cur < (value_f128_min) ||
                        *(flt128_t*)chunk_cur > (value_f128_max)) {
+                        continue;
+                    }
+                    if(chunk_end - addr < 16) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
