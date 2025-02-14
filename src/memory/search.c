@@ -269,7 +269,7 @@ static void* memory_search_begin_callback(void* context) {
     flt64_t value_f64_max = value + precision;
     flt128_t value_f128_max = value + precision;
 
-    for(MemoryType type = 0; type < MemoryTypeMAX; type++) {
+    for(MemoryType type = MemoryTypeMAX - 1; type < MemoryTypeMAX; type--) {
         if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
             continue;
         }
