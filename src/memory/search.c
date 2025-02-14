@@ -210,7 +210,7 @@ static bool memory_search_should_process_type(MemoryType param, flt128_t value, 
         }
         return false;
     default:
-        unreachable();
+        return false;
     }
 }
 
