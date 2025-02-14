@@ -227,7 +227,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             MemorySearchResultSet* prev_set = (void*)-1;
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
-                    while(clip_i - sets_progress > set->results_count) {
+                    while(clip_i - sets_progress >= set->results_count) {
                         sets_progress += set->results_count;
                         set_i++;
                         set = &batch->sets[set_i];
