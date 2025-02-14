@@ -268,11 +268,20 @@ void memory_search_begin(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
         return;
     }
+    if(memory_search->results.batches_count > 0) {
+        return;
+    }
     memory_search->search_thread = thread_start(memory_search_begin_callback, memory_search);
 }
 
 void memory_search_next(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+    if(memory_search->results.batches_count == 0) {
+        return;
+    }
+    if(memory_search->results.current_results_count == 0) {
         return;
     }
     memory_search->search_thread = thread_start(memory_search_next_callback, memory_search);

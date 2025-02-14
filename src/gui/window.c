@@ -248,9 +248,11 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_begin(gui->memory_search);
             }
         } else {
+            ImGui_BeginDisabled(results->current_results_count == 0);
             if(ImGui_Button(next_search)) {
                 memory_search_next(gui->memory_search);
             }
+            ImGui_EndDisabled();
         }
         ImGui_EndDisabled();
 
