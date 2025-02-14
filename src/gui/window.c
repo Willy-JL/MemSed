@@ -14,6 +14,8 @@ const char* reset_search = mdi_magnify_close " Reset Search";
 const uint8_t pane_spacing_mult = 3;
 const ImVec2 options_min_size = {378.0f, 250.0f};
 
+size_t imgui_clipper_max = 1'000'000;
+
 static void gui_window_draw_attach_process_popup(Gui* gui) {
     ImVec2 display = gui->io->DisplaySize;
     ImVec2 size = display;
@@ -169,38 +171,83 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
            size,
            0.0f)) {
         ImGui_PushFont(gui->fonts.mono);
-        ImGui_TableSetupColumnEx(
-            "Address",
-            ImGuiTableColumnFlags_WidthFixed,
-            ImGui_CalcTextSize("0x112233445566").x,
-            0);
+        ImGui_TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed);
         ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupColumn("Previous", ImGuiTableColumnFlags_WidthStretch);
-        ImGui_TableSetupScrollFreeze(0, 1);
+        MemorySearchResults* results = memory_search_get_results(gui->memory_search);
+        MemorySearchResultBatch* batch = NULL;
+        bool too_many = false;
+        if(!memory_search_is_searching(gui->memory_search) && results->batches_count >= 1) {
+            batch = &results->batches[results->batches_count - 1];
+            too_many = batch->total_results_count > imgui_clipper_max;
+        }
+        ImGui_TableSetupScrollFreeze(0, 1 + too_many);
         ImGui_PushFont(gui->fonts.base);
         ImGui_TableHeadersRow();
+        if(too_many) {
+            ImGui_TableNextRow();
+            ImGui_TableNextColumn();
+            ImVec2 text_pos = ImGui_GetCursorScreenPos();
+            ImVec2 rect_pos = text_pos;
+            ImGui_Text("");
+            char text[51];
+            snprintf(text, sizeof(text), "Too many results, only %zu shown!", imgui_clipper_max);
+            ImVec2 text_size = ImGui_CalcTextSize(text);
+            ImDrawList* foreground = ImGui_GetWindowDrawList();
+            rect_pos.x -= gui->style->ItemSpacing.x;
+            rect_pos.y -= gui->style->FrameBorderSize;
+            ImVec2 rect_max = {
+                rect_pos.x + size.x - gui->style->ScrollbarSize - gui->style->FrameBorderSize,
+                rect_pos.y + ImGui_GetTextLineHeightWithSpacing() - gui->style->FrameBorderSize};
+            text_pos.x += (size.x - text_size.x) / 2;
+            ImGui_PushClipRect(rect_pos, rect_max, false);
+            ImDrawList_AddRectFilled(foreground, rect_pos, rect_max, 0xFF000042);
+            ImDrawList_AddText(
+                foreground,
+                text_pos,
+                ImGui_GetColorU32ImVec4(gui->style->Colors[ImGuiCol_Text]),
+                text);
+            ImGui_PopClipRect();
+        }
         ImGui_PopFont();
 
-        MemorySearchResults* results = memory_search_get_results(gui->memory_search);
-        if(!memory_search_is_searching(gui->memory_search) && results->batches_count >= 1) {
-            // FIXME: use clipper
-            MemorySearchResultBatch* batch = &results->batches[results->batches_count - 1];
+        if(batch != NULL) {
             MemorySearchResultBatch* prev_batch =
                 results->batches_count >= 2 ? &results->batches[results->batches_count - 2] : NULL;
-            for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
-                MemorySearchResultSet* set = &batch->sets[set_i];
-                MemorySearchResultSet* prev_set = NULL;
-                if(prev_batch) {
-                    for(size_t prev_set_i = 0; prev_set_i < prev_batch->sets_count; prev_set_i++) {
-                        prev_set = &prev_batch->sets[prev_set_i];
-                        if(prev_set->type == set->type) {
-                            break;
+            ImGuiListClipper clipper = {0};
+            ImGuiListClipper_Begin(
+                &clipper,
+                MIN(batch->total_results_count, imgui_clipper_max),
+                ImGui_GetTextLineHeightWithSpacing());
+            size_t set_i = 0;
+            size_t sets_progress = 0;
+            const char* type_str = NULL;
+            MemorySearchResultSet* set = &batch->sets[set_i];
+            MemorySearchResultSet* prev_set = (void*)-1;
+            while(ImGuiListClipper_Step(&clipper)) {
+                for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
+                    while(clip_i - sets_progress > set->results_count) {
+                        sets_progress += set->results_count;
+                        set_i++;
+                        set = &batch->sets[set_i];
+                        prev_set = (void*)-1;
+                    }
+                    if(prev_set == (void*)-1) {
+                        type_str = memory_type_get_short_name(set->type);
+                        if(prev_batch) {
+                            for(size_t prev_set_i = 0; prev_set_i < prev_batch->sets_count;
+                                prev_set_i++) {
+                                prev_set = &prev_batch->sets[prev_set_i];
+                                if(prev_set->type == set->type) {
+                                    break;
+                                }
+                            }
+                        } else {
+                            prev_set = NULL;
                         }
                     }
-                }
-                const char* type_str = memory_type_get_short_name(set->type);
-                for(size_t result_i = 0; result_i < set->results_count; result_i++) {
+                    size_t result_i = clip_i - sets_progress;
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
                     ImGui_TableNextRow();
@@ -230,6 +277,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                 }
             }
         }
+
         ImGui_PopFont();
         ImGui_EndTable();
     }
