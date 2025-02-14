@@ -174,6 +174,23 @@ static bool memory_search_should_process_type(MemoryType param, MemoryType type)
     }
 }
 
+static void memory_search_consolidate_results(void* context) {
+    MemorySearch* memory_search = context;
+    MemorySearchResultBatch* batch =
+        &memory_search->results.batches[memory_search->results.batches_count - 1];
+    batch->total_results_count = 0;
+    for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
+        MemorySearchResultSet* set = &batch->sets[set_i];
+        batch->total_results_count += set->results_count;
+        if(set->results_count > 0) {
+            set->results = realloc(
+                set->results,
+                memory_search_get_result_size(set->type) * set->results_count);
+        }
+    }
+    memory_search->results.current_results_count = batch->total_results_count;
+}
+
 static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
 
@@ -183,7 +200,6 @@ static void* memory_search_begin_callback(void* context) {
     }
 
     MemorySearchResultBatch* batch = malloc(sizeof(MemorySearchResultBatch) * 1);
-    batch->total_results_count = 0;
     batch->sets_count = 0;
     batch->sets = malloc(sizeof(MemorySearchResultSet) * MemoryTypeMAX);
     size_t capacities[MemoryTypeMAX];
@@ -203,7 +219,13 @@ static void* memory_search_begin_callback(void* context) {
     }
     batch->sets = realloc(batch->sets, sizeof(MemorySearchResultSet) * batch->sets_count);
 
+    memory_search->results.batches = batch;
+    memory_search->results.batches_count++;
+    memory_search->results.regions = regions;
+    thread_self_push_cancel_cleanup(memory_search_consolidate_results, memory_search);
+
     void* chunk_buf = malloc(chunk_size);
+    thread_self_push_cancel_cleanup(free, chunk_buf);
     ProcessHandle* handle = memory_search->handle;
     uint8_t alignment = memory_search->params.alignment;
     size_t regions_progress = 0;
@@ -214,7 +236,8 @@ static void* memory_search_begin_callback(void* context) {
         size_t chunk_len = 0;
         void* chunk_cur;
         while(addr < region->end) {
-            // FIXME: check if this is slowing down the search and make it faster
+            // FIXME: check if these are slowing down the search and make it faster
+            thread_self_quit_if_canceled();
             memory_search->search_progress =
                 (flt32_t)(regions_progress + (addr - region->start)) / regions->total_size;
 
@@ -237,24 +260,9 @@ static void* memory_search_begin_callback(void* context) {
         }
         regions_progress += region->end - region->start;
     }
-    free(chunk_buf);
+    thread_self_pop_cancel_cleanup(true); // free(chunk_buf)
 
-    for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
-        MemorySearchResultSet* set = &batch->sets[set_i];
-        batch->total_results_count += set->results_count;
-        if(set->results_count > 0) {
-            set->results = realloc(
-                set->results,
-                memory_search_get_result_size(set->type) * set->results_count);
-        }
-    }
-
-    // FIXME: somehow free these if search is interrupted
-    memory_search->results.batches = batch;
-    memory_search->results.batches_count = 1;
-    memory_search->results.current_results_count = batch->total_results_count;
-    memory_search->results.regions = regions;
-
+    thread_self_pop_cancel_cleanup(true); // memory_search_consolidate_results(memory_search)
     return NULL;
 }
 
@@ -271,6 +279,8 @@ void memory_search_begin(MemorySearch* memory_search) {
     if(memory_search->results.batches_count > 0) {
         return;
     }
+
+    memory_search->search_progress = 0.0f;
     memory_search->search_thread = thread_start(memory_search_begin_callback, memory_search);
 }
 
@@ -284,6 +294,8 @@ void memory_search_next(MemorySearch* memory_search) {
     if(memory_search->results.current_results_count == 0) {
         return;
     }
+
+    memory_search->search_progress = 0.0f;
     memory_search->search_thread = thread_start(memory_search_next_callback, memory_search);
 }
 
@@ -299,7 +311,7 @@ void memory_search_stop(MemorySearch* memory_search) {
     if(!memory_search_is_searching(memory_search)) {
         return;
     }
-    thread_stop(memory_search->search_thread);
+    thread_cancel(memory_search->search_thread);
 }
 
 void memory_search_undo(MemorySearch* memory_search) {
@@ -513,7 +525,7 @@ MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet
 
 void memory_search_tick(MemorySearch* memory_search) {
     if(memory_search_is_searching(memory_search)) {
-        if(thread_tryjoin(memory_search->search_thread, NULL)) {
+        if(thread_try_join(memory_search->search_thread, NULL)) {
             memory_search->search_thread = NULL;
         }
     } else if(memory_search_process_is_attached(memory_search)) {

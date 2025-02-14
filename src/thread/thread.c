@@ -7,11 +7,22 @@
 // Linux: pthreads
 struct Thread {
     pthread_t tid;
+    ThreadCallback callback;
+    void* context;
 };
+
+static void* thread_body(void* context) {
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+    Thread* thread = context;
+    return thread->callback(thread->context);
+}
 
 Thread* thread_start(ThreadCallback callback, void* context) {
     Thread* thread = malloc(sizeof(Thread));
-    int32_t res = pthread_create(&thread->tid, NULL, callback, context);
+    thread->callback = callback;
+    thread->context = context;
+    int32_t res = pthread_create(&thread->tid, NULL, thread_body, thread);
     if(res != 0) {
         errno = res;
         perror("pthread_create()");
@@ -21,7 +32,7 @@ Thread* thread_start(ThreadCallback callback, void* context) {
     return thread;
 }
 
-void thread_stop(Thread* thread) {
+void thread_cancel(Thread* thread) {
     int32_t res = pthread_cancel(thread->tid);
     if(res != 0) {
         errno = res;
@@ -29,7 +40,7 @@ void thread_stop(Thread* thread) {
     }
 }
 
-bool thread_tryjoin(Thread* thread, void** result) {
+bool thread_try_join(Thread* thread, void** result) {
     void* ret;
     int32_t res = pthread_tryjoin_np(thread->tid, &ret);
     if(res != 0) {
@@ -67,4 +78,10 @@ void thread_join(Thread* thread, void** result) {
     }
     free(thread);
     return;
+}
+
+void thread_self_quit_if_canceled() {
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_testcancel();
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 }
