@@ -282,9 +282,10 @@ static void* memory_search_begin_callback(void* context) {
         MemoryAddress addr = region->start;
         MemoryAddress chunk_addr = 0;
         MemoryAddress chunk_end = 0;
+        MemoryAddress chunk_end_max_type_margin = 0;
         void* chunk_cur;
         while(addr < region->end) {
-            if(addr + max_type_size > chunk_end) {
+            if(addr > chunk_end_max_type_margin) {
                 thread_self_quit_if_canceled();
                 memory_search->search_progress =
                     (flt32_t)(regions_progress + (addr - region->start)) / regions->total_size;
@@ -294,6 +295,7 @@ static void* memory_search_begin_callback(void* context) {
                     break;
                 }
                 chunk_end = chunk_addr + chunk_len;
+                chunk_end_max_type_margin = chunk_end - max_type_size;
                 chunk_cur = chunk_buf;
             }
 
