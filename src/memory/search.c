@@ -484,8 +484,8 @@ static void* memory_search_next_callback(void* context) {
     memory_search->results.batches_count++;
     thread_self_push_cancel_cleanup(memory_search_consolidate_results, memory_search);
 
-    void* chunk_buf = malloc(max_type_size);
-    thread_self_push_cancel_cleanup(free, chunk_buf);
+    void* value_buf = malloc(max_type_size);
+    thread_self_push_cancel_cleanup(free, value_buf);
     ProcessHandle* handle = memory_search->handle;
     size_t results_progress = 0;
     size_t set_i = -1;
@@ -505,148 +505,148 @@ static void* memory_search_next_callback(void* context) {
             switch(set->type) {
             case MemoryTypeU8:
                 addr = last_set->results_8[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 1) < 1) {
+                if(process_handle_read(handle, addr, value_buf, 1) < 1) {
                     continue;
                 }
-                if(*(uint8_t*)chunk_buf != value_u8) {
+                if(*(uint8_t*)value_buf != value_u8) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_8[set->results_count].address = addr;
-                set->results_8[set->results_count].u8 = *(uint8_t*)chunk_buf;
+                set->results_8[set->results_count].u8 = *(uint8_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU16:
                 addr = last_set->results_16[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 2) < 2) {
+                if(process_handle_read(handle, addr, value_buf, 2) < 2) {
                     continue;
                 }
-                if(*(uint16_t*)chunk_buf != value_u16) {
+                if(*(uint16_t*)value_buf != value_u16) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_16[set->results_count].address = addr;
-                set->results_16[set->results_count].u16 = *(uint16_t*)chunk_buf;
+                set->results_16[set->results_count].u16 = *(uint16_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU32:
                 addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 4) < 4) {
+                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
                     continue;
                 }
-                if(*(uint32_t*)chunk_buf != value_u32) {
+                if(*(uint32_t*)value_buf != value_u32) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].address = addr;
-                set->results_32[set->results_count].u32 = *(uint32_t*)chunk_buf;
+                set->results_32[set->results_count].u32 = *(uint32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU64:
                 addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 8) < 8) {
+                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
                     continue;
                 }
-                if(*(uint64_t*)chunk_buf != value_u64) {
+                if(*(uint64_t*)value_buf != value_u64) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].address = addr;
-                set->results_64[set->results_count].u64 = *(uint64_t*)chunk_buf;
+                set->results_64[set->results_count].u64 = *(uint64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI8:
                 addr = last_set->results_8[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 1) < 1) {
+                if(process_handle_read(handle, addr, value_buf, 1) < 1) {
                     continue;
                 }
-                if(*(int8_t*)chunk_buf != value_i8) {
+                if(*(int8_t*)value_buf != value_i8) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_8[set->results_count].address = addr;
-                set->results_8[set->results_count].i8 = *(int8_t*)chunk_buf;
+                set->results_8[set->results_count].i8 = *(int8_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI16:
                 addr = last_set->results_16[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 2) < 2) {
+                if(process_handle_read(handle, addr, value_buf, 2) < 2) {
                     continue;
                 }
-                if(*(int16_t*)chunk_buf != value_i16) {
+                if(*(int16_t*)value_buf != value_i16) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_16[set->results_count].address = addr;
-                set->results_16[set->results_count].i16 = *(int16_t*)chunk_buf;
+                set->results_16[set->results_count].i16 = *(int16_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI32:
                 addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 4) < 4) {
+                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
                     continue;
                 }
-                if(*(int32_t*)chunk_buf != value_i32) {
+                if(*(int32_t*)value_buf != value_i32) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].address = addr;
-                set->results_32[set->results_count].i32 = *(int32_t*)chunk_buf;
+                set->results_32[set->results_count].i32 = *(int32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI64:
                 addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 8) < 8) {
+                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
                     continue;
                 }
-                if(*(int64_t*)chunk_buf != value_i64) {
+                if(*(int64_t*)value_buf != value_i64) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].address = addr;
-                set->results_64[set->results_count].i64 = *(int64_t*)chunk_buf;
+                set->results_64[set->results_count].i64 = *(int64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF32:
                 addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 4) < 4) {
+                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
                     continue;
                 }
-                if(isnanf(*(flt32_t*)chunk_buf) || *(flt32_t*)chunk_buf < (value_f32_min) ||
-                   *(flt32_t*)chunk_buf > (value_f32_max)) {
+                if(isnanf(*(flt32_t*)value_buf) || *(flt32_t*)value_buf < (value_f32_min) ||
+                   *(flt32_t*)value_buf > (value_f32_max)) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].address = addr;
-                set->results_32[set->results_count].f32 = *(flt32_t*)chunk_buf;
+                set->results_32[set->results_count].f32 = *(flt32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF64:
                 addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 8) < 8) {
+                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
                     continue;
                 }
-                if(isnanf(*(flt64_t*)chunk_buf) || *(flt64_t*)chunk_buf < (value_f64_min) ||
-                   *(flt64_t*)chunk_buf > (value_f64_max)) {
+                if(isnanf(*(flt64_t*)value_buf) || *(flt64_t*)value_buf < (value_f64_min) ||
+                   *(flt64_t*)value_buf > (value_f64_max)) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].address = addr;
-                set->results_64[set->results_count].f64 = *(flt64_t*)chunk_buf;
+                set->results_64[set->results_count].f64 = *(flt64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF128:
                 addr = last_set->results_128[result_i].address;
-                if(process_handle_read(handle, addr, chunk_buf, 16) < 16) {
+                if(process_handle_read(handle, addr, value_buf, 16) < 16) {
                     continue;
                 }
-                if(isnanf(*(flt128_t*)chunk_buf) || *(flt128_t*)chunk_buf < (value_f128_min) ||
-                   *(flt128_t*)chunk_buf > (value_f128_max)) {
+                if(isnanf(*(flt128_t*)value_buf) || *(flt128_t*)value_buf < (value_f128_min) ||
+                   *(flt128_t*)value_buf > (value_f128_max)) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_128[set->results_count].address = addr;
-                set->results_128[set->results_count].f128 = *(flt128_t*)chunk_buf;
+                set->results_128[set->results_count].f128 = *(flt128_t*)value_buf;
                 set->results_count++;
                 break;
             default:
@@ -656,7 +656,7 @@ static void* memory_search_next_callback(void* context) {
 
         results_progress += last_set->results_count;
     }
-    thread_self_pop_cancel_cleanup(true); // free(chunk_buf)
+    thread_self_pop_cancel_cleanup(true); // free(value_buf)
 
     thread_self_pop_cancel_cleanup(true); // memory_search_consolidate_results(memory_search)
     return NULL;
