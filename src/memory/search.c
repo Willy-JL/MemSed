@@ -45,42 +45,6 @@ void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid) {
         memory_search->process = NULL;
         return;
     }
-
-    // Example results for reference
-    return;
-    memory_search->results.batches = malloc(sizeof(MemorySearchResultBatch) * 2);
-    memory_search->results.batches[0].sets = malloc(sizeof(MemorySearchResultSet) * 2);
-    memory_search->results.batches[0].sets[0].type = MemoryTypeI8;
-    memory_search->results.batches[0].sets[0].results_8 = malloc(sizeof(MemorySearchResult8) * 2);
-    memory_search->results.batches[0].sets[0].results_8[0].address = 0x123456781234;
-    memory_search->results.batches[0].sets[0].results_8[0].i8 = 69;
-    memory_search->results.batches[0].sets[0].results_8[1].address = 0x876543214321;
-    memory_search->results.batches[0].sets[0].results_8[1].i8 = 42;
-    memory_search->results.batches[0].sets[0].results_count = 2;
-    memory_search->results.batches[0].sets[1].type = MemoryTypeF64;
-    memory_search->results.batches[0].sets[1].results_64 =
-        malloc(sizeof(MemorySearchResult64) * 1);
-    memory_search->results.batches[0].sets[1].results_64[0].address = 0x112233445566;
-    memory_search->results.batches[0].sets[1].results_64[0].f64 = 420.69;
-    memory_search->results.batches[0].sets[1].results_count = 1;
-    memory_search->results.batches[0].sets_count = 2;
-    memory_search->results.batches[0].total_results_count = 3;
-    memory_search->results.batches[1].sets = malloc(sizeof(MemorySearchResultSet) * 2);
-    memory_search->results.batches[1].sets[0].type = MemoryTypeI8;
-    memory_search->results.batches[1].sets[0].results_8 = malloc(sizeof(MemorySearchResult8) * 1);
-    memory_search->results.batches[1].sets[0].results_8[0].address = 0x123456781234;
-    memory_search->results.batches[1].sets[0].results_8[0].i8 = -42;
-    memory_search->results.batches[1].sets[0].results_count = 1;
-    memory_search->results.batches[1].sets[1].type = MemoryTypeF64;
-    memory_search->results.batches[1].sets[1].results_64 =
-        malloc(sizeof(MemorySearchResult64) * 1);
-    memory_search->results.batches[1].sets[1].results_64[0].address = 0x112233445566;
-    memory_search->results.batches[1].sets[1].results_64[0].f64 = -69.4200000000;
-    memory_search->results.batches[1].sets[1].results_count = 1;
-    memory_search->results.batches[1].sets_count = 2;
-    memory_search->results.batches[1].total_results_count = 2;
-    memory_search->results.batches_count = 2;
-    memory_search->results.current_results_count = 2;
 }
 
 bool memory_search_process_is_attached(MemorySearch* memory_search) {
