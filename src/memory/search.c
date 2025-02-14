@@ -145,7 +145,7 @@ static size_t memory_search_get_result_size(MemoryType type) {
     unreachable();
 }
 
-static bool memory_search_should_process_type(MemoryType param, MemoryType type) {
+static bool memory_search_should_process_type(MemoryType param, flt128_t value, MemoryType type) {
     if(type >= MemoryTypeMAX) {
         return false;
     }
@@ -155,20 +155,60 @@ static bool memory_search_should_process_type(MemoryType param, MemoryType type)
     }
 
     if(type == param) {
-        return true;
+        switch(type) {
+        case MemoryTypeU8:
+            return value >= 0 && value <= UINT8_MAX;
+        case MemoryTypeU16:
+            return value >= 0 && value <= UINT16_MAX;
+        case MemoryTypeU32:
+            return value >= 0 && value <= UINT32_MAX;
+        case MemoryTypeU64:
+            return value >= 0 && value <= UINT64_MAX;
+        case MemoryTypeI8:
+            return value >= INT8_MIN && value <= INT8_MAX;
+        case MemoryTypeI16:
+            return value >= INT16_MIN && value <= INT16_MAX;
+        case MemoryTypeI32:
+            return value >= INT32_MIN && value <= INT32_MAX;
+        case MemoryTypeI64:
+            return value >= INT64_MIN && value <= INT64_MAX;
+        case MemoryTypeF32:
+            return value >= FLT_MIN && value <= FLT_MAX;
+        case MemoryTypeF64:
+            return value >= DBL_MIN && value <= DBL_MAX;
+        case MemoryTypeF128:
+            return value >= LDBL_MIN && value <= LDBL_MAX;
+        default:
+            unreachable();
+        }
     }
 
     switch(param) {
     case MemoryTypeUnsigned:
-        return type < MemoryTypeUnsigned;
+        if(type < MemoryTypeUnsigned) {
+            return memory_search_should_process_type(type, value, type);
+        }
+        return false;
     case MemoryTypeSigned:
-        return type < MemoryTypeSigned && type > MemoryTypeUnsigned;
+        if(type < MemoryTypeSigned && type > MemoryTypeUnsigned) {
+            return memory_search_should_process_type(type, value, type);
+        }
+        return false;
     case MemoryTypeInteger:
-        return type < MemoryTypeInteger;
+        if(type < MemoryTypeInteger) {
+            return memory_search_should_process_type(type, value, type);
+        }
+        return false;
     case MemoryTypeFloating:
-        return type < MemoryTypeFloating && type > MemoryTypeInteger;
+        if(type < MemoryTypeFloating && type > MemoryTypeInteger) {
+            return memory_search_should_process_type(type, value, type);
+        }
+        return false;
     case MemoryTypeNumber:
-        return type < MemoryTypeNumber;
+        if(type < MemoryTypeNumber) {
+            return memory_search_should_process_type(type, value, type);
+        }
+        return false;
     default:
         unreachable();
     }
@@ -205,8 +245,10 @@ static void* memory_search_begin_callback(void* context) {
     size_t capacities[MemoryTypeMAX];
     size_t max_type_size = 0;
 
+    flt128_t value = memory_search->params.value;
+
     for(MemoryType type = 0; type < MemoryTypeMAX; type++) {
-        if(!memory_search_should_process_type(memory_search->params.type, type)) {
+        if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
             continue;
         }
         MemorySearchResultSet* set = &batch->sets[batch->sets_count];
