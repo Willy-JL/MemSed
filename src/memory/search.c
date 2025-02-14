@@ -261,13 +261,13 @@ static void* memory_search_begin_callback(void* context) {
     int16_t value_i16 = value;
     int32_t value_i32 = value;
     int64_t value_i64 = value;
-    flt32_t value_f32 = value;
-    flt64_t value_f64 = value;
-    flt128_t value_f128 = value;
     flt128_t precision = memory_search->params.precision;
-    flt32_t precision_f32 = precision;
-    flt64_t precision_f64 = precision;
-    flt128_t precision_f128 = precision;
+    flt32_t value_f32_min = value - precision;
+    flt64_t value_f64_min = value - precision;
+    flt128_t value_f128_min = value - precision;
+    flt32_t value_f32_max = value + precision;
+    flt64_t value_f64_max = value + precision;
+    flt128_t value_f128_max = value + precision;
 
     for(MemoryType type = 0; type < MemoryTypeMAX; type++) {
         if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
@@ -418,7 +418,8 @@ static void* memory_search_begin_callback(void* context) {
                     if(chunk_avail < 4) {
                         continue;
                     }
-                    if(ABS(*(flt32_t*)chunk_cur - value_f32) < precision_f32) {
+                    if(isnanf(*(flt32_t*)chunk_cur) || *(flt32_t*)chunk_cur < (value_f32_min) ||
+                       *(flt32_t*)chunk_cur > (value_f32_max)) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -430,7 +431,8 @@ static void* memory_search_begin_callback(void* context) {
                     if(chunk_avail < 8) {
                         continue;
                     }
-                    if(ABS(*(flt64_t*)chunk_cur - value_f64) < precision_f64) {
+                    if(isnan(*(flt64_t*)chunk_cur) || *(flt64_t*)chunk_cur < (value_f64_min) ||
+                       *(flt64_t*)chunk_cur > (value_f64_max)) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
@@ -442,7 +444,8 @@ static void* memory_search_begin_callback(void* context) {
                     if(chunk_avail < 16) {
                         continue;
                     }
-                    if(ABS(*(flt128_t*)chunk_cur - value_f128) < precision_f128) {
+                    if(isnanl(*(flt128_t*)chunk_cur) || *(flt128_t*)chunk_cur < (value_f128_min) ||
+                       *(flt128_t*)chunk_cur > (value_f128_max)) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
