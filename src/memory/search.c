@@ -231,6 +231,13 @@ static void memory_search_consolidate_results(void* context) {
     memory_search->results.current_results_count = batch->total_results_count;
 }
 
+static void memory_search_extend_results(MemorySearchResultSet* set, size_t* capacity) {
+    if(set->results_count == *capacity) {
+        *capacity *= 2;
+        set->results = realloc(set->results, memory_search_get_result_size(set->type) * *capacity);
+    }
+}
+
 static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
 
@@ -246,6 +253,21 @@ static void* memory_search_begin_callback(void* context) {
     size_t max_type_size = 0;
 
     flt128_t value = memory_search->params.value;
+    uint8_t value_u8 = value;
+    uint16_t value_u16 = value;
+    uint32_t value_u32 = value;
+    uint64_t value_u64 = value;
+    int8_t value_i8 = value;
+    int16_t value_i16 = value;
+    int32_t value_i32 = value;
+    int64_t value_i64 = value;
+    flt32_t value_f32 = value;
+    flt64_t value_f64 = value;
+    flt128_t value_f128 = value;
+    flt128_t precision = memory_search->params.precision;
+    flt32_t precision_f32 = precision;
+    flt64_t precision_f64 = precision;
+    flt128_t precision_f128 = precision;
 
     for(MemoryType type = 0; type < MemoryTypeMAX; type++) {
         if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
@@ -293,9 +315,145 @@ static void* memory_search_begin_callback(void* context) {
             }
             size_t chunk_avail = chunk_len - (addr - chunk_addr);
 
-            // FIXME: check values and save results
-            UNUSED(chunk_cur);
-            UNUSED(chunk_avail);
+            for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
+                MemorySearchResultSet* set = &batch->sets[set_i];
+                switch(set->type) {
+                case MemoryTypeU8:
+                    if(chunk_avail < 1) {
+                        continue;
+                    }
+                    if(*(uint8_t*)chunk_cur != value_u8) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_8[set->results_count].address = addr;
+                    set->results_8[set->results_count].u8 = *(uint8_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeU16:
+                    if(chunk_avail < 2) {
+                        continue;
+                    }
+                    if(*(uint16_t*)chunk_cur != value_u16) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_16[set->results_count].address = addr;
+                    set->results_16[set->results_count].u16 = *(uint16_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeU32:
+                    if(chunk_avail < 4) {
+                        continue;
+                    }
+                    if(*(uint32_t*)chunk_cur != value_u32) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].u32 = *(uint32_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeU64:
+                    if(chunk_avail < 8) {
+                        continue;
+                    }
+                    if(*(uint64_t*)chunk_cur != value_u64) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].u64 = *(uint64_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeI8:
+                    if(chunk_avail < 1) {
+                        continue;
+                    }
+                    if(*(int8_t*)chunk_cur != value_i8) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_8[set->results_count].address = addr;
+                    set->results_8[set->results_count].i8 = *(int8_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeI16:
+                    if(chunk_avail < 2) {
+                        continue;
+                    }
+                    if(*(int16_t*)chunk_cur != value_i16) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_16[set->results_count].address = addr;
+                    set->results_16[set->results_count].i16 = *(int16_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeI32:
+                    if(chunk_avail < 4) {
+                        continue;
+                    }
+                    if(*(int32_t*)chunk_cur != value_i32) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].i32 = *(int32_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeI64:
+                    if(chunk_avail < 8) {
+                        continue;
+                    }
+                    if(*(int64_t*)chunk_cur != value_i64) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].i64 = *(int64_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeF32:
+                    if(chunk_avail < 4) {
+                        continue;
+                    }
+                    if(ABS(*(flt32_t*)chunk_cur - value_f32) < precision_f32) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].f32 = *(flt32_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeF64:
+                    if(chunk_avail < 8) {
+                        continue;
+                    }
+                    if(ABS(*(flt64_t*)chunk_cur - value_f64) < precision_f64) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].f64 = *(flt64_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                case MemoryTypeF128:
+                    if(chunk_avail < 16) {
+                        continue;
+                    }
+                    if(ABS(*(flt128_t*)chunk_cur - value_f128) < precision_f128) {
+                        continue;
+                    }
+                    memory_search_extend_results(set, &capacities[set_i]);
+                    set->results_128[set->results_count].address = addr;
+                    set->results_128[set->results_count].f128 = *(flt128_t*)chunk_cur;
+                    set->results_count++;
+                    break;
+                default:
+                    unreachable();
+                }
+            }
 
             addr += alignment;
             chunk_cur += alignment;
