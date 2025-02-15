@@ -1,9 +1,16 @@
-- Actually implement the memory searching and editing
+- Finalize basic scratchpad functionality
+  - Allow editing values
+  - Save descriptions between frames
+  - Make the active checkbox work
 - Add more search options:
+  - Memory region flags (write, execute, ...)
   - Endianness
-  - Memory flags (write, execute, ...)
   - Pause process?
   - Boundaries?
   - More value options?
+- Show file path and offset for addresses in file-mapped memory regions
+- Confirm dialog when detaching process with non-empty results/scratchpad
+- Add keyboard shortcuts
+- Optimize process picker with list clipper
 - Figure out SDL segfault when building as static exe
 - Sleep GUI when inactive/minimized
