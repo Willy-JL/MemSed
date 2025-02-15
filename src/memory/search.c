@@ -791,6 +791,9 @@ static void* memory_search_update_callback(void* context) {
 }
 
 void memory_search_begin(MemorySearch* memory_search) {
+    if(!memory_search_process_is_attached(memory_search)) {
+        return;
+    }
     if(memory_search_is_searching(memory_search)) {
         return;
     }
