@@ -5,6 +5,7 @@ const char* ok = mdi_check " Ok";
 const char* cancel = mdi_cancel " Cancel";
 const char* attach_process = mdi_application_import " Attach Process";
 const char* detach_process = mdi_exit_run " Detach Process";
+const char* add_to_scratchpad = mdi_plus_box_multiple " Add to Scratchpad";
 const char* first_search = mdi_magnify_plus " First Search";
 const char* next_search = mdi_magnify_expand " Next Search";
 const char* undo_search = mdi_magnify_minus " Undo Search";
@@ -253,6 +254,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                     }
                     size_t result_i = clip_i - sets_progress;
+                    MemoryAddress address = memory_search_get_result_address(set, result_i);
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
                     ImGui_TableNextRow();
@@ -271,7 +273,6 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     if(prev_set == NULL) {
                         ImGui_TextDisabled("N/A");
                     } else {
-                        MemoryAddress address = memory_search_get_result_address(set, result_i);
                         for(size_t prev_i = 0; prev_i < prev_set->results_count; prev_i++) {
                             if(memory_search_get_result_address(prev_set, prev_i) == address) {
                                 display = memory_search_get_result_display(prev_set, prev_i);
@@ -308,9 +309,35 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         ImGuiSelectableFlags_SpanAllColumns);
                     if(ImGui_BeginPopupContextItem()) {
                         ImGui_PushFont(gui->fonts.base);
+                        if(ImGui_Selectable(add_to_scratchpad)) {
+                            if(!is_selected) {
+                                memory_search_scratchpad_add(
+                                    gui->memory_search,
+                                    address,
+                                    set->type);
+                            } else {
+                                for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                    i++) {
+                                    size_t add_i = selected[i];
+                                    size_t add_set_i = 0;
+                                    while(add_i > batch->sets[add_set_i].results_count) {
+                                        add_i -= batch->sets[add_set_i].results_count;
+                                        add_set_i++;
+                                    }
+                                    MemorySearchResultSet* add_set = &batch->sets[add_set_i];
+                                    MemoryAddress add_addr =
+                                        memory_search_get_result_address(add_set, add_i);
+                                    memory_search_scratchpad_add(
+                                        gui->memory_search,
+                                        add_addr,
+                                        add_set->type);
+                                }
+                            }
+                        }
                         ImGui_PopFont();
                         ImGui_EndPopup();
                     } else if(ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                        memory_search_scratchpad_add(gui->memory_search, address, set->type);
                         selected[0] = -1;
                         last_selected = -1;
                     } else if(ImGui_IsItemClicked()) {

@@ -18,6 +18,7 @@ struct MemorySearch {
     Thread* search_thread;
     flt32_t search_progress;
     MemorySearchResults results;
+    MemorySearchScratchpad scratchpad;
 };
 
 MemorySearch* memory_search_init() {
@@ -36,6 +37,8 @@ MemorySearch* memory_search_init() {
     memory_search->results.current_results_count = 0;
     memory_search->results.batches_count = 0;
     memory_search->results.batches = NULL;
+    memory_search->scratchpad.items_count = 0;
+    memory_search->scratchpad.items = NULL;
     return memory_search;
 }
 
@@ -886,6 +889,17 @@ void memory_search_reset(MemorySearch* memory_search) {
         }
         free(batches);
     }
+
+    size_t items_count = memory_search->scratchpad.items_count;
+    MemorySearchScratchpadItem* items = memory_search->scratchpad.items;
+    memory_search->scratchpad.items_count = 0;
+    memory_search->scratchpad.items = NULL;
+    if(items_count >= 1) {
+        for(size_t item_i = 0; item_i < items_count; item_i++) {
+            // FIXME: extra cleanup if needed when scratchpad is fully implemented
+        }
+        free(items);
+    }
 }
 
 MemorySearchResults* memory_search_get_results(MemorySearch* memory_search) {
@@ -1084,6 +1098,83 @@ MemorySearchResultDisplay
     snprintf(display.address_str, sizeof(display.address_str), "0x%" PRIXPTR, (uintptr_t)address);
 
     return display;
+}
+
+void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type) {
+    memory_search_stop_update(memory_search);
+    if(!memory_search_process_is_attached(memory_search)) {
+        return;
+    }
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+
+    MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
+    if(scratchpad->items_count > 0) {
+        for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
+            MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
+            if(item->address == addr && item->type == type) {
+                return;
+            }
+        }
+        scratchpad->items = realloc(
+            scratchpad->items,
+            sizeof(MemorySearchScratchpadItem) * (scratchpad->items_count + 1));
+    } else {
+        scratchpad->items = malloc(sizeof(MemorySearchScratchpadItem) * 1);
+    }
+
+    MemorySearchScratchpadItem* item = &scratchpad->items[scratchpad->items_count];
+    item->address = addr;
+    item->type = type;
+    size_t size = memory_type_get_size(type);
+    if(process_handle_read(memory_search->handle, addr, &item->value, size) != size) {
+        memset(&item->value, 0, size);
+    }
+    scratchpad->items_count++;
+}
+
+MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search) {
+    return &memory_search->scratchpad;
+}
+
+void memory_search_scratchpad_del(MemorySearch* memory_search, MemoryAddress addr, MemoryType type) {
+    memory_search_stop_update(memory_search);
+    if(!memory_search_process_is_attached(memory_search)) {
+        return;
+    }
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+
+    MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
+    if(scratchpad->items_count == 0) {
+        return;
+    }
+    size_t item_i;
+    for(item_i = 0; item_i < scratchpad->items_count; item_i++) {
+        MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
+        if(item->address == addr && item->type == type) {
+            break;
+        }
+    }
+    if(item_i == scratchpad->items_count) {
+        return;
+    }
+
+    scratchpad->items_count--;
+    if(scratchpad->items_count == 0) {
+        free(scratchpad->items);
+        scratchpad->items = NULL;
+    } else {
+        memmove(
+            &scratchpad->items[item_i],
+            &scratchpad->items[item_i + 1],
+            sizeof(MemorySearchScratchpadItem) * (scratchpad->items_count - item_i));
+        scratchpad->items = realloc(
+            scratchpad->items,
+            sizeof(MemorySearchScratchpadItem) * scratchpad->items_count);
+    }
 }
 
 void memory_search_tick(MemorySearch* memory_search) {

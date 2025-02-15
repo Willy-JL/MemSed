@@ -84,6 +84,29 @@ typedef struct {
     flt128_t precision;
 } MemorySearchParams;
 
+typedef struct __attribute__((packed)) {
+    MemoryAddress address;
+    MemoryType type;
+    union {
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+        int8_t i8;
+        int16_t i16;
+        int32_t i32;
+        int64_t i64;
+        flt32_t f32;
+        flt64_t f64;
+        flt128_t f128;
+    } value;
+} MemorySearchScratchpadItem;
+
+typedef struct {
+    size_t items_count;
+    MemorySearchScratchpadItem* items;
+} MemorySearchScratchpad;
+
 typedef struct MemorySearch MemorySearch;
 
 MemorySearch* memory_search_init();
@@ -105,5 +128,8 @@ MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
 MemorySearchResultDisplay
     memory_search_get_display(MemoryAddress address, MemoryType type, void* value);
+void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
+MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search);
+void memory_search_scratchpad_del(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
 void memory_search_tick(MemorySearch* memory_search);
 void memory_search_free(MemorySearch* memory_search);
