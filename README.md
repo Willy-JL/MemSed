@@ -4,8 +4,8 @@ MEMory Search and EDit for Linux
 Heavily inspired by basic Cheat Engine workflow (search value, make value change, search new value, save address and modify it)
 
 > [!WARNING]
-> This project is still a work in progress
-> It should work for the most part, but adjust your expectations accordingly
+> This project is still a work in progress \
+> It should work for the most part, but adjust your expectations accordingly \
 > Check [TODO.md](TODO.md) for things yet to be implemented
 
 ## System Requirements
