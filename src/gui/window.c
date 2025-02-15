@@ -171,7 +171,11 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
            size,
            0.0f)) {
         ImGui_PushFont(gui->fonts.mono);
-        ImGui_TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed);
+        ImGui_TableSetupColumnEx(
+            "Address",
+            ImGuiTableColumnFlags_WidthFixed,
+            ImGui_CalcTextSize("0x1122334455667788").x,
+            0);
         ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupColumn("Previous", ImGuiTableColumnFlags_WidthStretch);
