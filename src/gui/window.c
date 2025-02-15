@@ -6,6 +6,7 @@ const char* cancel = mdi_cancel " Cancel";
 const char* attach_process = mdi_application_import " Attach Process";
 const char* detach_process = mdi_exit_run " Detach Process";
 const char* add_to_scratchpad = mdi_plus_box_multiple " Add to Scratchpad";
+const char* remove_from_scratchpad = mdi_minus_box_multiple " Remove from Scratchpad";
 const char* first_search = mdi_magnify_plus " First Search";
 const char* next_search = mdi_magnify_expand " Next Search";
 const char* undo_search = mdi_magnify_minus " Undo Search";
@@ -572,47 +573,185 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 }
 
 static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
+    ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
     if(ImGui_BeginTableEx(
            "###scratchpad",
            5,
            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY,
            size,
            0.0f)) {
+        ImGui_PushFont(gui->fonts.mono);
         ImGui_TableSetupColumn("Active", ImGuiTableColumnFlags_WidthFixed);
-        ImGui_TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed);
-        ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthStretch);
+        ImGui_TableSetupColumnEx(
+            "Address",
+            ImGuiTableColumnFlags_WidthFixed,
+            ImGui_CalcTextSize("0x1122334455667788").x,
+            0);
+        ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
         ImGui_TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+        ImGui_TableSetupScrollFreeze(0, 1);
+        ImGui_PushFont(gui->fonts.base);
         ImGui_TableHeadersRow();
-        // FIXME: use data from memory search
-        // FIXME: use clipper
-        const ImVec2* example_addresses[] = {&size, &gui->prev_size, &gui->io->DisplaySize};
-        for(size_t i = 0; i < COUNT_OF(example_addresses); i++) {
-            ImGui_PushIDInt(i);
-            ImGui_TableNextRow();
-            // Active
-            ImGui_TableNextColumn();
-            bool x = false;
-            ImGui_Checkbox("###active", &x);
-            // Address
-            ImGui_TableNextColumn();
-            ImGui_Text("0x%" PRIXPTR, (uintptr_t)example_addresses[i]);
-            // Type
-            ImGui_TableNextColumn();
-            ImGui_Text("Example");
-            // Description
-            ImGui_TableNextColumn();
-            char y[20] = "";
-            ImGui_SetNextItemWidth(-FLT_MIN);
-            ImGui_InputText("###description", y, sizeof(y), ImGuiInputTextFlags_None);
-            // FIXME: handle different value types
-            // Value
-            ImGui_TableNextColumn();
-            ImGui_Text("%f", example_addresses[i]->x);
-            ImGui_PopID();
+        ImGui_PopFont();
+        MemorySearchScratchpad* scratchpad = memory_search_get_scratchpad(gui->memory_search);
+        if(scratchpad->items_count >= 1) {
+            ImGuiListClipper clipper = {0};
+            ImGuiListClipper_Begin(
+                &clipper,
+                scratchpad->items_count,
+                ImGui_GetFrameHeightWithSpacing());
+            while(ImGuiListClipper_Step(&clipper)) {
+                for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
+                    MemorySearchScratchpadItem* item = &scratchpad->items[clip_i];
+                    ImGui_PushIDInt(clip_i);
+                    MemorySearchResultDisplay display =
+                        memory_search_get_display(item->address, item->type, &item->value);
+                    ImGui_TableNextRow();
+                    // Active
+                    // FIXME: save checkbox state, keep applying the value
+                    ImGui_TableNextColumn();
+                    bool x = false;
+                    ImGui_Checkbox("###active", &x);
+                    // Address
+                    // FIXME: if address is in region mapped from file, show filename+offset
+                    ImGui_TableNextColumn();
+                    ImGui_TextUnformatted(display.address_str);
+                    // Type
+                    ImGui_TableNextColumn();
+                    ImGui_TextUnformatted(memory_type_get_short_name(item->type));
+                    // Description
+                    // FIXME: store description in scratchpad
+                    ImGui_TableNextColumn();
+                    char y[20] = "";
+                    ImGui_SetNextItemWidth(-FLT_MIN);
+                    ImGui_InputText("###description", y, sizeof(y), ImGuiInputTextFlags_None);
+                    // Value
+                    ImGui_TableNextColumn();
+                    ImGui_TextUnformatted(display.value_str);
+                    // Hitbox
+                    ImGui_SameLine();
+                    bool is_selected = false;
+                    static size_t last_total = 0;
+                    static int32_t last_selected = -1;
+                    static int32_t selected[UINT8_MAX] = {-1};
+                    if(last_total != scratchpad->items_count) {
+                        selected[0] = -1;
+                        last_selected = -1;
+                        last_total = scratchpad->items_count;
+                    }
+                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                        if(selected[i] == clip_i) {
+                            is_selected = true;
+                            break;
+                        }
+                    }
+                    ImGui_SetCursorPosY(ImGui_GetCursorPosY() - gui->style->FramePadding.y);
+                    ImVec4 hover_col = gui->style->Colors[ImGuiCol_HeaderHovered];
+                    ImVec4 active_col = gui->style->Colors[ImGuiCol_HeaderActive];
+                    hover_col.w *= 0.25;
+                    active_col.w *= 0.25;
+                    ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
+                    ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
+                    ImGui_SelectableBoolPtrEx(
+                        "###hitbox",
+                        &is_selected,
+                        ImGuiSelectableFlags_SpanAllColumns,
+                        (ImVec2){0.0f, ImGui_GetFrameHeight()});
+                    if(ImGui_BeginPopupContextItem()) {
+                        ImGui_PushFont(gui->fonts.base);
+                        if(ImGui_Selectable(remove_from_scratchpad)) {
+                            if(!is_selected) {
+                                memory_search_scratchpad_del(
+                                    gui->memory_search,
+                                    item->address,
+                                    item->type);
+                            } else {
+                                for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                    i++) {
+                                    MemorySearchScratchpadItem* del_item =
+                                        &scratchpad->items[selected[i]];
+                                    memory_search_scratchpad_del(
+                                        gui->memory_search,
+                                        del_item->address,
+                                        del_item->type);
+                                }
+                            }
+                        }
+                        ImGui_PopFont();
+                        ImGui_EndPopup();
+                    } else if(ImGui_IsItemClicked()) {
+                        uint8_t next_i = 0;
+                        while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
+                            next_i++;
+                        }
+                        if(ImGui_IsKeyDown(ImGuiMod_Shift)) {
+                            if(last_selected != -1) {
+                                int32_t range_min = clip_i > last_selected ? last_selected :
+                                                                             clip_i;
+                                int32_t range_max = clip_i > last_selected ? clip_i :
+                                                                             last_selected;
+                                for(int32_t range_i = range_min;
+                                    range_i <= range_max && next_i != COUNT_OF(selected);
+                                    range_i++) {
+                                    bool already_selected = false;
+                                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                        i++) {
+                                        if(selected[i] == range_i) {
+                                            already_selected = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!already_selected) {
+                                        selected[next_i++] = range_i;
+                                        if(next_i != COUNT_OF(selected)) {
+                                            selected[next_i] = -1;
+                                        }
+                                    }
+                                }
+                            }
+                        } else if(ImGui_IsKeyDown(ImGuiMod_Ctrl)) {
+                            if(is_selected) {
+                                for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                    i++) {
+                                    if(selected[i] == clip_i) {
+                                        if(i == COUNT_OF(selected) - 1) {
+                                            selected[i] = -1;
+                                        } else {
+                                            memmove(
+                                                &selected[i],
+                                                &selected[i + 1],
+                                                sizeof(*selected) * (COUNT_OF(selected) - i - 1));
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else if(next_i != COUNT_OF(selected)) {
+                                selected[next_i] = clip_i;
+                                if(next_i + 1 != COUNT_OF(selected)) {
+                                    selected[next_i + 1] = -1;
+                                }
+                            }
+                        } else {
+                            if(selected[0] != -1) {
+                                selected[0] = -1;
+                            } else {
+                                selected[0] = clip_i;
+                                selected[1] = -1;
+                            }
+                        }
+                        last_selected = clip_i;
+                    }
+                    ImGui_PopStyleColorEx(2);
+                    ImGui_PopID();
+                }
+            }
         }
+
+        ImGui_PopFont();
         ImGui_EndTable();
     }
+    ImGui_EndDisabled();
 }
 
 void gui_window_draw(Gui* gui) {
