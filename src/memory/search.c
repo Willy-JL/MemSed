@@ -696,8 +696,6 @@ static void* memory_search_update_callback(void* context) {
         max_type_size = MAX(max_type_size, memory_type_get_size(type));
     }
 
-    void* value_buf = malloc(max_type_size);
-    thread_self_push_cancel_cleanup(free, value_buf);
     ProcessHandle* handle = memory_search->handle;
     for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
         MemorySearchResultSet* set = &batch->sets[set_i];
@@ -708,90 +706,79 @@ static void* memory_search_update_callback(void* context) {
             switch(set->type) {
             case MemoryTypeU8: {
                 MemorySearchResult8* result = &set->results_8[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 1) < 1) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->u8, 1) < 1) {
+                    memset(&result->u8, 0, 1);
                 }
-                result->u8 = *(uint8_t*)value_buf;
                 break;
             }
             case MemoryTypeU16: {
                 MemorySearchResult16* result = &set->results_16[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 2) < 2) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->u16, 2) < 2) {
+                    memset(&result->u16, 0, 2);
                 }
-                result->u16 = *(uint16_t*)value_buf;
                 break;
             }
             case MemoryTypeU32: {
                 MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 4) < 4) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->u32, 4) < 4) {
+                    memset(&result->u32, 0, 4);
                 }
-                result->u32 = *(uint32_t*)value_buf;
                 break;
             }
             case MemoryTypeU64: {
                 MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 8) < 8) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->u64, 8) < 8) {
+                    memset(&result->u64, 0, 8);
                 }
-                result->u64 = *(uint64_t*)value_buf;
                 break;
             }
             case MemoryTypeI8: {
                 MemorySearchResult8* result = &set->results_8[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 1) < 1) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->i8, 1) < 1) {
+                    memset(&result->i8, 0, 1);
                 }
-                result->i8 = *(int8_t*)value_buf;
                 break;
             }
             case MemoryTypeI16: {
                 MemorySearchResult16* result = &set->results_16[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 2) < 2) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->i16, 2) < 2) {
+                    memset(&result->i16, 0, 2);
                 }
-                result->i16 = *(int16_t*)value_buf;
                 break;
             }
             case MemoryTypeI32: {
                 MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 4) < 4) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->i32, 4) < 4) {
+                    memset(&result->i32, 0, 4);
                 }
-                result->i32 = *(int32_t*)value_buf;
                 break;
             }
             case MemoryTypeI64: {
                 MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 8) < 8) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->i64, 8) < 8) {
+                    memset(&result->i64, 0, 8);
                 }
-                result->i64 = *(int64_t*)value_buf;
                 break;
             }
             case MemoryTypeF32: {
                 MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 4) < 4) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->f32, 4) < 4) {
+                    memset(&result->f32, 0, 4);
                 }
-                result->f32 = *(flt32_t*)value_buf;
                 break;
             }
             case MemoryTypeF64: {
                 MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 8) < 8) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->f64, 8) < 8) {
+                    memset(&result->f64, 0, 8);
                 }
-                result->f64 = *(flt64_t*)value_buf;
                 break;
             }
             case MemoryTypeF128: {
                 MemorySearchResult128* result = &set->results_128[result_i];
-                if(process_handle_read(handle, result->address, value_buf, 16) < 16) {
-                    continue;
+                if(process_handle_read(handle, result->address, &result->f128, 16) < 16) {
+                    memset(&result->f128, 0, 16);
                 }
-                result->f128 = *(flt128_t*)value_buf;
                 break;
             }
             default:
@@ -799,7 +786,6 @@ static void* memory_search_update_callback(void* context) {
             }
         }
     }
-    thread_self_pop_cancel_cleanup(true); // free(value_buf)
 
     return NULL;
 }
