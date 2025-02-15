@@ -498,7 +498,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_TableNextRow();
             ImGui_TableNextColumn();
             ImGui_AlignTextToFramePadding();
-            ImGui_Text("Precision:");
+            ImGui_Text("Float ± :");
             ImGui_TableNextColumn();
             flt32_t precision_alignment_width =
                 (ImGui_GetContentRegionAvail().x - ImGui_CalcTextSize("Alignment:").x -
