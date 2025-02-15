@@ -790,6 +790,17 @@ static void* memory_search_update_callback(void* context) {
         }
     }
 
+    MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
+    for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
+        // FIXME: check if these are slowing down the search and make it faster
+        thread_self_quit_if_canceled();
+        MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
+        size_t size = memory_type_get_size(item->type);
+        if(process_handle_read(memory_search->handle, item->address, &item->value, size) != size) {
+            memset(&item->value, 0, size);
+        }
+    }
+
     return NULL;
 }
 
