@@ -958,9 +958,6 @@ MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_
 }
 
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
-    MemorySearchResultDisplay display;
-    MemoryAddress address;
-
     switch(set->type) {
     case MemoryTypeUnsigned:
     case MemoryTypeSigned:
@@ -972,68 +969,111 @@ MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet
 
     case MemoryTypeU8: {
         MemorySearchResult8* result = &set->results_8[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%hhu", result->u8);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->u8);
     }
     case MemoryTypeU16: {
         MemorySearchResult16* result = &set->results_16[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%hu", result->u16);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->u16);
     }
     case MemoryTypeU32: {
         MemorySearchResult32* result = &set->results_32[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%u", result->u32);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->u32);
     }
     case MemoryTypeU64: {
         MemorySearchResult64* result = &set->results_64[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%lu", result->u64);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->u64);
     }
     case MemoryTypeI8: {
         MemorySearchResult8* result = &set->results_8[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%hhi", result->i8);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->i8);
     }
     case MemoryTypeI16: {
         MemorySearchResult16* result = &set->results_16[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%hi", result->i16);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->i16);
     }
     case MemoryTypeI32: {
         MemorySearchResult32* result = &set->results_32[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%i", result->i32);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->i32);
     }
     case MemoryTypeI64: {
         MemorySearchResult64* result = &set->results_64[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%li", result->i64);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->i64);
     }
     case MemoryTypeF32: {
         MemorySearchResult32* result = &set->results_32[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%.*g", FLT_DIG, result->f32);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->f32);
     }
     case MemoryTypeF64: {
         MemorySearchResult64* result = &set->results_64[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%.*lg", DBL_DIG, result->f64);
-        break;
+        return memory_search_get_display(result->address, set->type, &result->f64);
     }
     case MemoryTypeF128: {
         MemorySearchResult128* result = &set->results_128[i];
-        address = result->address;
-        snprintf(display.value_str, sizeof(display.value_str), "%.*Lg", LDBL_DIG, result->f128);
+        return memory_search_get_display(result->address, set->type, &result->f128);
+    }
+    }
+}
+
+MemorySearchResultDisplay
+    memory_search_get_display(MemoryAddress address, MemoryType type, void* value) {
+    MemorySearchResultDisplay display;
+
+    switch(type) {
+    case MemoryTypeUnsigned:
+    case MemoryTypeSigned:
+    case MemoryTypeInteger:
+    case MemoryTypeFloating:
+    case MemoryTypeNumber:
+    case MemoryTypeMAX:
+        unreachable();
+
+    case MemoryTypeU8: {
+        snprintf(display.value_str, sizeof(display.value_str), "%hhu", *(uint8_t*)value);
+        break;
+    }
+    case MemoryTypeU16: {
+        snprintf(display.value_str, sizeof(display.value_str), "%hu", *(uint16_t*)value);
+        break;
+    }
+    case MemoryTypeU32: {
+        snprintf(display.value_str, sizeof(display.value_str), "%u", *(uint32_t*)value);
+        break;
+    }
+    case MemoryTypeU64: {
+        snprintf(display.value_str, sizeof(display.value_str), "%lu", *(uint64_t*)value);
+        break;
+    }
+    case MemoryTypeI8: {
+        snprintf(display.value_str, sizeof(display.value_str), "%hhi", *(int8_t*)value);
+        break;
+    }
+    case MemoryTypeI16: {
+        snprintf(display.value_str, sizeof(display.value_str), "%hi", *(int16_t*)value);
+        break;
+    }
+    case MemoryTypeI32: {
+        snprintf(display.value_str, sizeof(display.value_str), "%i", *(int32_t*)value);
+        break;
+    }
+    case MemoryTypeI64: {
+        snprintf(display.value_str, sizeof(display.value_str), "%li", *(int64_t*)value);
+        break;
+    }
+    case MemoryTypeF32: {
+        snprintf(display.value_str, sizeof(display.value_str), "%.*g", FLT_DIG, *(flt32_t*)value);
+        break;
+    }
+    case MemoryTypeF64: {
+        snprintf(display.value_str, sizeof(display.value_str), "%.*lg", DBL_DIG, *(flt64_t*)value);
+        break;
+    }
+    case MemoryTypeF128: {
+        snprintf(
+            display.value_str,
+            sizeof(display.value_str),
+            "%.*Lg",
+            LDBL_DIG,
+            *(flt128_t*)value);
         break;
     }
     }
