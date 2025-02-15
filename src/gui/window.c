@@ -231,6 +231,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             MemorySearchResultSet* prev_set = (void*)-1;
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
+                    ImGui_PushIDInt(clip_i);
                     while(clip_i - sets_progress >= set->results_count) {
                         sets_progress += set->results_count;
                         set_i++;
@@ -278,6 +279,104 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             }
                         }
                     }
+                    // Hitbox
+                    ImGui_SameLine();
+                    bool is_selected = false;
+                    static size_t last_total = 0;
+                    static int32_t last_selected = -1;
+                    static int32_t selected[UINT8_MAX] = {-1};
+                    if(last_total != batch->total_results_count) {
+                        selected[0] = -1;
+                        last_selected = -1;
+                        last_total = batch->total_results_count;
+                    }
+                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                        if(selected[i] == clip_i) {
+                            is_selected = true;
+                            break;
+                        }
+                    }
+                    ImVec4 hover_col = gui->style->Colors[ImGuiCol_HeaderHovered];
+                    ImVec4 active_col = gui->style->Colors[ImGuiCol_HeaderActive];
+                    hover_col.w *= 0.25;
+                    active_col.w *= 0.25;
+                    ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
+                    ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
+                    ImGui_SelectableBoolPtr(
+                        "###hitbox",
+                        &is_selected,
+                        ImGuiSelectableFlags_SpanAllColumns);
+                    if(ImGui_BeginPopupContextItem()) {
+                        ImGui_PushFont(gui->fonts.base);
+                        ImGui_PopFont();
+                        ImGui_EndPopup();
+                    } else if(ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                        selected[0] = -1;
+                        last_selected = -1;
+                    } else if(ImGui_IsItemClicked()) {
+                        uint8_t next_i = 0;
+                        while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
+                            next_i++;
+                        }
+                        if(ImGui_IsKeyDown(ImGuiMod_Shift)) {
+                            if(last_selected != -1) {
+                                int32_t range_min = clip_i > last_selected ? last_selected :
+                                                                             clip_i;
+                                int32_t range_max = clip_i > last_selected ? clip_i :
+                                                                             last_selected;
+                                for(int32_t range_i = range_min;
+                                    range_i <= range_max && next_i != COUNT_OF(selected);
+                                    range_i++) {
+                                    bool already_selected = false;
+                                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                        i++) {
+                                        if(selected[i] == range_i) {
+                                            already_selected = true;
+                                            break;
+                                        }
+                                    }
+                                    if(!already_selected) {
+                                        selected[next_i++] = range_i;
+                                        if(next_i != COUNT_OF(selected)) {
+                                            selected[next_i] = -1;
+                                        }
+                                    }
+                                }
+                            }
+                        } else if(ImGui_IsKeyDown(ImGuiMod_Ctrl)) {
+                            if(is_selected) {
+                                for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                    i++) {
+                                    if(selected[i] == clip_i) {
+                                        if(i == COUNT_OF(selected) - 1) {
+                                            selected[i] = -1;
+                                        } else {
+                                            memmove(
+                                                &selected[i],
+                                                &selected[i + 1],
+                                                sizeof(*selected) * (COUNT_OF(selected) - i - 1));
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else if(next_i != COUNT_OF(selected)) {
+                                selected[next_i] = clip_i;
+                                if(next_i + 1 != COUNT_OF(selected)) {
+                                    selected[next_i + 1] = -1;
+                                }
+                            }
+                        } else {
+                            if(selected[0] != -1) {
+                                selected[0] = -1;
+                            } else {
+                                selected[0] = clip_i;
+                                selected[1] = -1;
+                            }
+                        }
+                        last_selected = clip_i;
+                    }
+                    ImGui_PopStyleColorEx(2);
+                    ImGui_PopID();
                 }
             }
         }
