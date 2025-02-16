@@ -12,6 +12,7 @@ typedef struct {
 
 typedef struct __attribute__((packed)) {
     MemoryAddress address;
+    size_t prev_i;
     union {
     } value;
 } MemorySearchResultBase;

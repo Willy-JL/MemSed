@@ -308,6 +308,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_8[set->results_count].base.address = addr;
+                    set->results_8[set->results_count].base.prev_i = -1;
                     set->results_8[set->results_count].u8 = *(uint8_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -320,6 +321,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_16[set->results_count].base.address = addr;
+                    set->results_16[set->results_count].base.prev_i = -1;
                     set->results_16[set->results_count].u16 = *(uint16_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -332,6 +334,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_32[set->results_count].base.address = addr;
+                    set->results_32[set->results_count].base.prev_i = -1;
                     set->results_32[set->results_count].u32 = *(uint32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -344,6 +347,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_64[set->results_count].base.address = addr;
+                    set->results_64[set->results_count].base.prev_i = -1;
                     set->results_64[set->results_count].u64 = *(uint64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -356,6 +360,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_8[set->results_count].base.address = addr;
+                    set->results_8[set->results_count].base.prev_i = -1;
                     set->results_8[set->results_count].i8 = *(int8_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -368,6 +373,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_16[set->results_count].base.address = addr;
+                    set->results_16[set->results_count].base.prev_i = -1;
                     set->results_16[set->results_count].i16 = *(int16_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -380,6 +386,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_32[set->results_count].base.address = addr;
+                    set->results_32[set->results_count].base.prev_i = -1;
                     set->results_32[set->results_count].i32 = *(int32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -392,6 +399,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_64[set->results_count].base.address = addr;
+                    set->results_64[set->results_count].base.prev_i = -1;
                     set->results_64[set->results_count].i64 = *(int64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -405,6 +413,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_32[set->results_count].base.address = addr;
+                    set->results_32[set->results_count].base.prev_i = -1;
                     set->results_32[set->results_count].f32 = *(flt32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -418,6 +427,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_64[set->results_count].base.address = addr;
+                    set->results_64[set->results_count].base.prev_i = -1;
                     set->results_64[set->results_count].f64 = *(flt64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -431,6 +441,7 @@ static void* memory_search_begin_callback(void* context) {
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
                     set->results_128[set->results_count].base.address = addr;
+                    set->results_128[set->results_count].base.prev_i = -1;
                     set->results_128[set->results_count].f128 = *(flt128_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -531,6 +542,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_8[set->results_count].base.address = addr;
+                set->results_8[set->results_count].base.prev_i = result_i;
                 set->results_8[set->results_count].u8 = *(uint8_t*)value_buf;
                 set->results_count++;
                 break;
@@ -544,6 +556,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_16[set->results_count].base.address = addr;
+                set->results_16[set->results_count].base.prev_i = result_i;
                 set->results_16[set->results_count].u16 = *(uint16_t*)value_buf;
                 set->results_count++;
                 break;
@@ -557,6 +570,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].base.address = addr;
+                set->results_32[set->results_count].base.prev_i = result_i;
                 set->results_32[set->results_count].u32 = *(uint32_t*)value_buf;
                 set->results_count++;
                 break;
@@ -570,6 +584,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].base.address = addr;
+                set->results_64[set->results_count].base.prev_i = result_i;
                 set->results_64[set->results_count].u64 = *(uint64_t*)value_buf;
                 set->results_count++;
                 break;
@@ -583,6 +598,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_8[set->results_count].base.address = addr;
+                set->results_8[set->results_count].base.prev_i = result_i;
                 set->results_8[set->results_count].i8 = *(int8_t*)value_buf;
                 set->results_count++;
                 break;
@@ -596,6 +612,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_16[set->results_count].base.address = addr;
+                set->results_16[set->results_count].base.prev_i = result_i;
                 set->results_16[set->results_count].i16 = *(int16_t*)value_buf;
                 set->results_count++;
                 break;
@@ -609,6 +626,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].base.address = addr;
+                set->results_32[set->results_count].base.prev_i = result_i;
                 set->results_32[set->results_count].i32 = *(int32_t*)value_buf;
                 set->results_count++;
                 break;
@@ -622,6 +640,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].base.address = addr;
+                set->results_64[set->results_count].base.prev_i = result_i;
                 set->results_64[set->results_count].i64 = *(int64_t*)value_buf;
                 set->results_count++;
                 break;
@@ -636,6 +655,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_32[set->results_count].base.address = addr;
+                set->results_32[set->results_count].base.prev_i = result_i;
                 set->results_32[set->results_count].f32 = *(flt32_t*)value_buf;
                 set->results_count++;
                 break;
@@ -650,6 +670,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_64[set->results_count].base.address = addr;
+                set->results_64[set->results_count].base.prev_i = result_i;
                 set->results_64[set->results_count].f64 = *(flt64_t*)value_buf;
                 set->results_count++;
                 break;
@@ -664,6 +685,7 @@ static void* memory_search_next_callback(void* context) {
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
                 set->results_128[set->results_count].base.address = addr;
+                set->results_128[set->results_count].base.prev_i = result_i;
                 set->results_128[set->results_count].f128 = *(flt128_t*)value_buf;
                 set->results_count++;
                 break;

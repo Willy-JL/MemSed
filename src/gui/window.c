@@ -262,7 +262,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                     }
                     size_t result_i = clip_i - sets_progress;
-                    MemoryAddress address = memory_search_get_result_base(set, result_i)->address;
+                    MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
                     ImGui_TableNextRow();
@@ -281,14 +281,8 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     if(prev_set == NULL) {
                         ImGui_TextDisabled("N/A");
                     } else {
-                        for(size_t prev_i = 0; prev_i < prev_set->results_count; prev_i++) {
-                            if(memory_search_get_result_base(prev_set, prev_i)->address ==
-                               address) {
-                                display = memory_search_get_result_display(prev_set, prev_i);
-                                ImGui_TextUnformatted(display.value_str);
-                                break;
-                            }
-                        }
+                        display = memory_search_get_result_display(prev_set, base->prev_i);
+                        ImGui_TextUnformatted(display.value_str);
                     }
                     // Hitbox
                     ImGui_SameLine();
@@ -323,7 +317,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             if(!is_selected) {
                                 memory_search_scratchpad_add(
                                     gui->memory_search,
-                                    address,
+                                    base->address,
                                     set->type);
                             } else {
                                 for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
@@ -351,7 +345,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                         ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        memory_search_scratchpad_add(gui->memory_search, address, set->type);
+                        memory_search_scratchpad_add(gui->memory_search, base->address, set->type);
                         selected[0] = -1;
                         last_selected = -1;
                     } else if(ImGui_IsItemClicked()) {
