@@ -70,6 +70,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         ImVec2 avail = ImGui_GetContentRegionAvail();
         avail.y -= ImGui_GetFrameHeightWithSpacing();
         ImGui_PushFont(gui->fonts.mono);
+        bool confirmed = false;
         if(ImGui_BeginListBox("###processes", avail)) {
             // FIXME: use clipper
             char label[257];
@@ -93,6 +94,11 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
                 if(ImGui_SelectableBoolPtr(label, &is_selected, ImGuiSelectableFlags_None)) {
                     selected = process->pid;
                 }
+                if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                   ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                    selected = process->pid;
+                    confirmed = true;
+                }
                 if(is_selected) {
                     any_selected = true;
                     ImGui_SetItemDefaultFocus();
@@ -104,7 +110,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         ImGui_PopFont();
 
         ImGui_BeginDisabled(!any_selected);
-        if(ImGui_Button(ok)) {
+        if(ImGui_Button(ok) || confirmed) {
             process_list_free(list);
             list = NULL;
             memory_search_process_attach(gui->memory_search, selected);
