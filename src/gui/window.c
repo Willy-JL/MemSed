@@ -278,6 +278,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             if(memory_search_get_result_address(prev_set, prev_i) == address) {
                                 display = memory_search_get_result_display(prev_set, prev_i);
                                 ImGui_TextUnformatted(display.value_str);
+                                break;
                             }
                         }
                     }
