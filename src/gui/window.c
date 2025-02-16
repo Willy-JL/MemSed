@@ -262,7 +262,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                     }
                     size_t result_i = clip_i - sets_progress;
-                    MemoryAddress address = memory_search_get_result_address(set, result_i);
+                    MemoryAddress address = memory_search_get_result_base(set, result_i)->address;
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
                     ImGui_TableNextRow();
@@ -282,7 +282,8 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         ImGui_TextDisabled("N/A");
                     } else {
                         for(size_t prev_i = 0; prev_i < prev_set->results_count; prev_i++) {
-                            if(memory_search_get_result_address(prev_set, prev_i) == address) {
+                            if(memory_search_get_result_base(prev_set, prev_i)->address ==
+                               address) {
                                 display = memory_search_get_result_display(prev_set, prev_i);
                                 ImGui_TextUnformatted(display.value_str);
                                 break;
@@ -335,7 +336,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                     }
                                     MemorySearchResultSet* add_set = &batch->sets[add_set_i];
                                     MemoryAddress add_addr =
-                                        memory_search_get_result_address(add_set, add_i);
+                                        memory_search_get_result_base(add_set, add_i)->address;
                                     memory_search_scratchpad_add(
                                         gui->memory_search,
                                         add_addr,

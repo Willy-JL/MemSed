@@ -13,13 +13,19 @@ typedef struct {
 typedef struct __attribute__((packed)) {
     MemoryAddress address;
     union {
+    } value;
+} MemorySearchResultBase;
+
+typedef struct __attribute__((packed)) {
+    MemorySearchResultBase base;
+    union {
         uint8_t u8;
         int8_t i8;
     };
 } MemorySearchResult8;
 
 typedef struct __attribute__((packed)) {
-    MemoryAddress address;
+    MemorySearchResultBase base;
     union {
         uint16_t u16;
         int16_t i16;
@@ -27,7 +33,7 @@ typedef struct __attribute__((packed)) {
 } MemorySearchResult16;
 
 typedef struct __attribute__((packed)) {
-    MemoryAddress address;
+    MemorySearchResultBase base;
     union {
         uint32_t u32;
         int32_t i32;
@@ -36,7 +42,7 @@ typedef struct __attribute__((packed)) {
 } MemorySearchResult32;
 
 typedef struct __attribute__((packed)) {
-    MemoryAddress address;
+    MemorySearchResultBase base;
     union {
         uint64_t u64;
         int64_t i64;
@@ -45,7 +51,7 @@ typedef struct __attribute__((packed)) {
 } MemorySearchResult64;
 
 typedef struct __attribute__((packed)) {
-    MemoryAddress address;
+    MemorySearchResultBase base;
     union {
         flt128_t f128;
     };
@@ -128,7 +134,7 @@ void memory_search_stop(MemorySearch* memory_search);
 void memory_search_undo(MemorySearch* memory_search);
 void memory_search_reset(MemorySearch* memory_search);
 MemorySearchResults* memory_search_get_results(MemorySearch* memory_search);
-MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_t i);
+MemorySearchResultBase* memory_search_get_result_base(MemorySearchResultSet* set, size_t i);
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
 MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search);

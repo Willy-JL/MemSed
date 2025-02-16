@@ -307,7 +307,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_8[set->results_count].address = addr;
+                    set->results_8[set->results_count].base.address = addr;
                     set->results_8[set->results_count].u8 = *(uint8_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -319,7 +319,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_16[set->results_count].address = addr;
+                    set->results_16[set->results_count].base.address = addr;
                     set->results_16[set->results_count].u16 = *(uint16_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -331,7 +331,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].base.address = addr;
                     set->results_32[set->results_count].u32 = *(uint32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -343,7 +343,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].base.address = addr;
                     set->results_64[set->results_count].u64 = *(uint64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -355,7 +355,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_8[set->results_count].address = addr;
+                    set->results_8[set->results_count].base.address = addr;
                     set->results_8[set->results_count].i8 = *(int8_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -367,7 +367,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_16[set->results_count].address = addr;
+                    set->results_16[set->results_count].base.address = addr;
                     set->results_16[set->results_count].i16 = *(int16_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -379,7 +379,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].base.address = addr;
                     set->results_32[set->results_count].i32 = *(int32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -391,7 +391,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].base.address = addr;
                     set->results_64[set->results_count].i64 = *(int64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -404,7 +404,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_32[set->results_count].address = addr;
+                    set->results_32[set->results_count].base.address = addr;
                     set->results_32[set->results_count].f32 = *(flt32_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -417,7 +417,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_64[set->results_count].address = addr;
+                    set->results_64[set->results_count].base.address = addr;
                     set->results_64[set->results_count].f64 = *(flt64_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -430,7 +430,7 @@ static void* memory_search_begin_callback(void* context) {
                         continue;
                     }
                     memory_search_extend_results(set, &capacities[set_i]);
-                    set->results_128[set->results_count].address = addr;
+                    set->results_128[set->results_count].base.address = addr;
                     set->results_128[set->results_count].f128 = *(flt128_t*)chunk_cur;
                     set->results_count++;
                     break;
@@ -522,112 +522,112 @@ static void* memory_search_next_callback(void* context) {
             MemoryAddress addr;
             switch(set->type) {
             case MemoryTypeU8:
-                addr = last_set->results_8[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 1) < 1) {
+                addr = last_set->results_8[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 1) != 1) {
                     continue;
                 }
                 if(*(uint8_t*)value_buf != value_u8) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_8[set->results_count].address = addr;
+                set->results_8[set->results_count].base.address = addr;
                 set->results_8[set->results_count].u8 = *(uint8_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU16:
-                addr = last_set->results_16[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 2) < 2) {
+                addr = last_set->results_16[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 2) != 2) {
                     continue;
                 }
                 if(*(uint16_t*)value_buf != value_u16) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_16[set->results_count].address = addr;
+                set->results_16[set->results_count].base.address = addr;
                 set->results_16[set->results_count].u16 = *(uint16_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU32:
-                addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
+                addr = last_set->results_32[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 4) != 4) {
                     continue;
                 }
                 if(*(uint32_t*)value_buf != value_u32) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_32[set->results_count].address = addr;
+                set->results_32[set->results_count].base.address = addr;
                 set->results_32[set->results_count].u32 = *(uint32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeU64:
-                addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
+                addr = last_set->results_64[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 8) != 8) {
                     continue;
                 }
                 if(*(uint64_t*)value_buf != value_u64) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_64[set->results_count].address = addr;
+                set->results_64[set->results_count].base.address = addr;
                 set->results_64[set->results_count].u64 = *(uint64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI8:
-                addr = last_set->results_8[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 1) < 1) {
+                addr = last_set->results_8[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 1) != 1) {
                     continue;
                 }
                 if(*(int8_t*)value_buf != value_i8) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_8[set->results_count].address = addr;
+                set->results_8[set->results_count].base.address = addr;
                 set->results_8[set->results_count].i8 = *(int8_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI16:
-                addr = last_set->results_16[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 2) < 2) {
+                addr = last_set->results_16[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 2) != 2) {
                     continue;
                 }
                 if(*(int16_t*)value_buf != value_i16) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_16[set->results_count].address = addr;
+                set->results_16[set->results_count].base.address = addr;
                 set->results_16[set->results_count].i16 = *(int16_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI32:
-                addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
+                addr = last_set->results_32[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 4) != 4) {
                     continue;
                 }
                 if(*(int32_t*)value_buf != value_i32) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_32[set->results_count].address = addr;
+                set->results_32[set->results_count].base.address = addr;
                 set->results_32[set->results_count].i32 = *(int32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeI64:
-                addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
+                addr = last_set->results_64[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 8) != 8) {
                     continue;
                 }
                 if(*(int64_t*)value_buf != value_i64) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_64[set->results_count].address = addr;
+                set->results_64[set->results_count].base.address = addr;
                 set->results_64[set->results_count].i64 = *(int64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF32:
-                addr = last_set->results_32[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 4) < 4) {
+                addr = last_set->results_32[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 4) != 4) {
                     continue;
                 }
                 if(isnanf(*(flt32_t*)value_buf) || *(flt32_t*)value_buf < (value_f32_min) ||
@@ -635,13 +635,13 @@ static void* memory_search_next_callback(void* context) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_32[set->results_count].address = addr;
+                set->results_32[set->results_count].base.address = addr;
                 set->results_32[set->results_count].f32 = *(flt32_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF64:
-                addr = last_set->results_64[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 8) < 8) {
+                addr = last_set->results_64[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 8) != 8) {
                     continue;
                 }
                 if(isnanf(*(flt64_t*)value_buf) || *(flt64_t*)value_buf < (value_f64_min) ||
@@ -649,13 +649,13 @@ static void* memory_search_next_callback(void* context) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_64[set->results_count].address = addr;
+                set->results_64[set->results_count].base.address = addr;
                 set->results_64[set->results_count].f64 = *(flt64_t*)value_buf;
                 set->results_count++;
                 break;
             case MemoryTypeF128:
-                addr = last_set->results_128[result_i].address;
-                if(process_handle_read(handle, addr, value_buf, 16) < 16) {
+                addr = last_set->results_128[result_i].base.address;
+                if(process_handle_read(handle, addr, value_buf, 16) != 16) {
                     continue;
                 }
                 if(isnanf(*(flt128_t*)value_buf) || *(flt128_t*)value_buf < (value_f128_min) ||
@@ -663,7 +663,7 @@ static void* memory_search_next_callback(void* context) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
-                set->results_128[set->results_count].address = addr;
+                set->results_128[set->results_count].base.address = addr;
                 set->results_128[set->results_count].f128 = *(flt128_t*)value_buf;
                 set->results_count++;
                 break;
@@ -716,87 +716,11 @@ static void* memory_search_update_callback(void* context) {
 
         for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
             MemorySearchResultSet* set = &batch->sets[set_i];
+            size_t size = memory_type_get_size(set->type);
             for(size_t result_i = 0; result_i < set->results_count; result_i++) {
-                switch(set->type) {
-                case MemoryTypeU8: {
-                    MemorySearchResult8* result = &set->results_8[result_i];
-                    if(process_handle_read(handle, result->address, &result->u8, 1) < 1) {
-                        memset(&result->u8, 0, 1);
-                    }
-                    break;
-                }
-                case MemoryTypeU16: {
-                    MemorySearchResult16* result = &set->results_16[result_i];
-                    if(process_handle_read(handle, result->address, &result->u16, 2) < 2) {
-                        memset(&result->u16, 0, 2);
-                    }
-                    break;
-                }
-                case MemoryTypeU32: {
-                    MemorySearchResult32* result = &set->results_32[result_i];
-                    if(process_handle_read(handle, result->address, &result->u32, 4) < 4) {
-                        memset(&result->u32, 0, 4);
-                    }
-                    break;
-                }
-                case MemoryTypeU64: {
-                    MemorySearchResult64* result = &set->results_64[result_i];
-                    if(process_handle_read(handle, result->address, &result->u64, 8) < 8) {
-                        memset(&result->u64, 0, 8);
-                    }
-                    break;
-                }
-                case MemoryTypeI8: {
-                    MemorySearchResult8* result = &set->results_8[result_i];
-                    if(process_handle_read(handle, result->address, &result->i8, 1) < 1) {
-                        memset(&result->i8, 0, 1);
-                    }
-                    break;
-                }
-                case MemoryTypeI16: {
-                    MemorySearchResult16* result = &set->results_16[result_i];
-                    if(process_handle_read(handle, result->address, &result->i16, 2) < 2) {
-                        memset(&result->i16, 0, 2);
-                    }
-                    break;
-                }
-                case MemoryTypeI32: {
-                    MemorySearchResult32* result = &set->results_32[result_i];
-                    if(process_handle_read(handle, result->address, &result->i32, 4) < 4) {
-                        memset(&result->i32, 0, 4);
-                    }
-                    break;
-                }
-                case MemoryTypeI64: {
-                    MemorySearchResult64* result = &set->results_64[result_i];
-                    if(process_handle_read(handle, result->address, &result->i64, 8) < 8) {
-                        memset(&result->i64, 0, 8);
-                    }
-                    break;
-                }
-                case MemoryTypeF32: {
-                    MemorySearchResult32* result = &set->results_32[result_i];
-                    if(process_handle_read(handle, result->address, &result->f32, 4) < 4) {
-                        memset(&result->f32, 0, 4);
-                    }
-                    break;
-                }
-                case MemoryTypeF64: {
-                    MemorySearchResult64* result = &set->results_64[result_i];
-                    if(process_handle_read(handle, result->address, &result->f64, 8) < 8) {
-                        memset(&result->f64, 0, 8);
-                    }
-                    break;
-                }
-                case MemoryTypeF128: {
-                    MemorySearchResult128* result = &set->results_128[result_i];
-                    if(process_handle_read(handle, result->address, &result->f128, 16) < 16) {
-                        memset(&result->f128, 0, 16);
-                    }
-                    break;
-                }
-                default:
-                    unreachable();
+                MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
+                if(process_handle_read(handle, base->address, &base->value, size) != size) {
+                    memset(&base->value, 0, size);
                 }
 
                 thread_self_usleep(update_delay_usec);
@@ -920,7 +844,7 @@ MemorySearchResults* memory_search_get_results(MemorySearch* memory_search) {
     return &memory_search->results;
 }
 
-MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_t i) {
+MemorySearchResultBase* memory_search_get_result_base(MemorySearchResultSet* set, size_t i) {
     switch(set->type) {
     case MemoryTypeUnsigned:
     case MemoryTypeSigned:
@@ -931,59 +855,37 @@ MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_
         unreachable();
 
     case MemoryTypeU8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return result->address;
-        break;
+        return &set->results_8[i].base;
     }
     case MemoryTypeU16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return result->address;
-        break;
+        return &set->results_16[i].base;
     }
     case MemoryTypeU32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return result->address;
-        break;
+        return &set->results_32[i].base;
     }
     case MemoryTypeU64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return result->address;
-        break;
+        return &set->results_64[i].base;
     }
     case MemoryTypeI8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return result->address;
-        break;
+        return &set->results_8[i].base;
     }
     case MemoryTypeI16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return result->address;
-        break;
+        return &set->results_16[i].base;
     }
     case MemoryTypeI32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return result->address;
-        break;
+        return &set->results_32[i].base;
     }
     case MemoryTypeI64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return result->address;
-        break;
+        return &set->results_64[i].base;
     }
     case MemoryTypeF32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return result->address;
-        break;
+        return &set->results_32[i].base;
     }
     case MemoryTypeF64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return result->address;
-        break;
+        return &set->results_64[i].base;
     }
     case MemoryTypeF128: {
-        MemorySearchResult128* result = &set->results_128[i];
-        return result->address;
-        break;
+        return &set->results_128[i].base;
     }
     }
 }
@@ -1058,60 +960,8 @@ static MemorySearchResultDisplay
 }
 
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
-    switch(set->type) {
-    case MemoryTypeUnsigned:
-    case MemoryTypeSigned:
-    case MemoryTypeInteger:
-    case MemoryTypeFloating:
-    case MemoryTypeNumber:
-    case MemoryTypeMAX:
-        unreachable();
-
-    case MemoryTypeU8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return memory_search_get_display(result->address, set->type, &result->u8);
-    }
-    case MemoryTypeU16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return memory_search_get_display(result->address, set->type, &result->u16);
-    }
-    case MemoryTypeU32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->u32);
-    }
-    case MemoryTypeU64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->u64);
-    }
-    case MemoryTypeI8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return memory_search_get_display(result->address, set->type, &result->i8);
-    }
-    case MemoryTypeI16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return memory_search_get_display(result->address, set->type, &result->i16);
-    }
-    case MemoryTypeI32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->i32);
-    }
-    case MemoryTypeI64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->i64);
-    }
-    case MemoryTypeF32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->f32);
-    }
-    case MemoryTypeF64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->f64);
-    }
-    case MemoryTypeF128: {
-        MemorySearchResult128* result = &set->results_128[i];
-        return memory_search_get_display(result->address, set->type, &result->f128);
-    }
-    }
+    MemorySearchResultBase* base = memory_search_get_result_base(set, i);
+    return memory_search_get_display(base->address, set->type, &base->value);
 }
 
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type) {
