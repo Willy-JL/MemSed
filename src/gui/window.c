@@ -18,6 +18,21 @@ const ImVec2 options_min_size = {378.0f, 250.0f};
 
 const size_t imgui_clipper_max = 1'000'000;
 
+typedef struct {
+    char** buf;
+    int32_t* len;
+} ImguiInputTextResizeCallbackCtx;
+
+static int32_t imgui_input_text_resize_callback(ImGuiInputTextCallbackData* data) {
+    ImguiInputTextResizeCallbackCtx* ctx = data->UserData;
+    if(data->EventFlag & ImGuiInputTextFlags_CallbackResize && data->BufTextLen + 1 != *ctx->len) {
+        *ctx->len = data->BufTextLen + 1;
+        *ctx->buf = realloc(*ctx->buf, *ctx->len);
+        data->Buf = *ctx->buf;
+    }
+    return 0;
+}
+
 static void gui_window_draw_attach_process_popup(Gui* gui) {
     ImVec2 display = gui->io->DisplaySize;
     ImVec2 size = display;
@@ -649,11 +664,17 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     // Description
                     ImGui_TableNextColumn();
                     ImGui_SetNextItemWidth(-FLT_MIN);
-                    ImGui_InputText(
+                    ImguiInputTextResizeCallbackCtx resize_ctx = {
+                        .buf = &item->description,
+                        .len = &item->description_len,
+                    };
+                    ImGui_InputTextEx(
                         "###description",
                         item->description,
-                        sizeof(item->description),
-                        ImGuiInputTextFlags_None);
+                        item->description_len,
+                        ImGuiInputTextFlags_CallbackResize,
+                        imgui_input_text_resize_callback,
+                        &resize_ctx);
                     // Hitbox
                     ImGui_SameLine();
                     bool is_selected = false;

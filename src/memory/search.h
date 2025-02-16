@@ -91,11 +91,12 @@ typedef struct {
     flt128_t deviation;
 } MemorySearchParams;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
     MemoryAddress address;
     MemoryType type;
     bool active;
-    char description[67];
+    char* description;
+    int32_t description_len;
     union {
         uint8_t u8;
         uint16_t u16;

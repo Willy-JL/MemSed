@@ -1031,6 +1031,8 @@ void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress add
     item->address = addr;
     item->type = type;
     item->active = false;
+    item->description_len = 1;
+    item->description = malloc(item->description_len);
     item->description[0] = '\0';
     size_t size = memory_type_get_size(type);
     if(process_handle_read(memory_search->handle, addr, &item->value, size) != size) {
@@ -1182,7 +1184,8 @@ void memory_search_scratchpad_wipe(MemorySearch* memory_search) {
     memory_search->scratchpad.items = NULL;
     if(items_count >= 1) {
         for(size_t item_i = 0; item_i < items_count; item_i++) {
-            // FIXME: extra cleanup if needed when scratchpad is fully implemented
+            MemorySearchScratchpadItem* item = &items[item_i];
+            free(item->description);
         }
         free(items);
     }
