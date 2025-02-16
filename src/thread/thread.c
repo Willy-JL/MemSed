@@ -80,8 +80,23 @@ void thread_join(Thread* thread, void** result) {
     return;
 }
 
-void thread_self_quit_if_canceled() {
+void thread_self_enable_canceling() {
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-    pthread_testcancel();
+}
+
+void thread_self_disable_canceling() {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+}
+
+void thread_self_quit_if_canceled() {
+    int32_t old_state;
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &old_state);
+    pthread_testcancel();
+    if(old_state == PTHREAD_CANCEL_DISABLE) {
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+    }
+}
+
+void thread_self_usleep(useconds_t usec) {
+    usleep(usec);
 }

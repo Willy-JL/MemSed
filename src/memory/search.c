@@ -2,11 +2,8 @@
 #include "../process/handle.h"
 #include "../thread/thread.h"
 
-// TODO: not cross-platform
-#include <unistd.h>
-
 const size_t chunk_size = 1024 * 1024;
-const time_t update_interval = 1;
+const size_t update_delay_usec = 20;
 const size_t update_max_results = 100'000;
 
 struct MemorySearch {
@@ -14,7 +11,6 @@ struct MemorySearch {
     Process* process;
     ProcessHandle* handle;
     Thread* update_thread;
-    time_t last_update;
     Thread* search_thread;
     flt32_t search_progress;
     MemorySearchResults results;
@@ -30,7 +26,6 @@ MemorySearch* memory_search_init() {
     memory_search->process = NULL;
     memory_search->handle = NULL;
     memory_search->update_thread = NULL;
-    memory_search->last_update = 0;
     memory_search->search_thread = NULL;
     memory_search->search_progress = 0.0f;
     memory_search->results.regions = NULL;
@@ -47,7 +42,6 @@ static void memory_search_stop_update(MemorySearch* memory_search) {
         thread_cancel(memory_search->update_thread);
         thread_join(memory_search->update_thread, NULL);
         memory_search->update_thread = NULL;
-        memory_search->last_update = time(NULL);
     }
 }
 
@@ -687,10 +681,12 @@ static void* memory_search_next_callback(void* context) {
 }
 
 static void* memory_search_update_callback(void* context) {
+    thread_self_enable_canceling();
     MemorySearch* memory_search = context;
 
     MemorySearchResultBatch* batch =
         &memory_search->results.batches[memory_search->results.batches_count - 1];
+    ProcessHandle* handle = memory_search->handle;
     size_t max_type_size = 0;
 
     for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
@@ -699,108 +695,108 @@ static void* memory_search_update_callback(void* context) {
         max_type_size = MAX(max_type_size, memory_type_get_size(type));
     }
 
-    ProcessHandle* handle = memory_search->handle;
-    for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
-        MemorySearchResultSet* set = &batch->sets[set_i];
-        for(size_t result_i = 0; result_i < set->results_count; result_i++) {
-            // FIXME: check if these are slowing down the search and make it faster
-            thread_self_quit_if_canceled();
+    while(true) {
+        for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
+            MemorySearchResultSet* set = &batch->sets[set_i];
+            for(size_t result_i = 0; result_i < set->results_count; result_i++) {
+                switch(set->type) {
+                case MemoryTypeU8: {
+                    MemorySearchResult8* result = &set->results_8[result_i];
+                    if(process_handle_read(handle, result->address, &result->u8, 1) < 1) {
+                        memset(&result->u8, 0, 1);
+                    }
+                    break;
+                }
+                case MemoryTypeU16: {
+                    MemorySearchResult16* result = &set->results_16[result_i];
+                    if(process_handle_read(handle, result->address, &result->u16, 2) < 2) {
+                        memset(&result->u16, 0, 2);
+                    }
+                    break;
+                }
+                case MemoryTypeU32: {
+                    MemorySearchResult32* result = &set->results_32[result_i];
+                    if(process_handle_read(handle, result->address, &result->u32, 4) < 4) {
+                        memset(&result->u32, 0, 4);
+                    }
+                    break;
+                }
+                case MemoryTypeU64: {
+                    MemorySearchResult64* result = &set->results_64[result_i];
+                    if(process_handle_read(handle, result->address, &result->u64, 8) < 8) {
+                        memset(&result->u64, 0, 8);
+                    }
+                    break;
+                }
+                case MemoryTypeI8: {
+                    MemorySearchResult8* result = &set->results_8[result_i];
+                    if(process_handle_read(handle, result->address, &result->i8, 1) < 1) {
+                        memset(&result->i8, 0, 1);
+                    }
+                    break;
+                }
+                case MemoryTypeI16: {
+                    MemorySearchResult16* result = &set->results_16[result_i];
+                    if(process_handle_read(handle, result->address, &result->i16, 2) < 2) {
+                        memset(&result->i16, 0, 2);
+                    }
+                    break;
+                }
+                case MemoryTypeI32: {
+                    MemorySearchResult32* result = &set->results_32[result_i];
+                    if(process_handle_read(handle, result->address, &result->i32, 4) < 4) {
+                        memset(&result->i32, 0, 4);
+                    }
+                    break;
+                }
+                case MemoryTypeI64: {
+                    MemorySearchResult64* result = &set->results_64[result_i];
+                    if(process_handle_read(handle, result->address, &result->i64, 8) < 8) {
+                        memset(&result->i64, 0, 8);
+                    }
+                    break;
+                }
+                case MemoryTypeF32: {
+                    MemorySearchResult32* result = &set->results_32[result_i];
+                    if(process_handle_read(handle, result->address, &result->f32, 4) < 4) {
+                        memset(&result->f32, 0, 4);
+                    }
+                    break;
+                }
+                case MemoryTypeF64: {
+                    MemorySearchResult64* result = &set->results_64[result_i];
+                    if(process_handle_read(handle, result->address, &result->f64, 8) < 8) {
+                        memset(&result->f64, 0, 8);
+                    }
+                    break;
+                }
+                case MemoryTypeF128: {
+                    MemorySearchResult128* result = &set->results_128[result_i];
+                    if(process_handle_read(handle, result->address, &result->f128, 16) < 16) {
+                        memset(&result->f128, 0, 16);
+                    }
+                    break;
+                }
+                default:
+                    unreachable();
+                }
 
-            switch(set->type) {
-            case MemoryTypeU8: {
-                MemorySearchResult8* result = &set->results_8[result_i];
-                if(process_handle_read(handle, result->address, &result->u8, 1) < 1) {
-                    memset(&result->u8, 0, 1);
-                }
-                break;
-            }
-            case MemoryTypeU16: {
-                MemorySearchResult16* result = &set->results_16[result_i];
-                if(process_handle_read(handle, result->address, &result->u16, 2) < 2) {
-                    memset(&result->u16, 0, 2);
-                }
-                break;
-            }
-            case MemoryTypeU32: {
-                MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, &result->u32, 4) < 4) {
-                    memset(&result->u32, 0, 4);
-                }
-                break;
-            }
-            case MemoryTypeU64: {
-                MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, &result->u64, 8) < 8) {
-                    memset(&result->u64, 0, 8);
-                }
-                break;
-            }
-            case MemoryTypeI8: {
-                MemorySearchResult8* result = &set->results_8[result_i];
-                if(process_handle_read(handle, result->address, &result->i8, 1) < 1) {
-                    memset(&result->i8, 0, 1);
-                }
-                break;
-            }
-            case MemoryTypeI16: {
-                MemorySearchResult16* result = &set->results_16[result_i];
-                if(process_handle_read(handle, result->address, &result->i16, 2) < 2) {
-                    memset(&result->i16, 0, 2);
-                }
-                break;
-            }
-            case MemoryTypeI32: {
-                MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, &result->i32, 4) < 4) {
-                    memset(&result->i32, 0, 4);
-                }
-                break;
-            }
-            case MemoryTypeI64: {
-                MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, &result->i64, 8) < 8) {
-                    memset(&result->i64, 0, 8);
-                }
-                break;
-            }
-            case MemoryTypeF32: {
-                MemorySearchResult32* result = &set->results_32[result_i];
-                if(process_handle_read(handle, result->address, &result->f32, 4) < 4) {
-                    memset(&result->f32, 0, 4);
-                }
-                break;
-            }
-            case MemoryTypeF64: {
-                MemorySearchResult64* result = &set->results_64[result_i];
-                if(process_handle_read(handle, result->address, &result->f64, 8) < 8) {
-                    memset(&result->f64, 0, 8);
-                }
-                break;
-            }
-            case MemoryTypeF128: {
-                MemorySearchResult128* result = &set->results_128[result_i];
-                if(process_handle_read(handle, result->address, &result->f128, 16) < 16) {
-                    memset(&result->f128, 0, 16);
-                }
-                break;
-            }
-            default:
-                unreachable();
+                thread_self_usleep(update_delay_usec);
             }
         }
-    }
 
-    MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
-    for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
-        // FIXME: check if these are slowing down the search and make it faster
-        thread_self_quit_if_canceled();
-        MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
-        size_t size = memory_type_get_size(item->type);
-        if(item->active) {
-            process_handle_write(handle, item->address, &item->value, size);
-        }
-        if(process_handle_read(handle, item->address, &item->value, size) != size) {
-            memset(&item->value, 0, size);
+        MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
+        for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
+            MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
+            size_t size = memory_type_get_size(item->type);
+            if(item->active) {
+                process_handle_write(handle, item->address, &item->value, size);
+            }
+            if(process_handle_read(handle, item->address, &item->value, size) != size) {
+                memset(&item->value, 0, size);
+            }
+
+            thread_self_usleep(update_delay_usec);
         }
     }
 
@@ -1282,12 +1278,6 @@ void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScrat
 }
 
 void memory_search_tick(MemorySearch* memory_search) {
-    if(memory_search->update_thread != NULL) {
-        if(thread_try_join(memory_search->update_thread, NULL)) {
-            memory_search->update_thread = NULL;
-            memory_search->last_update = time(NULL);
-        }
-    }
     if(memory_search_is_searching(memory_search)) {
         if(thread_try_join(memory_search->search_thread, NULL)) {
             memory_search->search_thread = NULL;
@@ -1296,10 +1286,10 @@ void memory_search_tick(MemorySearch* memory_search) {
         if(!process_handle_is_valid(memory_search->handle)) {
             memory_search_process_detach(memory_search);
         } else if(
-            memory_search->results.batches_count > 0 &&
             memory_search->results.current_results_count < update_max_results &&
-            memory_search->update_thread == NULL &&
-            time(NULL) >= memory_search->last_update + update_interval) {
+            (memory_search->results.current_results_count > 0 ||
+             memory_search->scratchpad.items_count > 0) &&
+            memory_search->update_thread == NULL) {
             memory_search->update_thread =
                 thread_start(memory_search_update_callback, memory_search);
         }
