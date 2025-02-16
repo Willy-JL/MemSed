@@ -145,5 +145,6 @@ void memory_search_scratchpad_set(
     MemorySearchScratchpadItem* item,
     flt128_t value);
 void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScratchpadItem* item);
+void memory_search_scratchpad_wipe(MemorySearch* memory_search);
 void memory_search_tick(MemorySearch* memory_search);
 void memory_search_free(MemorySearch* memory_search);

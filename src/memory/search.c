@@ -80,6 +80,7 @@ void memory_search_process_detach(MemorySearch* memory_search) {
     process_free(process);
 
     memory_search_reset(memory_search);
+    memory_search_scratchpad_wipe(memory_search);
 }
 
 MemorySearchParams memory_search_get_params(MemorySearch* memory_search) {
@@ -876,17 +877,6 @@ void memory_search_reset(MemorySearch* memory_search) {
         }
         free(batches);
     }
-
-    size_t items_count = memory_search->scratchpad.items_count;
-    MemorySearchScratchpadItem* items = memory_search->scratchpad.items;
-    memory_search->scratchpad.items_count = 0;
-    memory_search->scratchpad.items = NULL;
-    if(items_count >= 1) {
-        for(size_t item_i = 0; item_i < items_count; item_i++) {
-            // FIXME: extra cleanup if needed when scratchpad is fully implemented
-        }
-        free(items);
-    }
 }
 
 MemorySearchResults* memory_search_get_results(MemorySearch* memory_search) {
@@ -1177,6 +1167,24 @@ void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScrat
         scratchpad->items = realloc(
             scratchpad->items,
             sizeof(MemorySearchScratchpadItem) * scratchpad->items_count);
+    }
+}
+
+void memory_search_scratchpad_wipe(MemorySearch* memory_search) {
+    memory_search_stop_update(memory_search);
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+
+    size_t items_count = memory_search->scratchpad.items_count;
+    MemorySearchScratchpadItem* items = memory_search->scratchpad.items;
+    memory_search->scratchpad.items_count = 0;
+    memory_search->scratchpad.items = NULL;
+    if(items_count >= 1) {
+        for(size_t item_i = 0; item_i < items_count; item_i++) {
+            // FIXME: extra cleanup if needed when scratchpad is fully implemented
+        }
+        free(items);
     }
 }
 
