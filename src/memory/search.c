@@ -796,7 +796,10 @@ static void* memory_search_update_callback(void* context) {
         thread_self_quit_if_canceled();
         MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
         size_t size = memory_type_get_size(item->type);
-        if(process_handle_read(memory_search->handle, item->address, &item->value, size) != size) {
+        if(item->active) {
+            process_handle_write(handle, item->address, &item->value, size);
+        }
+        if(process_handle_read(handle, item->address, &item->value, size) != size) {
             memset(&item->value, 0, size);
         }
     }
