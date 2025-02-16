@@ -1,5 +1,4 @@
 - Finalize basic scratchpad functionality
-  - Allow editing values
   - Make the active checkbox work
 - Add more search options:
   - Memory region flags (write, execute, ...)

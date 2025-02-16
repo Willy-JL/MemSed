@@ -1155,6 +1155,90 @@ MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScrat
     return memory_search_get_display(item->address, item->type, &item->value);
 }
 
+void memory_search_scratchpad_set(
+    MemorySearch* memory_search,
+    MemorySearchScratchpadItem* item,
+    flt128_t value) {
+    memory_search_stop_update(memory_search);
+    if(!memory_search_process_is_attached(memory_search)) {
+        return;
+    }
+    if(memory_search_is_searching(memory_search)) {
+        return;
+    }
+
+    switch(item->type) {
+    case MemoryTypeUnsigned:
+    case MemoryTypeSigned:
+    case MemoryTypeInteger:
+    case MemoryTypeFloating:
+    case MemoryTypeNumber:
+    case MemoryTypeMAX:
+        unreachable();
+
+    case MemoryTypeU8: {
+        uint8_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeU16: {
+        uint16_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeU32: {
+        uint32_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeU64: {
+        uint64_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeI8: {
+        int8_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeI16: {
+        int16_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeI32: {
+        int32_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeI64: {
+        int64_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeF32: {
+        flt32_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeF64: {
+        flt64_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    case MemoryTypeF128: {
+        flt128_t val = value;
+        process_handle_write(memory_search->handle, item->address, &val, sizeof(val));
+        break;
+    }
+    }
+
+    size_t size = memory_type_get_size(item->type);
+    if(process_handle_read(memory_search->handle, item->address, &item->value, size) != size) {
+        memset(&item->value, 0, size);
+    }
+}
+
 void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScratchpadItem* item) {
     memory_search_stop_update(memory_search);
     if(!memory_search_process_is_attached(memory_search)) {

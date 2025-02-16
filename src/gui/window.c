@@ -623,7 +623,26 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     ImGui_TextUnformatted(memory_type_get_short_name(item->type));
                     // Value
                     ImGui_TableNextColumn();
-                    ImGui_TextUnformatted(display.value_str);
+                    static int32_t editing = -1;
+                    if(clip_i == editing) {
+                        char temp_str[33];
+                        strlcpy(temp_str, display.value_str, sizeof(temp_str));
+                        ImGui_SetNextItemWidth(-FLT_MIN);
+                        ImGui_SetKeyboardFocusHere();
+                        if(ImGui_InputText(
+                               "###value",
+                               temp_str,
+                               sizeof(temp_str),
+                               ImGuiInputTextFlags_AutoSelectAll |
+                                   ImGuiInputTextFlags_CharsDecimal |
+                                   ImGuiInputTextFlags_EnterReturnsTrue)) {
+                            flt128_t value = strtold(temp_str, NULL);
+                            memory_search_scratchpad_set(gui->memory_search, item, value);
+                            editing = -1;
+                        }
+                    } else {
+                        ImGui_TextUnformatted(display.value_str);
+                    }
                     // Description
                     ImGui_TableNextColumn();
                     ImGui_SetNextItemWidth(-FLT_MIN);
@@ -679,6 +698,12 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         }
                         ImGui_PopFont();
                         ImGui_EndPopup();
+                    } else if(
+                        ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                        ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                        editing = clip_i;
+                        selected[0] = -1;
+                        last_selected = -1;
                     } else if(ImGui_IsItemClicked()) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {

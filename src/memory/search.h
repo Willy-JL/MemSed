@@ -131,6 +131,10 @@ MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
 MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search);
 MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item);
+void memory_search_scratchpad_set(
+    MemorySearch* memory_search,
+    MemorySearchScratchpadItem* item,
+    flt128_t value);
 void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScratchpadItem* item);
 void memory_search_tick(MemorySearch* memory_search);
 void memory_search_free(MemorySearch* memory_search);
