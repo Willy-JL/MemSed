@@ -339,7 +339,9 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                         ImGui_PopFont();
                         ImGui_EndPopup();
-                    } else if(ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                    } else if(
+                        ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                        ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         memory_search_scratchpad_add(gui->memory_search, address, set->type);
                         selected[0] = -1;
                         last_selected = -1;
