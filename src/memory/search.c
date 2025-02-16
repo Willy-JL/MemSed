@@ -19,10 +19,10 @@ struct MemorySearch {
 
 MemorySearch* memory_search_init() {
     MemorySearch* memory_search = malloc(sizeof(MemorySearch));
-    memory_search->params.type = MemoryTypeInteger;
+    memory_search->params.type = MemoryTypeNumber;
     memory_search->params.alignment = 4;
-    memory_search->params.value = 0.0l;
-    memory_search->params.precision = 0.1l;
+    memory_search->params.value = 123.0l;
+    memory_search->params.deviation = 0.1l;
     memory_search->process = NULL;
     memory_search->handle = NULL;
     memory_search->update_thread = NULL;
@@ -98,13 +98,14 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
 
     params.type = CLAMP(params.type, MemoryTypeMAX - 1, 0);
     params.alignment = MAX(params.alignment, 1);
+    params.deviation = ABS(params.deviation);
     if(params.type <= MemoryTypeInteger) {
         params.value = round(params.value);
+        params.deviation = round(params.deviation);
     }
     if(params.type <= MemoryTypeUnsigned) {
         params.value = ABS(params.value);
     }
-    params.precision = ABS(params.precision);
 
     memory_search->params = params;
 }
@@ -234,21 +235,29 @@ static void* memory_search_begin_callback(void* context) {
     size_t max_type_size = 0;
 
     flt128_t value = memory_search->params.value;
-    uint8_t value_u8 = value;
-    uint16_t value_u16 = value;
-    uint32_t value_u32 = value;
-    uint64_t value_u64 = value;
-    int8_t value_i8 = value;
-    int16_t value_i16 = value;
-    int32_t value_i32 = value;
-    int64_t value_i64 = value;
-    flt128_t precision = memory_search->params.precision;
-    flt32_t value_f32_min = value - precision;
-    flt64_t value_f64_min = value - precision;
-    flt128_t value_f128_min = value - precision;
-    flt32_t value_f32_max = value + precision;
-    flt64_t value_f64_max = value + precision;
-    flt128_t value_f128_max = value + precision;
+    flt128_t deviation = memory_search->params.deviation;
+    uint8_t value_u8_min = value - deviation;
+    uint8_t value_u8_max = value + deviation;
+    uint16_t value_u16_min = value - deviation;
+    uint16_t value_u16_max = value + deviation;
+    uint32_t value_u32_min = value - deviation;
+    uint32_t value_u32_max = value + deviation;
+    uint64_t value_u64_min = value - deviation;
+    uint64_t value_u64_max = value + deviation;
+    int8_t value_i8_min = value - deviation;
+    int8_t value_i8_max = value + deviation;
+    int16_t value_i16_min = value - deviation;
+    int16_t value_i16_max = value + deviation;
+    int32_t value_i32_min = value - deviation;
+    int32_t value_i32_max = value + deviation;
+    int64_t value_i64_min = value - deviation;
+    int64_t value_i64_max = value + deviation;
+    flt32_t value_f32_min = value - deviation;
+    flt32_t value_f32_max = value + deviation;
+    flt64_t value_f64_min = value - deviation;
+    flt64_t value_f64_max = value + deviation;
+    flt128_t value_f128_min = value - deviation;
+    flt128_t value_f128_max = value + deviation;
 
     for(MemoryType type = MemoryTypeMAX - 1; type < MemoryTypeMAX; type--) {
         if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
@@ -300,7 +309,8 @@ static void* memory_search_begin_callback(void* context) {
                 MemorySearchResultSet* set = &batch->sets[set_i];
                 switch(set->type) {
                 case MemoryTypeU8:
-                    if(*(uint8_t*)chunk_cur != value_u8) {
+                    if(*(uint8_t*)chunk_cur < value_u8_min ||
+                       *(uint8_t*)chunk_cur > value_u8_max) {
                         continue;
                     }
                     if(chunk_end - addr < 1) {
@@ -313,7 +323,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU16:
-                    if(*(uint16_t*)chunk_cur != value_u16) {
+                    if(*(uint16_t*)chunk_cur < value_u16_min ||
+                       *(uint16_t*)chunk_cur > value_u16_max) {
                         continue;
                     }
                     if(chunk_end - addr < 2) {
@@ -326,7 +337,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU32:
-                    if(*(uint32_t*)chunk_cur != value_u32) {
+                    if(*(uint32_t*)chunk_cur < value_u32_min ||
+                       *(uint32_t*)chunk_cur > value_u32_max) {
                         continue;
                     }
                     if(chunk_end - addr < 4) {
@@ -339,7 +351,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeU64:
-                    if(*(uint64_t*)chunk_cur != value_u64) {
+                    if(*(uint64_t*)chunk_cur < value_u64_min ||
+                       *(uint64_t*)chunk_cur > value_u64_max) {
                         continue;
                     }
                     if(chunk_end - addr < 8) {
@@ -352,7 +365,7 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI8:
-                    if(*(int8_t*)chunk_cur != value_i8) {
+                    if(*(int8_t*)chunk_cur < value_i8_min || *(int8_t*)chunk_cur > value_i8_max) {
                         continue;
                     }
                     if(chunk_end - addr < 1) {
@@ -365,7 +378,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI16:
-                    if(*(int16_t*)chunk_cur != value_i16) {
+                    if(*(int16_t*)chunk_cur < value_i16_min ||
+                       *(int16_t*)chunk_cur > value_i16_max) {
                         continue;
                     }
                     if(chunk_end - addr < 2) {
@@ -378,7 +392,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI32:
-                    if(*(int32_t*)chunk_cur != value_i32) {
+                    if(*(int32_t*)chunk_cur < value_i32_min ||
+                       *(int32_t*)chunk_cur > value_i32_max) {
                         continue;
                     }
                     if(chunk_end - addr < 4) {
@@ -391,7 +406,8 @@ static void* memory_search_begin_callback(void* context) {
                     set->results_count++;
                     break;
                 case MemoryTypeI64:
-                    if(*(int64_t*)chunk_cur != value_i64) {
+                    if(*(int64_t*)chunk_cur < value_i64_min ||
+                       *(int64_t*)chunk_cur > value_i64_max) {
                         continue;
                     }
                     if(chunk_end - addr < 8) {
@@ -478,21 +494,29 @@ static void* memory_search_next_callback(void* context) {
     size_t max_type_size = 0;
 
     flt128_t value = memory_search->params.value;
-    uint8_t value_u8 = value;
-    uint16_t value_u16 = value;
-    uint32_t value_u32 = value;
-    uint64_t value_u64 = value;
-    int8_t value_i8 = value;
-    int16_t value_i16 = value;
-    int32_t value_i32 = value;
-    int64_t value_i64 = value;
-    flt128_t precision = memory_search->params.precision;
-    flt32_t value_f32_min = value - precision;
-    flt64_t value_f64_min = value - precision;
-    flt128_t value_f128_min = value - precision;
-    flt32_t value_f32_max = value + precision;
-    flt64_t value_f64_max = value + precision;
-    flt128_t value_f128_max = value + precision;
+    flt128_t deviation = memory_search->params.deviation;
+    uint8_t value_u8_min = value - deviation;
+    uint8_t value_u8_max = value + deviation;
+    uint16_t value_u16_min = value - deviation;
+    uint16_t value_u16_max = value + deviation;
+    uint32_t value_u32_min = value - deviation;
+    uint32_t value_u32_max = value + deviation;
+    uint64_t value_u64_min = value - deviation;
+    uint64_t value_u64_max = value + deviation;
+    int8_t value_i8_min = value - deviation;
+    int8_t value_i8_max = value + deviation;
+    int16_t value_i16_min = value - deviation;
+    int16_t value_i16_max = value + deviation;
+    int32_t value_i32_min = value - deviation;
+    int32_t value_i32_max = value + deviation;
+    int64_t value_i64_min = value - deviation;
+    int64_t value_i64_max = value + deviation;
+    flt32_t value_f32_min = value - deviation;
+    flt32_t value_f32_max = value + deviation;
+    flt64_t value_f64_min = value - deviation;
+    flt64_t value_f64_max = value + deviation;
+    flt128_t value_f128_min = value - deviation;
+    flt128_t value_f128_max = value + deviation;
 
     for(size_t last_set_i = 0; last_set_i < last_batch->sets_count; last_set_i++) {
         MemorySearchResultSet* last_set = &last_batch->sets[last_set_i];
@@ -537,7 +561,7 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 1) != 1) {
                     continue;
                 }
-                if(*(uint8_t*)value_buf != value_u8) {
+                if(*(uint8_t*)value_buf < value_u8_min || *(uint8_t*)value_buf > value_u8_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -551,7 +575,8 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 2) != 2) {
                     continue;
                 }
-                if(*(uint16_t*)value_buf != value_u16) {
+                if(*(uint16_t*)value_buf < value_u16_min ||
+                   *(uint16_t*)value_buf > value_u16_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -565,7 +590,8 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 4) != 4) {
                     continue;
                 }
-                if(*(uint32_t*)value_buf != value_u32) {
+                if(*(uint32_t*)value_buf < value_u32_min ||
+                   *(uint32_t*)value_buf > value_u32_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -579,7 +605,8 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 8) != 8) {
                     continue;
                 }
-                if(*(uint64_t*)value_buf != value_u64) {
+                if(*(uint64_t*)value_buf < value_u64_min ||
+                   *(uint64_t*)value_buf > value_u64_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -593,7 +620,7 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 1) != 1) {
                     continue;
                 }
-                if(*(int8_t*)value_buf != value_i8) {
+                if(*(int8_t*)value_buf < value_i8_min || *(int8_t*)value_buf > value_i8_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -607,7 +634,7 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 2) != 2) {
                     continue;
                 }
-                if(*(int16_t*)value_buf != value_i16) {
+                if(*(int16_t*)value_buf < value_i16_min || *(int16_t*)value_buf > value_i16_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -621,7 +648,7 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 4) != 4) {
                     continue;
                 }
-                if(*(int32_t*)value_buf != value_i32) {
+                if(*(int32_t*)value_buf < value_i32_min || *(int32_t*)value_buf > value_i32_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);
@@ -635,7 +662,7 @@ static void* memory_search_next_callback(void* context) {
                 if(process_handle_read(handle, addr, value_buf, 8) != 8) {
                     continue;
                 }
-                if(*(int64_t*)value_buf != value_i64) {
+                if(*(int64_t*)value_buf < value_i64_min || *(int64_t*)value_buf > value_i64_max) {
                     continue;
                 }
                 memory_search_extend_results(set, &capacities[set_i]);

@@ -88,7 +88,7 @@ typedef struct {
     MemoryType type;
     uint8_t alignment;
     flt128_t value;
-    flt128_t precision;
+    flt128_t deviation;
 } MemorySearchParams;
 
 typedef struct __attribute__((packed)) {

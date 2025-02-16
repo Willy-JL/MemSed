@@ -1,4 +1,3 @@
-- Change Float +- to apply to integers too
 - Add more search options:
   - Memory region flags (write, execute, ...)
   - Endianness

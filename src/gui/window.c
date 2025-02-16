@@ -501,25 +501,25 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_PopFont();
 
             ImGui_BeginDisabled(params.type <= MemoryTypeInteger);
-            // Precision
+            // Deviation
             ImGui_TableNextRow();
             ImGui_TableNextColumn();
             ImGui_AlignTextToFramePadding();
-            ImGui_Text("Float ± :");
+            ImGui_Text("Value ± :");
             ImGui_TableNextColumn();
-            flt32_t precision_alignment_width =
+            flt32_t deviation_alignment_width =
                 (ImGui_GetContentRegionAvail().x - ImGui_CalcTextSize("Alignment:").x -
                  (pane_spacing_mult + 1) * gui->style->ItemSpacing.x) /
                 2.0f;
-            snprintf(temp_str, sizeof(temp_str), "%.*Lg", LDBL_DIG, params.precision);
+            snprintf(temp_str, sizeof(temp_str), "%.*Lg", LDBL_DIG, params.deviation);
             ImGui_PushFont(gui->fonts.mono);
-            ImGui_SetNextItemWidth(precision_alignment_width);
+            ImGui_SetNextItemWidth(deviation_alignment_width);
             if(ImGui_InputText(
-                   "###precision",
+                   "###deviation",
                    temp_str,
                    sizeof(temp_str),
                    ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CharsDecimal)) {
-                params.precision = strtold(temp_str, NULL);
+                params.deviation = strtold(temp_str, NULL);
                 memory_search_set_params(gui->memory_search, params);
             }
             ImGui_PopFont();
@@ -532,7 +532,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_SameLine();
             snprintf(temp_str, sizeof(temp_str), "%u", params.alignment);
             ImGui_PushFont(gui->fonts.mono);
-            ImGui_SetNextItemWidth(precision_alignment_width);
+            ImGui_SetNextItemWidth(deviation_alignment_width);
             if(ImGui_BeginCombo("###alignment", temp_str, ImGuiComboFlags_None)) {
                 for(uint8_t i = 1; i <= 16; i *= 2) {
                     bool is_selected = i == params.alignment;
