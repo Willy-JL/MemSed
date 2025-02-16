@@ -87,6 +87,8 @@ typedef struct {
 typedef struct __attribute__((packed)) {
     MemoryAddress address;
     MemoryType type;
+    bool active;
+    char description[67];
     union {
         uint8_t u8;
         uint16_t u16;

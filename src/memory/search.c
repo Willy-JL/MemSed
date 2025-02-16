@@ -1138,6 +1138,8 @@ void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress add
     MemorySearchScratchpadItem* item = &scratchpad->items[scratchpad->items_count];
     item->address = addr;
     item->type = type;
+    item->active = false;
+    item->description[0] = '\0';
     size_t size = memory_type_get_size(type);
     if(process_handle_read(memory_search->handle, addr, &item->value, size) != size) {
         memset(&item->value, 0, size);

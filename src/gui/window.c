@@ -612,10 +612,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         memory_search_get_display(item->address, item->type, &item->value);
                     ImGui_TableNextRow();
                     // Active
-                    // FIXME: save checkbox state, keep applying the value
+                    // FIXME: keep applying the value
                     ImGui_TableNextColumn();
-                    bool x = false;
-                    ImGui_Checkbox("###active", &x);
+                    ImGui_Checkbox("###active", &item->active);
                     // Address
                     // FIXME: if address is in region mapped from file, show filename+offset
                     ImGui_TableNextColumn();
@@ -624,11 +623,13 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(memory_type_get_short_name(item->type));
                     // Description
-                    // FIXME: store description in scratchpad
                     ImGui_TableNextColumn();
-                    char y[20] = "";
                     ImGui_SetNextItemWidth(-FLT_MIN);
-                    ImGui_InputText("###description", y, sizeof(y), ImGuiInputTextFlags_None);
+                    ImGui_InputText(
+                        "###description",
+                        item->description,
+                        sizeof(item->description),
+                        ImGuiInputTextFlags_None);
                     // Value
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(display.value_str);

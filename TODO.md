@@ -1,6 +1,5 @@
 - Finalize basic scratchpad functionality
   - Allow editing values
-  - Save descriptions between frames
   - Make the active checkbox work
 - Add more search options:
   - Memory region flags (write, execute, ...)
