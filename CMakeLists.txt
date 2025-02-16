@@ -84,7 +84,7 @@ add_custom_target(run
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
 add_custom_target(gdb
-    COMMAND sudo gdb ./memsed
+    COMMAND sudo gdb -q ./memsed
     DEPENDS memsed
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
 )
