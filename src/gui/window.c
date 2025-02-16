@@ -333,6 +333,8 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                         add_addr,
                                         add_set->type);
                                 }
+                                selected[0] = -1;
+                                last_selected = -1;
                             }
                         }
                         ImGui_PopFont();
@@ -521,7 +523,6 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_BeginDisabled(results->batches_count != 0);
             // Alignment
             ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
-            // ImGui_SameLine();
             ImGui_Text("Alignment:");
             ImGui_SameLine();
             snprintf(temp_str, sizeof(temp_str), "%u", params.alignment);
@@ -676,6 +677,8 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                                         del_item->address,
                                         del_item->type);
                                 }
+                                selected[0] = -1;
+                                last_selected = -1;
                             }
                         }
                         ImGui_PopFont();
