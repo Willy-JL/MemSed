@@ -339,7 +339,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                     i++) {
                                     size_t add_i = selected[i];
                                     size_t add_set_i = 0;
-                                    while(add_i > batch->sets[add_set_i].results_count) {
+                                    while(add_i >= batch->sets[add_set_i].results_count) {
                                         add_i -= batch->sets[add_set_i].results_count;
                                         add_set_i++;
                                     }
@@ -710,11 +710,19 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                             if(!is_selected) {
                                 memory_search_scratchpad_del(gui->memory_search, item);
                             } else {
-                                for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
-                                    i++) {
+                                for(uint8_t del_i = 0;
+                                    del_i < COUNT_OF(selected) && selected[del_i] != -1;
+                                    del_i++) {
                                     MemorySearchScratchpadItem* del_item =
-                                        &scratchpad->items[selected[i]];
+                                        &scratchpad->items[selected[del_i]];
                                     memory_search_scratchpad_del(gui->memory_search, del_item);
+                                    for(uint8_t fix_i = del_i + 1;
+                                        fix_i < COUNT_OF(selected) && selected[fix_i] != -1;
+                                        fix_i++) {
+                                        if(selected[fix_i] > selected[del_i]) {
+                                            selected[fix_i]--;
+                                        }
+                                    }
                                 }
                                 selected[0] = -1;
                                 last_selected = -1;
