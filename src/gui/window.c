@@ -658,6 +658,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                             memory_search_scratchpad_set(gui->memory_search, item, value);
                             editing = -1;
                         }
+                        if(ImGui_IsItemDeactivated()) {
+                            editing = -1;
+                        }
                     } else {
                         ImGui_TextUnformatted(display.value_str);
                     }
