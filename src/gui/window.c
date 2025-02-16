@@ -591,8 +591,8 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
             ImGui_CalcTextSize("0x1122334455667788").x,
             0);
         ImGui_TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed);
-        ImGui_TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
+        ImGui_TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
         ImGui_TableSetupScrollFreeze(0, 1);
         ImGui_PushFont(gui->fonts.base);
         ImGui_TableHeadersRow();
@@ -622,6 +622,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     // Type
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(memory_type_get_short_name(item->type));
+                    // Value
+                    ImGui_TableNextColumn();
+                    ImGui_TextUnformatted(display.value_str);
                     // Description
                     ImGui_TableNextColumn();
                     ImGui_SetNextItemWidth(-FLT_MIN);
@@ -630,9 +633,6 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         item->description,
                         sizeof(item->description),
                         ImGuiInputTextFlags_None);
-                    // Value
-                    ImGui_TableNextColumn();
-                    ImGui_TextUnformatted(display.value_str);
                     // Hitbox
                     ImGui_SameLine();
                     bool is_selected = false;
