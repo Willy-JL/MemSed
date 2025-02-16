@@ -283,6 +283,22 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                     }
                     size_t result_i = clip_i - sets_progress;
+                    bool is_selected = false;
+                    static size_t last_total = 0;
+                    static int32_t last_selected = -1;
+                    static int32_t selected[UINT8_MAX] = {-1};
+                    static int32_t doubleclick_selected[UINT8_MAX] = {-1};
+                    if(last_total != batch->total_results_count) {
+                        selected[0] = -1;
+                        last_selected = -1;
+                        last_total = batch->total_results_count;
+                    }
+                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                        if(selected[i] == clip_i) {
+                            is_selected = true;
+                            break;
+                        }
+                    }
                     MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
@@ -307,21 +323,6 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     }
                     // Hitbox
                     ImGui_SameLine();
-                    bool is_selected = false;
-                    static size_t last_total = 0;
-                    static int32_t last_selected = -1;
-                    static int32_t selected[UINT8_MAX] = {-1};
-                    if(last_total != batch->total_results_count) {
-                        selected[0] = -1;
-                        last_selected = -1;
-                        last_total = batch->total_results_count;
-                    }
-                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
-                        if(selected[i] == clip_i) {
-                            is_selected = true;
-                            break;
-                        }
-                    }
                     ImVec4 hover_col = gui->style->Colors[ImGuiCol_HeaderHovered];
                     ImVec4 active_col = gui->style->Colors[ImGuiCol_HeaderActive];
                     hover_col.w *= 0.25;
@@ -357,8 +358,6 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                         add_addr,
                                         add_set->type);
                                 }
-                                selected[0] = -1;
-                                last_selected = -1;
                             }
                         }
                         ImGui_PopFont();
@@ -366,9 +365,36 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                         ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        memory_search_scratchpad_add(gui->memory_search, base->address, set->type);
-                        selected[0] = -1;
-                        last_selected = -1;
+                        memcpy(selected, doubleclick_selected, sizeof(selected));
+                        is_selected = false;
+                        for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                            if(selected[i] == clip_i) {
+                                is_selected = true;
+                                break;
+                            }
+                        }
+                        if(!is_selected) {
+                            memory_search_scratchpad_add(
+                                gui->memory_search,
+                                base->address,
+                                set->type);
+                        } else {
+                            for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                                size_t add_i = selected[i];
+                                size_t add_set_i = 0;
+                                while(add_i >= batch->sets[add_set_i].results_count) {
+                                    add_i -= batch->sets[add_set_i].results_count;
+                                    add_set_i++;
+                                }
+                                MemorySearchResultSet* add_set = &batch->sets[add_set_i];
+                                MemoryAddress add_addr =
+                                    memory_search_get_result_base(add_set, add_i)->address;
+                                memory_search_scratchpad_add(
+                                    gui->memory_search,
+                                    add_addr,
+                                    add_set->type);
+                            }
+                        }
                     } else if(ImGui_IsItemClicked()) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
@@ -422,6 +448,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                 }
                             }
                         } else {
+                            memcpy(doubleclick_selected, selected, sizeof(selected));
                             if(selected[0] != -1) {
                                 selected[0] = -1;
                             } else {
@@ -632,6 +659,22 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     MemorySearchScratchpadItem* item = &scratchpad->items[clip_i];
                     ImGui_PushIDInt(clip_i);
+                    bool is_selected = false;
+                    static size_t last_total = 0;
+                    static int32_t last_selected = -1;
+                    static int32_t selected[UINT8_MAX] = {-1};
+                    static int32_t doubleclick_selected[UINT8_MAX] = {-1};
+                    if(last_total != scratchpad->items_count) {
+                        selected[0] = -1;
+                        last_selected = -1;
+                        last_total = scratchpad->items_count;
+                    }
+                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                        if(selected[i] == clip_i) {
+                            is_selected = true;
+                            break;
+                        }
+                    }
                     MemorySearchResultDisplay display = memory_search_get_scratchpad_display(item);
                     ImGui_TableNextRow();
                     // Active
@@ -663,7 +706,17 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                            ImGui_IsItemDeactivated()) {
                             if(!ImGui_IsKeyDown(ImGuiKey_Escape)) {
                                 flt128_t value = strtold(temp_str, NULL);
-                                memory_search_scratchpad_set(gui->memory_search, item, value);
+                                if(!is_selected) {
+                                    memory_search_scratchpad_set(gui->memory_search, item, value);
+                                } else {
+                                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
+                                        i++) {
+                                        memory_search_scratchpad_set(
+                                            gui->memory_search,
+                                            &scratchpad->items[selected[i]],
+                                            value);
+                                    }
+                                }
                             }
                             editing = -1;
                         }
@@ -686,21 +739,6 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         &resize_ctx);
                     // Hitbox
                     ImGui_SameLine();
-                    bool is_selected = false;
-                    static size_t last_total = 0;
-                    static int32_t last_selected = -1;
-                    static int32_t selected[UINT8_MAX] = {-1};
-                    if(last_total != scratchpad->items_count) {
-                        selected[0] = -1;
-                        last_selected = -1;
-                        last_total = scratchpad->items_count;
-                    }
-                    for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
-                        if(selected[i] == clip_i) {
-                            is_selected = true;
-                            break;
-                        }
-                    }
                     ImGui_SetCursorPosY(ImGui_GetCursorPosY() - gui->style->FramePadding.y);
                     ImVec4 hover_col = gui->style->Colors[ImGuiCol_HeaderHovered];
                     ImVec4 active_col = gui->style->Colors[ImGuiCol_HeaderActive];
@@ -722,9 +760,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                                 for(uint8_t del_i = 0;
                                     del_i < COUNT_OF(selected) && selected[del_i] != -1;
                                     del_i++) {
-                                    MemorySearchScratchpadItem* del_item =
-                                        &scratchpad->items[selected[del_i]];
-                                    memory_search_scratchpad_del(gui->memory_search, del_item);
+                                    memory_search_scratchpad_del(
+                                        gui->memory_search,
+                                        &scratchpad->items[selected[del_i]]);
                                     for(uint8_t fix_i = del_i + 1;
                                         fix_i < COUNT_OF(selected) && selected[fix_i] != -1;
                                         fix_i++) {
@@ -743,8 +781,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                         ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         editing = clip_i;
-                        selected[0] = -1;
-                        last_selected = -1;
+                        memcpy(selected, doubleclick_selected, sizeof(selected));
                     } else if(ImGui_IsItemClicked()) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
@@ -798,6 +835,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                                 }
                             }
                         } else {
+                            memcpy(doubleclick_selected, selected, sizeof(selected));
                             if(selected[0] != -1) {
                                 selected[0] = -1;
                             } else {

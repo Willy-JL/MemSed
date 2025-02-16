@@ -1,4 +1,3 @@
-- Edit multiple selected values at once
 - Add more search options:
   - Memory region flags (write, execute, ...)
   - Endianness
