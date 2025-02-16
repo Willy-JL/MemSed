@@ -659,12 +659,12 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                                sizeof(temp_str),
                                ImGuiInputTextFlags_AutoSelectAll |
                                    ImGuiInputTextFlags_CharsDecimal |
-                                   ImGuiInputTextFlags_EnterReturnsTrue)) {
-                            flt128_t value = strtold(temp_str, NULL);
-                            memory_search_scratchpad_set(gui->memory_search, item, value);
-                            editing = -1;
-                        }
-                        if(ImGui_IsItemDeactivated()) {
+                                   ImGuiInputTextFlags_EnterReturnsTrue) ||
+                           ImGui_IsItemDeactivated()) {
+                            if(!ImGui_IsKeyDown(ImGuiKey_Escape)) {
+                                flt128_t value = strtold(temp_str, NULL);
+                                memory_search_scratchpad_set(gui->memory_search, item, value);
+                            }
                             editing = -1;
                         }
                     } else {
