@@ -128,10 +128,9 @@ void memory_search_reset(MemorySearch* memory_search);
 MemorySearchResults* memory_search_get_results(MemorySearch* memory_search);
 MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_t i);
 MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
-MemorySearchResultDisplay
-    memory_search_get_display(MemoryAddress address, MemoryType type, void* value);
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
 MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search);
-void memory_search_scratchpad_del(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
+MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item);
+void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScratchpadItem* item);
 void memory_search_tick(MemorySearch* memory_search);
 void memory_search_free(MemorySearch* memory_search);

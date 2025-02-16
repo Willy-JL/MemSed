@@ -985,64 +985,7 @@ MemoryAddress memory_search_get_result_address(MemorySearchResultSet* set, size_
     }
 }
 
-MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
-    switch(set->type) {
-    case MemoryTypeUnsigned:
-    case MemoryTypeSigned:
-    case MemoryTypeInteger:
-    case MemoryTypeFloating:
-    case MemoryTypeNumber:
-    case MemoryTypeMAX:
-        unreachable();
-
-    case MemoryTypeU8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return memory_search_get_display(result->address, set->type, &result->u8);
-    }
-    case MemoryTypeU16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return memory_search_get_display(result->address, set->type, &result->u16);
-    }
-    case MemoryTypeU32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->u32);
-    }
-    case MemoryTypeU64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->u64);
-    }
-    case MemoryTypeI8: {
-        MemorySearchResult8* result = &set->results_8[i];
-        return memory_search_get_display(result->address, set->type, &result->i8);
-    }
-    case MemoryTypeI16: {
-        MemorySearchResult16* result = &set->results_16[i];
-        return memory_search_get_display(result->address, set->type, &result->i16);
-    }
-    case MemoryTypeI32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->i32);
-    }
-    case MemoryTypeI64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->i64);
-    }
-    case MemoryTypeF32: {
-        MemorySearchResult32* result = &set->results_32[i];
-        return memory_search_get_display(result->address, set->type, &result->f32);
-    }
-    case MemoryTypeF64: {
-        MemorySearchResult64* result = &set->results_64[i];
-        return memory_search_get_display(result->address, set->type, &result->f64);
-    }
-    case MemoryTypeF128: {
-        MemorySearchResult128* result = &set->results_128[i];
-        return memory_search_get_display(result->address, set->type, &result->f128);
-    }
-    }
-}
-
-MemorySearchResultDisplay
+static MemorySearchResultDisplay
     memory_search_get_display(MemoryAddress address, MemoryType type, void* value) {
     MemorySearchResultDisplay display;
 
@@ -1111,6 +1054,63 @@ MemorySearchResultDisplay
     return display;
 }
 
+MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
+    switch(set->type) {
+    case MemoryTypeUnsigned:
+    case MemoryTypeSigned:
+    case MemoryTypeInteger:
+    case MemoryTypeFloating:
+    case MemoryTypeNumber:
+    case MemoryTypeMAX:
+        unreachable();
+
+    case MemoryTypeU8: {
+        MemorySearchResult8* result = &set->results_8[i];
+        return memory_search_get_display(result->address, set->type, &result->u8);
+    }
+    case MemoryTypeU16: {
+        MemorySearchResult16* result = &set->results_16[i];
+        return memory_search_get_display(result->address, set->type, &result->u16);
+    }
+    case MemoryTypeU32: {
+        MemorySearchResult32* result = &set->results_32[i];
+        return memory_search_get_display(result->address, set->type, &result->u32);
+    }
+    case MemoryTypeU64: {
+        MemorySearchResult64* result = &set->results_64[i];
+        return memory_search_get_display(result->address, set->type, &result->u64);
+    }
+    case MemoryTypeI8: {
+        MemorySearchResult8* result = &set->results_8[i];
+        return memory_search_get_display(result->address, set->type, &result->i8);
+    }
+    case MemoryTypeI16: {
+        MemorySearchResult16* result = &set->results_16[i];
+        return memory_search_get_display(result->address, set->type, &result->i16);
+    }
+    case MemoryTypeI32: {
+        MemorySearchResult32* result = &set->results_32[i];
+        return memory_search_get_display(result->address, set->type, &result->i32);
+    }
+    case MemoryTypeI64: {
+        MemorySearchResult64* result = &set->results_64[i];
+        return memory_search_get_display(result->address, set->type, &result->i64);
+    }
+    case MemoryTypeF32: {
+        MemorySearchResult32* result = &set->results_32[i];
+        return memory_search_get_display(result->address, set->type, &result->f32);
+    }
+    case MemoryTypeF64: {
+        MemorySearchResult64* result = &set->results_64[i];
+        return memory_search_get_display(result->address, set->type, &result->f64);
+    }
+    case MemoryTypeF128: {
+        MemorySearchResult128* result = &set->results_128[i];
+        return memory_search_get_display(result->address, set->type, &result->f128);
+    }
+    }
+}
+
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type) {
     memory_search_stop_update(memory_search);
     if(!memory_search_process_is_attached(memory_search)) {
@@ -1151,7 +1151,11 @@ MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search
     return &memory_search->scratchpad;
 }
 
-void memory_search_scratchpad_del(MemorySearch* memory_search, MemoryAddress addr, MemoryType type) {
+MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item) {
+    return memory_search_get_display(item->address, item->type, &item->value);
+}
+
+void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScratchpadItem* item) {
     memory_search_stop_update(memory_search);
     if(!memory_search_process_is_attached(memory_search)) {
         return;
@@ -1166,8 +1170,8 @@ void memory_search_scratchpad_del(MemorySearch* memory_search, MemoryAddress add
     }
     size_t item_i;
     for(item_i = 0; item_i < scratchpad->items_count; item_i++) {
-        MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
-        if(item->address == addr && item->type == type) {
+        MemorySearchScratchpadItem* del_item = &scratchpad->items[item_i];
+        if(del_item == item) {
             break;
         }
     }

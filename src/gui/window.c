@@ -608,8 +608,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     MemorySearchScratchpadItem* item = &scratchpad->items[clip_i];
                     ImGui_PushIDInt(clip_i);
-                    MemorySearchResultDisplay display =
-                        memory_search_get_display(item->address, item->type, &item->value);
+                    MemorySearchResultDisplay display = memory_search_get_scratchpad_display(item);
                     ImGui_TableNextRow();
                     // Active
                     // FIXME: keep applying the value
@@ -666,19 +665,13 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         ImGui_PushFont(gui->fonts.base);
                         if(ImGui_Selectable(remove_from_scratchpad)) {
                             if(!is_selected) {
-                                memory_search_scratchpad_del(
-                                    gui->memory_search,
-                                    item->address,
-                                    item->type);
+                                memory_search_scratchpad_del(gui->memory_search, item);
                             } else {
                                 for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
                                     i++) {
                                     MemorySearchScratchpadItem* del_item =
                                         &scratchpad->items[selected[i]];
-                                    memory_search_scratchpad_del(
-                                        gui->memory_search,
-                                        del_item->address,
-                                        del_item->type);
+                                    memory_search_scratchpad_del(gui->memory_search, del_item);
                                 }
                                 selected[0] = -1;
                                 last_selected = -1;
