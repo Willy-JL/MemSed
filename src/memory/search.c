@@ -734,16 +734,17 @@ static void* memory_search_update_callback(void* context) {
     thread_self_enable_canceling();
     MemorySearch* memory_search = context;
 
-    MemorySearchResultBatch* batch =
-        &memory_search->results.batches[memory_search->results.batches_count - 1];
     MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
     ProcessHandle* handle = memory_search->handle;
+    MemorySearchResultBatch* batch = NULL;
     size_t max_type_size = 0;
-
-    for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
-        MemorySearchResultSet* set = &batch->sets[set_i];
-        MemoryType type = set->type;
-        max_type_size = MAX(max_type_size, memory_type_get_size(type));
+    if(memory_search->results.batches_count != 0) {
+        batch = &memory_search->results.batches[memory_search->results.batches_count - 1];
+        for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
+            MemorySearchResultSet* set = &batch->sets[set_i];
+            MemoryType type = set->type;
+            max_type_size = MAX(max_type_size, memory_type_get_size(type));
+        }
     }
 
     while(true) {
@@ -760,7 +761,7 @@ static void* memory_search_update_callback(void* context) {
             thread_self_usleep(update_delay_usec);
         }
 
-        if(batch->total_results_count >= memory_search_update_max_results) {
+        if(batch == NULL || batch->total_results_count >= memory_search_update_max_results) {
             continue;
         }
 
