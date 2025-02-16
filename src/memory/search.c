@@ -4,7 +4,7 @@
 
 const size_t chunk_size = 1024 * 1024;
 const size_t update_delay_usec = 20;
-const size_t update_max_results = 100'000;
+const size_t memory_search_update_max_results = 100'000;
 
 struct MemorySearch {
     MemorySearchParams params;
@@ -686,6 +686,7 @@ static void* memory_search_update_callback(void* context) {
 
     MemorySearchResultBatch* batch =
         &memory_search->results.batches[memory_search->results.batches_count - 1];
+    MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
     ProcessHandle* handle = memory_search->handle;
     size_t max_type_size = 0;
 
@@ -696,6 +697,23 @@ static void* memory_search_update_callback(void* context) {
     }
 
     while(true) {
+        for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
+            MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
+            size_t size = memory_type_get_size(item->type);
+            if(item->active) {
+                process_handle_write(handle, item->address, &item->value, size);
+            }
+            if(process_handle_read(handle, item->address, &item->value, size) != size) {
+                memset(&item->value, 0, size);
+            }
+
+            thread_self_usleep(update_delay_usec);
+        }
+
+        if(batch->total_results_count >= memory_search_update_max_results) {
+            continue;
+        }
+
         for(size_t set_i = 0; set_i < batch->sets_count; set_i++) {
             MemorySearchResultSet* set = &batch->sets[set_i];
             for(size_t result_i = 0; result_i < set->results_count; result_i++) {
@@ -783,20 +801,6 @@ static void* memory_search_update_callback(void* context) {
 
                 thread_self_usleep(update_delay_usec);
             }
-        }
-
-        MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
-        for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
-            MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
-            size_t size = memory_type_get_size(item->type);
-            if(item->active) {
-                process_handle_write(handle, item->address, &item->value, size);
-            }
-            if(process_handle_read(handle, item->address, &item->value, size) != size) {
-                memset(&item->value, 0, size);
-            }
-
-            thread_self_usleep(update_delay_usec);
         }
     }
 
@@ -1286,10 +1290,10 @@ void memory_search_tick(MemorySearch* memory_search) {
         if(!process_handle_is_valid(memory_search->handle)) {
             memory_search_process_detach(memory_search);
         } else if(
-            memory_search->results.current_results_count < update_max_results &&
-            (memory_search->results.current_results_count > 0 ||
-             memory_search->scratchpad.items_count > 0) &&
-            memory_search->update_thread == NULL) {
+            memory_search->update_thread == NULL &&
+            ((memory_search->results.current_results_count > 0 &&
+              memory_search->results.current_results_count < memory_search_update_max_results) ||
+             memory_search->scratchpad.items_count > 0)) {
             memory_search->update_thread =
                 thread_start(memory_search_update_callback, memory_search);
         }

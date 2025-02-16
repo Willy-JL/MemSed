@@ -16,7 +16,7 @@ const char* reset_search = mdi_magnify_close " Reset Search";
 const uint8_t pane_spacing_mult = 3;
 const ImVec2 options_min_size = {378.0f, 250.0f};
 
-size_t imgui_clipper_max = 1'000'000;
+const size_t imgui_clipper_max = 1'000'000;
 
 static void gui_window_draw_attach_process_popup(Gui* gui) {
     ImVec2 display = gui->io->DisplaySize;
@@ -186,7 +186,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
         bool too_many = false;
         if(!memory_search_is_searching(gui->memory_search) && results->batches_count >= 1) {
             batch = &results->batches[results->batches_count - 1];
-            too_many = batch->total_results_count > imgui_clipper_max;
+            too_many = batch->total_results_count > memory_search_update_max_results;
         }
         ImGui_TableSetupScrollFreeze(0, 1 + too_many);
         ImGui_PushFont(gui->fonts.base);
@@ -197,8 +197,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             ImVec2 text_pos = ImGui_GetCursorScreenPos();
             ImVec2 rect_pos = text_pos;
             ImGui_Text("");
-            char text[51];
-            snprintf(text, sizeof(text), "Too many results, only %zu shown!", imgui_clipper_max);
+            const char* text = "Too many results, no live updates!";
             ImVec2 text_size = ImGui_CalcTextSize(text);
             ImDrawList* foreground = ImGui_GetWindowDrawList();
             rect_pos.x -= gui->style->ItemSpacing.x;
@@ -208,6 +207,14 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                 rect_pos.y + ImGui_GetTextLineHeightWithSpacing() - gui->style->FrameBorderSize};
             text_pos.x += (size.x - text_size.x) / 2;
             ImGui_PushClipRect(rect_pos, rect_max, false);
+            if(ImGui_IsMouseHoveringRect(rect_pos, rect_max) && ImGui_BeginTooltip()) {
+                ImGui_Text(
+                    "Max 100,000 results for live value updates"); // memory_search_update_max_results
+                if(batch->total_results_count > imgui_clipper_max) {
+                    ImGui_Text("Only first 1,000,000 results shown in list"); // imgui_clipper_max
+                }
+                ImGui_EndTooltip();
+            }
             ImDrawList_AddRectFilled(foreground, rect_pos, rect_max, 0xFF000042);
             ImDrawList_AddText(
                 foreground,
