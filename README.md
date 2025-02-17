@@ -8,6 +8,8 @@ Heavily inspired by basic Cheat Engine workflow (search value, make value change
 > It should work for the most part, but adjust your expectations accordingly. \
 > Check [TODO.md](TODO.md) for things yet to be implemented.
 
+![Screenshot of MemSed](.github/assets/preview.png)
+
 ## System Requirements
 
 - Linux (other platforms might be supported in the future) with `/proc` fs
