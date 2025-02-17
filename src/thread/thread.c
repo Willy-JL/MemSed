@@ -80,15 +80,15 @@ void thread_join(Thread* thread, void** result) {
     return;
 }
 
-void thread_self_enable_canceling() {
+void thread_self_enable_canceling(void) {
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 }
 
-void thread_self_disable_canceling() {
+void thread_self_disable_canceling(void) {
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 }
 
-void thread_self_quit_if_canceled() {
+void thread_self_quit_if_canceled(void) {
     int32_t old_state;
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &old_state);
     pthread_testcancel();

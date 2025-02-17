@@ -1,3 +1,7 @@
+- Add an app icon
+- Distribute packages (AUR, Flatpak, maybe COPR and PPA)
+- Maybe change theming a bit
+- Maybe multi-threading for faster searching
 - Add more search options:
   - Endianness
   - Boundaries?

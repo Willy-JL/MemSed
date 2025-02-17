@@ -130,7 +130,7 @@ typedef struct MemorySearch MemorySearch;
 
 extern const size_t memory_search_update_max_results;
 
-MemorySearch* memory_search_init();
+MemorySearch* memory_search_init(void);
 void memory_search_process_attach(MemorySearch* memory_search, ProcessPid pid);
 bool memory_search_process_is_attached(MemorySearch* memory_search);
 Process* memory_search_get_process(MemorySearch* memory_search);

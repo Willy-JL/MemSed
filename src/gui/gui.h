@@ -24,7 +24,7 @@ typedef struct {
     MemorySearch* memory_search;
 } Gui;
 
-Gui* gui_init();
+Gui* gui_init(void);
 bool gui_should_close(Gui* gui);
 void gui_tick(Gui* gui);
 void gui_free(Gui* gui);

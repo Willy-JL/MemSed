@@ -3,7 +3,7 @@
 #include "fonts.h"
 #include "window.h"
 
-Gui* gui_init() {
+Gui* gui_init(void) {
     Gui* gui = malloc(sizeof(Gui));
     gui->should_close = false;
 

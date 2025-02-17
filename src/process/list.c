@@ -2,7 +2,7 @@
 
 #include <dirent.h>
 
-ProcessList* process_list_init() {
+ProcessList* process_list_init(void) {
     DIR* dir = opendir("/proc");
     if(dir == NULL) {
         perror("/proc");

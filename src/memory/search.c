@@ -17,7 +17,7 @@ struct MemorySearch {
     MemorySearchScratchpad scratchpad;
 };
 
-MemorySearch* memory_search_init() {
+MemorySearch* memory_search_init(void) {
     MemorySearch* memory_search = malloc(sizeof(MemorySearch));
     memory_search->params.type = MemoryTypeNumber;
     memory_search->params.alignment = 4;
