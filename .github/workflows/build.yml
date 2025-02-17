@@ -14,17 +14,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone repo
-      uses: actions/checkout@v4
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-    - name: Configure CMake
-      run: cmake --preset ${{env.CMAKE_PRESET}}
+      - name: Configure CMake
+        run: cmake --preset ${{env.CMAKE_PRESET}}
 
-    - name: Build
-      run: cmake --build -j $(nproc) --preset ${{env.CMAKE_PRESET}}
+      - name: Build
+        run: cmake --build -j $(nproc) --preset ${{env.CMAKE_PRESET}}
 
-    - name: Upload artifacts to GitHub
-      uses: actions/upload-artifact@v4
-      with:
-        path: |
-          build/${{env.CMAKE_PRESET}}/memsed
+      - name: Upload artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            build/${{env.CMAKE_PRESET}}/memsed
