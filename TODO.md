@@ -1,5 +1,4 @@
 - Add more search options:
-  - Memory region flags (write, execute, ...)
   - Endianness
   - Pause process?
   - Boundaries?

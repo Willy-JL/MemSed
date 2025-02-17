@@ -615,6 +615,64 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_set_params(gui->memory_search, params);
             }
             ImGui_PopFont();
+
+            // Region
+            ImGui_TableNextRow();
+            ImGui_TableNextColumn();
+            ImGui_AlignTextToFramePadding();
+            ImGui_Text("Region:");
+            ImGui_TableNextColumn();
+            ImGui_PushFont(gui->fonts.mono);
+            temp_int = params.region_types;
+            if(ImGui_CheckboxFlagsIntPtr("File", &temp_int, ProcessRegionTypeFile)) {
+                params.region_types = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Stack", &temp_int, ProcessRegionTypeStack)) {
+                params.region_types = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Heap", &temp_int, ProcessRegionTypeHeap)) {
+                params.region_types = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Anon", &temp_int, ProcessRegionTypeAnonymous)) {
+                params.region_types = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_PopFont();
+
+            // Flags
+            ImGui_TableNextRow();
+            ImGui_TableNextColumn();
+            ImGui_AlignTextToFramePadding();
+            ImGui_Text("Flags:");
+            ImGui_TableNextColumn();
+            ImGui_PushFont(gui->fonts.mono);
+            temp_int = params.region_flags;
+            if(ImGui_CheckboxFlagsIntPtr("Read", &temp_int, ProcessRegionFlagRead)) {
+                params.region_flags = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Write", &temp_int, ProcessRegionFlagWrite)) {
+                params.region_flags = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Exec", &temp_int, ProcessRegionFlagExecute)) {
+                params.region_flags = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            if(ImGui_CheckboxFlagsIntPtr("Shared", &temp_int, ProcessRegionFlagShared)) {
+                params.region_flags = temp_int;
+                memory_search_set_params(gui->memory_search, params);
+            }
+            ImGui_PopFont();
             ImGui_EndDisabled();
 
             ImGui_EndTable();

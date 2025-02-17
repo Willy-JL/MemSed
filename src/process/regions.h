@@ -32,5 +32,8 @@ typedef struct {
     ProcessRegion regions[];
 } ProcessRegions;
 
-ProcessRegions* process_regions_init(ProcessPid pid);
+ProcessRegions* process_regions_init(
+    ProcessPid pid,
+    ProcessRegionType types_mask,
+    ProcessRegionFlag flags_mask);
 void process_regions_free(ProcessRegions* regions);

@@ -1,6 +1,9 @@
 #include "regions.h"
 
-ProcessRegions* process_regions_init(ProcessPid pid) {
+ProcessRegions* process_regions_init(
+    ProcessPid pid,
+    ProcessRegionType types_mask,
+    ProcessRegionFlag flags_mask) {
     char line[1024];
 
     snprintf(line, sizeof(line), "/proc/%i/maps", pid);
@@ -37,6 +40,37 @@ ProcessRegions* process_regions_init(ProcessPid pid) {
                &file_path_start) == 7) {
             char* file_path = line + file_path_start;
 
+            ProcessRegionType type;
+            if(file_path[0] == '\0') {
+                type = ProcessRegionTypeAnonymous;
+            } else if(strcmp(file_path, "[heap]") == 0) {
+                type = ProcessRegionTypeHeap;
+            } else if(strcmp(file_path, "[stack]") == 0) {
+                type = ProcessRegionTypeStack;
+            } else {
+                type = ProcessRegionTypeFile;
+            }
+            if(!(types_mask & type)) {
+                continue;
+            }
+
+            ProcessRegionFlag flags = 0;
+            if(r == 'r') {
+                flags |= ProcessRegionFlagRead;
+            }
+            if(w == 'w') {
+                flags |= ProcessRegionFlagWrite;
+            }
+            if(x == 'x') {
+                flags |= ProcessRegionFlagExecute;
+            }
+            if(s == 's') {
+                flags |= ProcessRegionFlagShared;
+            }
+            if(!(flags & flags_mask)) {
+                continue;
+            }
+
             if(count == capacity) {
                 capacity *= 2;
                 regions =
@@ -48,29 +82,8 @@ ProcessRegions* process_regions_init(ProcessPid pid) {
             region->start = start;
             region->end = end;
 
-            if(file_path[0] == '\0') {
-                region->type = ProcessRegionTypeAnonymous;
-            } else if(strcmp(file_path, "[heap]") == 0) {
-                region->type = ProcessRegionTypeHeap;
-            } else if(strcmp(file_path, "[stack]") == 0) {
-                region->type = ProcessRegionTypeStack;
-            } else {
-                region->type = ProcessRegionTypeFile;
-            }
-
-            region->flags = 0;
-            if(r == 'r') {
-                region->flags |= ProcessRegionFlagRead;
-            }
-            if(w == 'w') {
-                region->flags |= ProcessRegionFlagWrite;
-            }
-            if(x == 'x') {
-                region->flags |= ProcessRegionFlagExecute;
-            }
-            if(s == 's') {
-                region->flags |= ProcessRegionFlagShared;
-            }
+            region->type = type;
+            region->flags = flags;
 
             if(region->type == ProcessRegionTypeFile) {
                 region->file_path = strdup(file_path);

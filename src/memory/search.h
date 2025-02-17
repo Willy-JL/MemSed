@@ -87,6 +87,8 @@ typedef struct {
 typedef struct {
     MemoryType type;
     uint8_t alignment;
+    ProcessRegionType region_types;
+    ProcessRegionFlag region_flags;
     flt128_t value;
     flt128_t deviation;
 } MemorySearchParams;

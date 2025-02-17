@@ -21,6 +21,9 @@ MemorySearch* memory_search_init() {
     MemorySearch* memory_search = malloc(sizeof(MemorySearch));
     memory_search->params.type = MemoryTypeNumber;
     memory_search->params.alignment = 4;
+    memory_search->params.region_types = ProcessRegionTypeHeap | ProcessRegionTypeStack |
+                                         ProcessRegionTypeAnonymous;
+    memory_search->params.region_flags = ProcessRegionFlagRead | ProcessRegionFlagWrite;
     memory_search->params.value = 123.0l;
     memory_search->params.deviation = 0.1l;
     memory_search->process = NULL;
@@ -95,6 +98,8 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
         // Can't change some values after first scan
         params.type = memory_search->params.type;
         params.alignment = memory_search->params.alignment;
+        params.region_types = memory_search->params.region_types;
+        params.region_flags = memory_search->params.region_flags;
     }
 
     params.type = CLAMP(params.type, MemoryTypeMAX - 1, 0);
@@ -224,7 +229,10 @@ static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
     memory_search_stop_update(memory_search);
 
-    ProcessRegions* regions = process_regions_init(memory_search->process->pid);
+    ProcessRegions* regions = process_regions_init(
+        memory_search->process->pid,
+        memory_search->params.region_types,
+        memory_search->params.region_flags);
     if(regions == NULL) {
         return NULL;
     }
