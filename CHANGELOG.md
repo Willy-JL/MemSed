@@ -1,0 +1,15 @@
+### Initial release!
+- Select process and search its memory
+- Add addresses to scratchpad and edit their values
+- Several search options:
+  - Value type
+    - Unsigned (u8, u16, u32, u64)
+    - Signed (i8, i16, i32, i64)
+    - Floating (f32, f64, f128)
+  - Deviation (Value +-)
+  - Alignment
+  - Suspend process while searching
+  - Memory region types
+  - Memory permission flags
+- Live updating of results and scratchpad values
+- Info of addresses' memory regions (file, heap, stack, offset...)
