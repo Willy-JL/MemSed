@@ -21,3 +21,39 @@ bool process_pid_is_alive(ProcessPid pid) {
     }
     unreachable();
 }
+
+void process_pid_pause(ProcessPid pid) {
+    int32_t res = kill(pid, SIGSTOP);
+    if(res == 0) {
+        return;
+    }
+    if(res == -1) {
+        switch(errno) {
+        case ESRCH:
+        case EPERM:
+            return;
+        default:
+            perror("Unknown result sending STOP signal");
+            return;
+        }
+    }
+    unreachable();
+}
+
+void process_pid_resume(ProcessPid pid) {
+    int32_t res = kill(pid, SIGCONT);
+    if(res == 0) {
+        return;
+    }
+    if(res == -1) {
+        switch(errno) {
+        case ESRCH:
+        case EPERM:
+            return;
+        default:
+            perror("Unknown result sending CONT signal");
+            return;
+        }
+    }
+    unreachable();
+}

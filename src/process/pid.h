@@ -8,3 +8,5 @@
 typedef int32_t ProcessPid;
 
 bool process_pid_is_alive(ProcessPid pid);
+void process_pid_pause(ProcessPid pid);
+void process_pid_resume(ProcessPid pid);

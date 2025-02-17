@@ -21,6 +21,7 @@ MemorySearch* memory_search_init() {
     MemorySearch* memory_search = malloc(sizeof(MemorySearch));
     memory_search->params.type = MemoryTypeNumber;
     memory_search->params.alignment = 4;
+    memory_search->params.suspend_process = false;
     memory_search->params.region_types = ProcessRegionTypeHeap | ProcessRegionTypeStack |
                                          ProcessRegionTypeAnonymous;
     memory_search->params.region_flags = ProcessRegionFlagRead | ProcessRegionFlagWrite;
@@ -216,6 +217,10 @@ static void memory_search_consolidate_results(void* context) {
         }
     }
     memory_search->results.current_results_count = batch->total_results_count;
+
+    if(memory_search->params.suspend_process) {
+        process_pid_resume(memory_search->process->pid);
+    }
 }
 
 static void memory_search_extend_results(MemorySearchResultSet* set, size_t* capacity) {
@@ -228,12 +233,18 @@ static void memory_search_extend_results(MemorySearchResultSet* set, size_t* cap
 static void* memory_search_begin_callback(void* context) {
     MemorySearch* memory_search = context;
     memory_search_stop_update(memory_search);
+    if(memory_search->params.suspend_process) {
+        process_pid_pause(memory_search->process->pid);
+    }
 
     ProcessRegions* regions = process_regions_init(
         memory_search->process->pid,
         memory_search->params.region_types,
         memory_search->params.region_flags);
     if(regions == NULL) {
+        if(memory_search->params.suspend_process) {
+            process_pid_resume(memory_search->process->pid);
+        }
         return NULL;
     }
 
@@ -489,6 +500,9 @@ static void* memory_search_begin_callback(void* context) {
 static void* memory_search_next_callback(void* context) {
     MemorySearch* memory_search = context;
     memory_search_stop_update(memory_search);
+    if(memory_search->params.suspend_process) {
+        process_pid_pause(memory_search->process->pid);
+    }
 
     memory_search->results.batches = realloc(
         memory_search->results.batches,

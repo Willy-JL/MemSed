@@ -87,6 +87,7 @@ typedef struct {
 typedef struct {
     MemoryType type;
     uint8_t alignment;
+    bool suspend_process;
     ProcessRegionType region_types;
     ProcessRegionFlag region_flags;
     flt128_t value;

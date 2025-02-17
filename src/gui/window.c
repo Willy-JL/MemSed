@@ -572,8 +572,11 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_Text("Value:");
             ImGui_TableNextColumn();
             snprintf(temp_str, sizeof(temp_str), "%.*Lg", LDBL_DIG, params.value);
+            ImGui_SetNextItemWidth(
+                ImGui_GetContentRegionAvail().x - ImGui_CalcTextSize("Suspend:").x -
+                ImGui_GetFrameHeightWithSpacing() - pane_spacing_mult * gui->style->ItemSpacing.x -
+                gui->style->FrameBorderSize);
             ImGui_PushFont(gui->fonts.mono);
-            ImGui_SetNextItemWidth(-FLT_MIN);
             if(ImGui_InputText(
                    "###value",
                    temp_str,
@@ -583,6 +586,12 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_set_params(gui->memory_search, params);
             }
             ImGui_PopFont();
+            ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
+            ImGui_Text("Suspend:");
+            ImGui_SameLine();
+            if(ImGui_Checkbox("###suspend_process", &params.suspend_process)) {
+                memory_search_set_params(gui->memory_search, params);
+            }
 
             ImGui_BeginDisabled(params.type <= MemoryTypeInteger);
             // Deviation

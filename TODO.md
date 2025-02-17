@@ -1,6 +1,5 @@
 - Add more search options:
   - Endianness
-  - Pause process?
   - Boundaries?
   - More value options?
 - Confirm dialog when detaching process with non-empty results/scratchpad
