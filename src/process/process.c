@@ -12,7 +12,7 @@ typedef struct {
 static UidUsername* uid_usernames = NULL;
 static size_t uid_usernames_count = 0;
 
-static void load_uid_usernames() {
+static void load_uid_usernames(void) {
     char temp_str[257];
     size_t capacity = 1;
     size_t count = 0;

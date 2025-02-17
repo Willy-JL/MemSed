@@ -7,5 +7,5 @@ typedef struct {
     Process* processes[];
 } ProcessList;
 
-ProcessList* process_list_init();
+ProcessList* process_list_init(void);
 void process_list_free(ProcessList* list);
