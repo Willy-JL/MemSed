@@ -33,7 +33,7 @@ include_directories("${LIB_DIR}" "${VENDOR_DIR}")
 
 # Main sources
 # Globbing is discouraged but fine when keeping in mind its caveat:
-# Adding new files weon't be detected, need to run cmake again to detect them
+# Adding new files won't be detected, need to run cmake again to detect them
 # You can also `touch CMakeLists.txt`, or save it without making changes
 file(GLOB_RECURSE sources "${SRC_DIR}/*.c" "${SRC_DIR}/*.h")
 
