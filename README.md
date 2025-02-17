@@ -73,3 +73,14 @@ Press `Ctrl+Shift+P` and run `clangd: Restart language server` if things ever go
 - `src/process/`: platform-specific implementation of basic process primitives
 - `src/thread/`: platform-specific implementation of basic thread primitives
 - everything else in `src/` should be fairly platform-agnostic
+
+## ❤️ Support
+If you enjoy this program please __**spread the word!**__ And if you really love it, maybe consider donating? :D
+
+> **[Ko-fi](https://ko-fi.com/willyjl)**: One-off or Recurring, No signup required
+
+> **[PayPal](https://paypal.me/willyjl1)**: One-off, Signup required
+
+> **BTC**: `1EnCi1HF8Jw6m2dWSUwHLbCRbVBCQSyDKm`
+
+**Thank you <3**
