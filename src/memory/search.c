@@ -1021,6 +1021,16 @@ void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress add
         return;
     }
 
+    ProcessRegion* region = NULL;
+    ProcessRegions* regions = memory_search->results.regions;
+    for(size_t region_i = 0; region_i < regions->regions_count; region_i++) {
+        ProcessRegion* reg = &regions->regions[region_i];
+        if(addr >= reg->start && addr < reg->end) {
+            region = reg;
+            break;
+        }
+    }
+
     MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
     if(scratchpad->items_count > 0) {
         for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
@@ -1043,6 +1053,21 @@ void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress add
     item->description_len = 1;
     item->description = malloc(item->description_len);
     item->description[0] = '\0';
+    if(region != NULL) {
+        item->region.type = region->type;
+        item->region.flags = region->flags;
+        if(region->file_path != NULL) {
+            item->region.file_path = strdup(region->file_path);
+        } else {
+            item->region.file_path = NULL;
+        }
+        item->region.file_offset = region->file_offset + (addr - region->start);
+    } else {
+        item->region.type = 0;
+        item->region.flags = 0;
+        item->region.file_path = NULL;
+        item->region.file_offset = 0;
+    }
     size_t size = memory_type_get_size(type);
     if(process_handle_read(memory_search->handle, addr, &item->value, size) != size) {
         memset(&item->value, 0, size);
@@ -1166,6 +1191,11 @@ void memory_search_scratchpad_del(MemorySearch* memory_search, MemorySearchScrat
         return;
     }
 
+    free(item->description);
+    if(item->region.file_path != NULL) {
+        free(item->region.file_path);
+    }
+
     scratchpad->items_count--;
     if(scratchpad->items_count == 0) {
         free(scratchpad->items);
@@ -1195,6 +1225,9 @@ void memory_search_scratchpad_wipe(MemorySearch* memory_search) {
         for(size_t item_i = 0; item_i < items_count; item_i++) {
             MemorySearchScratchpadItem* item = &items[item_i];
             free(item->description);
+            if(item->region.file_path != NULL) {
+                free(item->region.file_path);
+            }
         }
         free(items);
     }

@@ -300,13 +300,59 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         }
                     }
                     MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
+                    MemoryAddress addr = base->address;
                     MemorySearchResultDisplay display =
                         memory_search_get_result_display(set, result_i);
+                    ProcessRegion* region = NULL;
+                    for(size_t region_i = 0; region_i < results->regions->regions_count;
+                        region_i++) {
+                        ProcessRegion* reg = &results->regions->regions[region_i];
+                        if(addr >= reg->start && addr < reg->end) {
+                            region = reg;
+                            break;
+                        }
+                    }
                     ImGui_TableNextRow();
                     // Address
-                    // FIXME: if address is in region mapped from file, show filename+offset
                     ImGui_TableNextColumn();
-                    ImGui_TextUnformatted(display.address_str);
+                    ImVec4 col;
+                    switch(region->type) {
+                    case ProcessRegionTypeFile:
+                        col = (ImVec4){0.2f, 0.8f, 0.2f, 1.0f};
+                        break;
+                    case ProcessRegionTypeHeap:
+                        col = (ImVec4){0.3f, 0.5f, 1.0f, 1.0f};
+                        break;
+                    case ProcessRegionTypeStack:
+                        col = (ImVec4){1.0f, 0.4f, 0.3f, 1.0f};
+                        break;
+                    case ProcessRegionTypeAnonymous:
+                        col = (ImVec4){1.0f, 1.0f, 1.0f, 1.0f};
+                        break;
+                    }
+                    ImGui_TextColored(col, "%s", display.address_str);
+                    if(ImGui_BeginItemTooltip()) {
+                        ImGui_Text(
+                            "Region Type: %s",
+                            region->type == ProcessRegionTypeFile      ? "File" :
+                            region->type == ProcessRegionTypeHeap      ? "Heap" :
+                            region->type == ProcessRegionTypeStack     ? "Stack" :
+                            region->type == ProcessRegionTypeAnonymous ? "Anonymous" :
+                                                                         "Unknown");
+                        ImGui_Text(
+                            "Region Flags: %c%c%c%c",
+                            region->flags & ProcessRegionFlagRead ? 'r' : '-',
+                            region->flags & ProcessRegionFlagWrite ? 'w' : '-',
+                            region->flags & ProcessRegionFlagExecute ? 'x' : '-',
+                            region->flags & ProcessRegionFlagShared ? 's' : '-');
+                        if(region->type == ProcessRegionTypeFile) {
+                            ImGui_Text("File: %s", region->file_path);
+                            ImGui_Text(
+                                "File Offset: 0x%lX",
+                                region->file_offset + (addr - region->start));
+                        }
+                        ImGui_EndTooltip();
+                    }
                     // Type
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(type_str);
@@ -337,10 +383,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         ImGui_PushFont(gui->fonts.base);
                         if(ImGui_Selectable(add_to_scratchpad)) {
                             if(!is_selected) {
-                                memory_search_scratchpad_add(
-                                    gui->memory_search,
-                                    base->address,
-                                    set->type);
+                                memory_search_scratchpad_add(gui->memory_search, addr, set->type);
                             } else {
                                 for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1;
                                     i++) {
@@ -351,11 +394,9 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                         add_set_i++;
                                     }
                                     MemorySearchResultSet* add_set = &batch->sets[add_set_i];
-                                    MemoryAddress add_addr =
-                                        memory_search_get_result_base(add_set, add_i)->address;
                                     memory_search_scratchpad_add(
                                         gui->memory_search,
-                                        add_addr,
+                                        memory_search_get_result_base(add_set, add_i)->address,
                                         add_set->type);
                                 }
                             }
@@ -374,10 +415,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             }
                         }
                         if(!is_selected) {
-                            memory_search_scratchpad_add(
-                                gui->memory_search,
-                                base->address,
-                                set->type);
+                            memory_search_scratchpad_add(gui->memory_search, addr, set->type);
                         } else {
                             for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
                                 size_t add_i = selected[i];
@@ -387,11 +425,9 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                     add_set_i++;
                                 }
                                 MemorySearchResultSet* add_set = &batch->sets[add_set_i];
-                                MemoryAddress add_addr =
-                                    memory_search_get_result_base(add_set, add_i)->address;
                                 memory_search_scratchpad_add(
                                     gui->memory_search,
-                                    add_addr,
+                                    memory_search_get_result_base(add_set, add_i)->address,
                                     add_set->type);
                             }
                         }
@@ -736,13 +772,46 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     MemorySearchResultDisplay display = memory_search_get_scratchpad_display(item);
                     ImGui_TableNextRow();
                     // Active
-                    // FIXME: keep applying the value
                     ImGui_TableNextColumn();
                     ImGui_Checkbox("###active", &item->active);
                     // Address
-                    // FIXME: if address is in region mapped from file, show filename+offset
                     ImGui_TableNextColumn();
-                    ImGui_TextUnformatted(display.address_str);
+                    ImVec4 col;
+                    switch(item->region.type) {
+                    case ProcessRegionTypeFile:
+                        col = (ImVec4){0.2f, 0.8f, 0.2f, 1.0f};
+                        break;
+                    case ProcessRegionTypeHeap:
+                        col = (ImVec4){0.3f, 0.5f, 1.0f, 1.0f};
+                        break;
+                    case ProcessRegionTypeStack:
+                        col = (ImVec4){1.0f, 0.4f, 0.3f, 1.0f};
+                        break;
+                    case ProcessRegionTypeAnonymous:
+                        col = (ImVec4){1.0f, 1.0f, 1.0f, 1.0f};
+                        break;
+                    }
+                    ImGui_TextColored(col, "%s", display.address_str);
+                    if(ImGui_BeginItemTooltip()) {
+                        ImGui_Text(
+                            "Region Type: %s",
+                            item->region.type == ProcessRegionTypeFile      ? "File" :
+                            item->region.type == ProcessRegionTypeHeap      ? "Heap" :
+                            item->region.type == ProcessRegionTypeStack     ? "Stack" :
+                            item->region.type == ProcessRegionTypeAnonymous ? "Anonymous" :
+                                                                              "Unknown");
+                        ImGui_Text(
+                            "Region Flags: %c%c%c%c",
+                            item->region.flags & ProcessRegionFlagRead ? 'r' : '-',
+                            item->region.flags & ProcessRegionFlagWrite ? 'w' : '-',
+                            item->region.flags & ProcessRegionFlagExecute ? 'x' : '-',
+                            item->region.flags & ProcessRegionFlagShared ? 's' : '-');
+                        if(item->region.type == ProcessRegionTypeFile) {
+                            ImGui_Text("File: %s", item->region.file_path);
+                            ImGui_Text("File Offset: 0x%lX", item->region.file_offset);
+                        }
+                        ImGui_EndTooltip();
+                    }
                     // Type
                     ImGui_TableNextColumn();
                     ImGui_TextUnformatted(memory_type_get_short_name(item->type));

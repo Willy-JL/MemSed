@@ -3,7 +3,6 @@
   - Pause process?
   - Boundaries?
   - More value options?
-- Show file path and offset for addresses in file-mapped memory regions
 - Confirm dialog when detaching process with non-empty results/scratchpad
 - Add keyboard shortcuts
 - Optimize process picker with list clipper

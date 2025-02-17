@@ -99,6 +99,12 @@ typedef struct {
     bool active;
     char* description;
     int32_t description_len;
+    struct {
+        ProcessRegionType type;
+        ProcessRegionFlag flags;
+        char* file_path;
+        size_t file_offset;
+    } region;
     union {
         uint8_t u8;
         uint16_t u16;
