@@ -31,6 +31,8 @@ static_assert(
     "float is not 32 bit on this architecture, fix the f32 typedef.");
 typedef long double flt128_t;
 
+#define CLOCKS_TO_USEC(clocks) (clocks * 1'000'000 / CLOCKS_PER_SEC)
+
 #ifndef MAX
 #define MAX(a, b)               \
     ({                          \

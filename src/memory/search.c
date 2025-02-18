@@ -3,7 +3,7 @@
 #include "../thread/thread.h"
 
 const size_t chunk_size = 1024 * 1024;
-const size_t update_delay_usec = 20;
+const size_t update_delay_mult = 20;
 const size_t memory_search_update_max_results = 100'000;
 
 struct MemorySearch {
@@ -771,6 +771,7 @@ static void* memory_search_update_callback(void* context) {
 
     while(true) {
         for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
+            clock_t start = clock();
             MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
             size_t size = memory_type_get_size(item->type);
             if(item->active) {
@@ -779,8 +780,9 @@ static void* memory_search_update_callback(void* context) {
             if(process_handle_read(handle, item->address, &item->value, size) != size) {
                 memset(&item->value, 0, size);
             }
+            clock_t end = clock();
 
-            thread_self_usleep(update_delay_usec);
+            thread_self_usleep(CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
         }
 
         if(batch == NULL || batch->total_results_count >= memory_search_update_max_results) {
@@ -791,12 +793,14 @@ static void* memory_search_update_callback(void* context) {
             MemorySearchResultSet* set = &batch->sets[set_i];
             size_t size = memory_type_get_size(set->type);
             for(size_t result_i = 0; result_i < set->results_count; result_i++) {
+                clock_t start = clock();
                 MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
                 if(process_handle_read(handle, base->address, &base->value, size) != size) {
                     memset(&base->value, 0, size);
                 }
+                clock_t end = clock();
 
-                thread_self_usleep(update_delay_usec);
+                thread_self_usleep(CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
             }
         }
     }
