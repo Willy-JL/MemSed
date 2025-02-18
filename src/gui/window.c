@@ -593,7 +593,6 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_set_params(gui->memory_search, params);
             }
 
-            ImGui_BeginDisabled(params.type <= MemoryTypeInteger);
             // Deviation
             ImGui_TableNextRow();
             ImGui_TableNextColumn();
@@ -616,7 +615,6 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 memory_search_set_params(gui->memory_search, params);
             }
             ImGui_PopFont();
-            ImGui_EndDisabled();
 
             ImGui_BeginDisabled(results->batches_count != 0);
             // Alignment
