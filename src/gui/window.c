@@ -259,6 +259,20 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             const char* type_str = NULL;
             MemorySearchResultSet* set = &batch->sets[set_i];
             MemorySearchResultSet* prev_set = (void*)-1;
+            static int32_t dragging = -1;
+            static size_t last_total = 0;
+            static int32_t last_selected = -1;
+            static int32_t selected[UINT8_MAX] = {-1};
+            static int32_t doubleclick_selected[UINT8_MAX] = {-1};
+            if(last_total != batch->total_results_count) {
+                dragging = -1;
+                selected[0] = -1;
+                last_selected = -1;
+                last_total = batch->total_results_count;
+            }
+            if(dragging != -1 && !ImGui_IsMouseDown(ImGuiMouseButton_Left)) {
+                dragging = -1;
+            }
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     ImGui_PushIDInt(clip_i);
@@ -284,15 +298,6 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     }
                     size_t result_i = clip_i - sets_progress;
                     bool is_selected = false;
-                    static size_t last_total = 0;
-                    static int32_t last_selected = -1;
-                    static int32_t selected[UINT8_MAX] = {-1};
-                    static int32_t doubleclick_selected[UINT8_MAX] = {-1};
-                    if(last_total != batch->total_results_count) {
-                        selected[0] = -1;
-                        last_selected = -1;
-                        last_total = batch->total_results_count;
-                    }
                     for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
                         if(selected[i] == clip_i) {
                             is_selected = true;
@@ -493,6 +498,37 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             }
                         }
                         last_selected = clip_i;
+                    } else if(
+                        dragging != -1 && ImGui_GetMousePos().y > ImGui_GetItemRectMin().y &&
+                        ImGui_GetMousePos().y < ImGui_GetItemRectMax().y) {
+                        uint8_t next_i = 0;
+                        while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
+                            next_i++;
+                        }
+                        int32_t range_min = clip_i > last_selected ? last_selected : clip_i;
+                        int32_t range_max = clip_i > last_selected ? clip_i : last_selected;
+                        for(int32_t range_i = range_min;
+                            range_i <= range_max && next_i != COUNT_OF(selected);
+                            range_i++) {
+                            bool already_selected = false;
+                            for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                                if(selected[i] == range_i) {
+                                    already_selected = true;
+                                    break;
+                                }
+                            }
+                            if(!already_selected) {
+                                selected[next_i++] = range_i;
+                                if(next_i != COUNT_OF(selected)) {
+                                    selected[next_i] = -1;
+                                }
+                            }
+                        }
+                        last_selected = clip_i;
+                    } else if(
+                        ImGui_IsItemActive() && is_selected &&
+                        !ImGui_IsItemHovered(ImGuiHoveredFlags_None)) {
+                        dragging = clip_i;
                     }
                     ImGui_PopStyleColorEx(2);
                     ImGui_PopID();
@@ -756,20 +792,25 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                 &clipper,
                 scratchpad->items_count,
                 ImGui_GetFrameHeightWithSpacing());
+            static int32_t dragging = -1;
+            static size_t last_total = 0;
+            static int32_t last_selected = -1;
+            static int32_t selected[UINT8_MAX] = {-1};
+            static int32_t doubleclick_selected[UINT8_MAX] = {-1};
+            if(last_total != scratchpad->items_count) {
+                dragging = -1;
+                selected[0] = -1;
+                last_selected = -1;
+                last_total = scratchpad->items_count;
+            }
+            if(dragging != -1 && !ImGui_IsMouseDown(ImGuiMouseButton_Left)) {
+                dragging = -1;
+            }
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     MemorySearchScratchpadItem* item = &scratchpad->items[clip_i];
                     ImGui_PushIDInt(clip_i);
                     bool is_selected = false;
-                    static size_t last_total = 0;
-                    static int32_t last_selected = -1;
-                    static int32_t selected[UINT8_MAX] = {-1};
-                    static int32_t doubleclick_selected[UINT8_MAX] = {-1};
-                    if(last_total != scratchpad->items_count) {
-                        selected[0] = -1;
-                        last_selected = -1;
-                        last_total = scratchpad->items_count;
-                    }
                     for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
                         if(selected[i] == clip_i) {
                             is_selected = true;
@@ -978,6 +1019,37 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                             }
                         }
                         last_selected = clip_i;
+                    } else if(
+                        dragging != -1 && ImGui_GetMousePos().y > ImGui_GetItemRectMin().y &&
+                        ImGui_GetMousePos().y < ImGui_GetItemRectMax().y) {
+                        uint8_t next_i = 0;
+                        while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
+                            next_i++;
+                        }
+                        int32_t range_min = clip_i > last_selected ? last_selected : clip_i;
+                        int32_t range_max = clip_i > last_selected ? clip_i : last_selected;
+                        for(int32_t range_i = range_min;
+                            range_i <= range_max && next_i != COUNT_OF(selected);
+                            range_i++) {
+                            bool already_selected = false;
+                            for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
+                                if(selected[i] == range_i) {
+                                    already_selected = true;
+                                    break;
+                                }
+                            }
+                            if(!already_selected) {
+                                selected[next_i++] = range_i;
+                                if(next_i != COUNT_OF(selected)) {
+                                    selected[next_i] = -1;
+                                }
+                            }
+                        }
+                        last_selected = clip_i;
+                    } else if(
+                        ImGui_IsItemActive() && is_selected &&
+                        !ImGui_IsItemHovered(ImGuiHoveredFlags_None)) {
+                        dragging = clip_i;
                     }
                     ImGui_PopStyleColorEx(2);
                     ImGui_PopID();
