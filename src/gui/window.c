@@ -306,7 +306,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     }
                     MemorySearchResultBase* base = memory_search_get_result_base(set, result_i);
                     MemoryAddress addr = base->address;
-                    MemorySearchResultDisplay display =
+                    MemorySearchValueDisplay display =
                         memory_search_get_result_display(set, result_i);
                     ProcessRegion* region = NULL;
                     for(size_t region_i = 0; region_i < results->regions->regions_count;
@@ -817,7 +817,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                             break;
                         }
                     }
-                    MemorySearchResultDisplay display = memory_search_get_scratchpad_display(item);
+                    MemorySearchValueDisplay display = memory_search_get_scratchpad_display(item);
                     ImGui_TableNextRow();
                     // Active
                     ImGui_TableNextColumn();

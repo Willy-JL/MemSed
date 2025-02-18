@@ -956,9 +956,9 @@ MemorySearchResultBase* memory_search_get_result_base(MemorySearchResultSet* set
     }
 }
 
-static MemorySearchResultDisplay
+static MemorySearchValueDisplay
     memory_search_get_display(MemoryAddress address, MemoryType type, void* value) {
-    MemorySearchResultDisplay display;
+    MemorySearchValueDisplay display;
 
     switch(type) {
     case MemoryTypeUnsigned:
@@ -1025,7 +1025,7 @@ static MemorySearchResultDisplay
     return display;
 }
 
-MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
+MemorySearchValueDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i) {
     MemorySearchResultBase* base = memory_search_get_result_base(set, i);
     return memory_search_get_display(base->address, set->type, &base->value);
 }
@@ -1097,7 +1097,7 @@ MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search
     return &memory_search->scratchpad;
 }
 
-MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item) {
+MemorySearchValueDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item) {
     return memory_search_get_display(item->address, item->type, &item->value);
 }
 

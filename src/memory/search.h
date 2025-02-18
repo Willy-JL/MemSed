@@ -8,7 +8,7 @@
 typedef struct {
     char address_str[19]; // (64bit = 8byte) * 2hexchars + "0x" + '\0'
     char value_str[33]; // i64 = 20digit, floats could be more but 32chars are good enough
-} MemorySearchResultDisplay;
+} MemorySearchValueDisplay;
 
 typedef struct __attribute__((packed)) {
     MemoryAddress address;
@@ -146,10 +146,10 @@ void memory_search_undo(MemorySearch* memory_search);
 void memory_search_reset(MemorySearch* memory_search);
 MemorySearchResults* memory_search_get_results(MemorySearch* memory_search);
 MemorySearchResultBase* memory_search_get_result_base(MemorySearchResultSet* set, size_t i);
-MemorySearchResultDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
+MemorySearchValueDisplay memory_search_get_result_display(MemorySearchResultSet* set, size_t i);
 void memory_search_scratchpad_add(MemorySearch* memory_search, MemoryAddress addr, MemoryType type);
 MemorySearchScratchpad* memory_search_get_scratchpad(MemorySearch* memory_search);
-MemorySearchResultDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item);
+MemorySearchValueDisplay memory_search_get_scratchpad_display(MemorySearchScratchpadItem* item);
 void memory_search_scratchpad_set(
     MemorySearch* memory_search,
     MemorySearchScratchpadItem* item,
