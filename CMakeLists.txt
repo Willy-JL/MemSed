@@ -49,8 +49,8 @@ target_compile_options(memsed PRIVATE -Wall -Wextra -Wstrict-prototypes -Wredund
 target_compile_options(memsed PRIVATE -fdata-sections -ffunction-sections -fno-math-errno)  # Optimizations
 
 # Python (needed for GLAD and dear_bindings)
+find_package(Python COMPONENTS Interpreter REQUIRED)
 if(MEMSED_PYTHON_VENV)
-    find_package(Python COMPONENTS Interpreter REQUIRED)
     execute_process(COMMAND "${Python_EXECUTABLE}" -m venv "${VENV_DIR}")
     set(Python_EXECUTABLE "${VENV_DIR}/bin/python")
     execute_process(COMMAND "${Python_EXECUTABLE}" -m pip install -U -r "${MEMSED_DIR}/requirements.txt")
