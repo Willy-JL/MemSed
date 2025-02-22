@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(MemSed)
 
+option(MEMSED_VENDORED_SDL3     "Statically build and link SDL3, will not require SDL3 on target system to run"         ON)
+option(MEMSED_PYTHON_VENV       "Use a dedicated python venv instead of system python, requirements are auto-installed" ON)
+
 # Directories
 set(MEMSED_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(BUILD_DIR "${MEMSED_DIR}/build")
@@ -46,11 +49,13 @@ target_compile_options(memsed PRIVATE -Wall -Wextra -Wstrict-prototypes -Wredund
 target_compile_options(memsed PRIVATE -fdata-sections -ffunction-sections -fno-math-errno)  # Optimizations
 
 # Python (needed for GLAD and dear_bindings)
-find_package(Python COMPONENTS Interpreter REQUIRED)
-execute_process(COMMAND "${Python_EXECUTABLE}" -m venv "${VENV_DIR}")
-set(Python_EXECUTABLE "${VENV_DIR}/bin/python")
-execute_process(COMMAND "${Python_EXECUTABLE}" -m pip install -U -r "${MEMSED_DIR}/requirements.txt")
-configure_file("${MEMSED_DIR}/requirements.txt" "${VENV_DIR}/.installed")
+if(MEMSED_PYTHON_VENV)
+    find_package(Python COMPONENTS Interpreter REQUIRED)
+    execute_process(COMMAND "${Python_EXECUTABLE}" -m venv "${VENV_DIR}")
+    set(Python_EXECUTABLE "${VENV_DIR}/bin/python")
+    execute_process(COMMAND "${Python_EXECUTABLE}" -m pip install -U -r "${MEMSED_DIR}/requirements.txt")
+    configure_file("${MEMSED_DIR}/requirements.txt" "${VENV_DIR}/.installed")
+endif()
 
 # OpenGL (via GLAD loader)
 add_subdirectory("${GLAD_GEN}/cmake")
@@ -58,14 +63,18 @@ glad_add_library(glad STATIC EXCLUDE_FROM_ALL MERGE REPRODUCIBLE API gl:core=3.0
 target_link_libraries(memsed PRIVATE glad)
 
 # SDL3
-set(SDL_STATIC ON)
-add_subdirectory("${SDL3_DIR}" EXCLUDE_FROM_ALL)
-target_link_libraries(memsed PRIVATE SDL3-static)
+if(MEMSED_VENDORED_SDL3)
+    set(SDL_STATIC ON)
+    add_subdirectory("${SDL3_DIR}" EXCLUDE_FROM_ALL)
+else()
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+endif()
+target_link_libraries(memsed PRIVATE SDL3::SDL3)
 
 # ImGui (via dcimgui bindings)
 set(DCIMGUI_BACKENDS sdl3 opengl3)
 add_subdirectory("${DCIMGUI_DIR}")
-target_link_libraries(dcimgui PRIVATE SDL3-static)
+target_link_libraries(dcimgui PRIVATE SDL3::SDL3)
 target_link_libraries(dcimgui PRIVATE glad)
 target_link_libraries(memsed PRIVATE dcimgui)
 
