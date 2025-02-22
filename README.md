@@ -32,6 +32,7 @@ Will work on most Linux distros, needs to be updated manually.
 ```bash
 curl -Lo memsed https://github.com/Willy-JL/MemSed/releases/latest/download/memsed
 sudo install memsed -D -t /usr/local/bin/
+rm memsed
 ```
 Then, run from terminal with `sudo memsed`. \
 If your distro does not support `/usr/local/bin/` in PATH, try `/usr/bin/` instead.
