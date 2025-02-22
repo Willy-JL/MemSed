@@ -1,9 +1,12 @@
 #include "handle.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+
 // Linux: file handle to /proc/pid/mem
 struct ProcessHandle {
     ProcessPid pid;
-    FILE* mem;
+    int32_t mem;
 };
 
 ProcessHandle* process_handle_init(ProcessPid pid) {
@@ -11,8 +14,8 @@ ProcessHandle* process_handle_init(ProcessPid pid) {
     handle->pid = pid;
     char path[31];
     snprintf(path, sizeof(path), "/proc/%i/mem", pid);
-    handle->mem = fopen(path, "r+");
-    if(handle->mem == NULL) {
+    handle->mem = open(path, O_RDWR);
+    if(handle->mem < 0) {
         perror(path);
         free(handle);
         return NULL;
@@ -21,49 +24,28 @@ ProcessHandle* process_handle_init(ProcessPid pid) {
 }
 
 bool process_handle_is_valid(ProcessHandle* handle) {
-    return ftell(handle->mem) >= 0 && process_pid_is_alive(handle->pid);
-}
-
-static bool process_handle_seek(ProcessHandle* handle, MemoryAddress addr) {
-    if(ftell(handle->mem) != (int64_t)addr) {
-        if(fseek(handle->mem, addr, SEEK_SET) != 0) {
-            return false;
-        }
-    }
-    return true;
+    return lseek(handle->mem, 0, SEEK_CUR) >= 0 && process_pid_is_alive(handle->pid);
 }
 
 size_t process_handle_read(ProcessHandle* handle, MemoryAddress addr, void* buf, size_t size) {
-    if(!process_handle_seek(handle, addr)) {
+    uint64_t did_read = pread(handle->mem, buf, size, addr);
+    if(did_read < 0) {
+        perror("Error reading process memory");
         return 0;
     }
-    uint64_t read = fread(buf, 1, size, handle->mem);
-    if(read != size) {
-        if(feof(handle->mem)) {
-            // For some reason when reaching EOF, it sets error to 1 instead,
-            // but perror() says "Input/output error" which should be 5 (EIO)
-        } else if(ferror(handle->mem) != 1) {
-            perror("Error reading process memory");
-        }
-    }
-    return read;
+    return did_read;
 }
 
 size_t process_handle_write(ProcessHandle* handle, MemoryAddress addr, void* buf, size_t size) {
-    if(!process_handle_seek(handle, addr)) {
+    uint64_t did_write = pwrite(handle->mem, buf, size, addr);
+    if(did_write < 0) {
+        perror("Error writing process memory");
         return 0;
     }
-    uint64_t written = fwrite(buf, 1, size, handle->mem);
-    if(written != size) {
-        // FIXME: check this works correctly
-        if(ferror(handle->mem)) {
-            perror("Error writing process memory");
-        }
-    }
-    return written;
+    return did_write;
 }
 
 void process_handle_free(ProcessHandle* handle) {
-    fclose(handle->mem);
+    close(handle->mem);
     free(handle);
 }
