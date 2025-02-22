@@ -15,6 +15,27 @@ Heavily inspired by basic Cheat Engine workflow (search value, make value change
 - Linux (other platforms might be supported in the future) with `/proc` fs
 - OpenGL 3.0+ capable GPU driver
 
+## Install
+
+### Arch Linux
+
+Thanks to [ImperatorStorm](https://github.com/ImperatorStorm), we have an [AUR package](https://aur.archlinux.org/packages/memsed-git)! \
+Install with your favorite AUR helper, for example with `yay`:
+```bash
+yay -S memsed-git
+```
+Then, run from terminal with `sudo memsed`.
+
+### Universal Binary
+
+Will work on most Linux distros, needs to be updated manually.
+```bash
+curl -Lo memsed https://github.com/Willy-JL/MemSed/releases/latest/download/memsed
+sudo install memsed -D -t /usr/local/bin/
+```
+Then, run from terminal with `sudo memsed`. \
+If your distro does not support `/usr/local/bin/` in PATH, try `/usr/bin/` instead.
+
 ## Building
 
 ### Build Requirements
