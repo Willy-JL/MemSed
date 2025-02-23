@@ -45,7 +45,7 @@ file(GLOB_RECURSE sources "${SRC_DIR}/*.c" "${SRC_DIR}/*.h")
 add_executable(memsed "${sources}")
 
 # Compiler flags
-target_compile_options(memsed PRIVATE -std=gnu23)  # Standard
+target_compile_options(memsed PRIVATE -std=gnu2x)  # Standard
 target_compile_options(memsed PRIVATE -Wall -Wextra -Wstrict-prototypes -Wredundant-decls -Wundef)  # Warnings
 target_compile_options(memsed PRIVATE -fdata-sections -ffunction-sections -fno-math-errno)  # Optimizations
 
