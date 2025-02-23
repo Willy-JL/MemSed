@@ -2,6 +2,7 @@
 - Drag click to select items in address list and scratchpad
 
 ### Updated:
+- Use custom `thread_cancel()` implementation that is more portable and works with `-fexceptions`
 - Use simpler and slightly faster `pread()` to read process memory
 - Use smaller chunk sizes (128kb instead of 1mb) which seem to search slightly faster
 
