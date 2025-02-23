@@ -111,13 +111,15 @@ void thread_self_quit_if_canceled(Thread* self) {
     thread_assert_self(self);
     if(!self->canceled) return;
 
-    for(size_t i = self->cleanups_count - 1; i < self->cleanups_count; i--) {
-        ThreadCancelCleanup* cleanup = &self->cleanups[i];
-        cleanup->callback(cleanup->context);
+    if(self->cleanups_count > 0) {
+        for(size_t i = self->cleanups_count - 1; i < self->cleanups_count; i--) {
+            ThreadCancelCleanup* cleanup = &self->cleanups[i];
+            cleanup->callback(cleanup->context);
+        }
+        self->cleanups_count = 0;
+        free(self->cleanups);
+        self->cleanups = NULL;
     }
-    self->cleanups_count = 0;
-    free(self->cleanups);
-    self->cleanups = NULL;
 
     pthread_exit(PTHREAD_CANCELED);
 }
