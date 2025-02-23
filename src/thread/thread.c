@@ -54,7 +54,10 @@ Thread* thread_start(ThreadCallback callback, void* context) {
 void thread_cancel(Thread* thread) {
     thread->canceled = true;
     uint64_t notify = 1;
-    write(thread->canceled_eventfd, &notify, sizeof(notify));
+    ssize_t res = write(thread->canceled_eventfd, &notify, sizeof(notify));
+    if(res < 0 && errno != EAGAIN) {
+        perror("write(eventfd)");
+    }
 }
 
 bool thread_try_join(Thread* thread, void** result) {
