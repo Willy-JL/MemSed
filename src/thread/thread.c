@@ -2,7 +2,9 @@
 #include "thread.h"
 
 #include <errno.h>
+#include <poll.h>
 #include <pthread.h>
+#include <sys/eventfd.h>
 
 typedef struct {
     ThreadCancelCleanupCb callback;
@@ -15,6 +17,7 @@ struct Thread {
     ThreadCallback callback;
     void* context;
     bool canceled;
+    int32_t canceled_eventfd;
     size_t cleanups_count;
     ThreadCancelCleanup* cleanups;
 };
@@ -30,12 +33,19 @@ Thread* thread_start(ThreadCallback callback, void* context) {
     thread->callback = callback;
     thread->context = context;
     thread->canceled = false;
+    thread->canceled_eventfd = eventfd(0, EFD_NONBLOCK);
+    if(thread->canceled_eventfd < 0) {
+        perror("eventfd()");
+        free(thread);
+        return NULL;
+    }
     thread->cleanups_count = 0;
     thread->cleanups = NULL;
     int32_t res = pthread_create(&thread->tid, NULL, thread_body, thread);
     if(res != 0) {
         errno = res;
         perror("pthread_create()");
+        close(thread->canceled_eventfd);
         free(thread);
         return NULL;
     }
@@ -44,6 +54,8 @@ Thread* thread_start(ThreadCallback callback, void* context) {
 
 void thread_cancel(Thread* thread) {
     thread->canceled = true;
+    uint64_t notify = 1;
+    write(thread->canceled_eventfd, &notify, sizeof(notify));
 }
 
 bool thread_try_join(Thread* thread, void** result) {
@@ -63,6 +75,7 @@ bool thread_try_join(Thread* thread, void** result) {
     if(result != NULL) {
         *result = ret;
     }
+    close(thread->canceled_eventfd);
     free(thread);
     return true;
 }
@@ -82,6 +95,7 @@ void thread_join(Thread* thread, void** result) {
     if(result != NULL) {
         *result = ret;
     }
+    close(thread->canceled_eventfd);
     free(thread);
     return;
 }
@@ -109,10 +123,22 @@ void thread_self_quit_if_canceled(Thread* self) {
 void thread_self_usleep(Thread* self, useconds_t usec) {
     thread_assert_self(self);
 
-    // FIXME: add event flag to wake up earlier if canceled?
-    UNUSED(self);
+    struct timespec timeout = {
+        .tv_sec = 0,
+        .tv_nsec = usec * 1000,
+    };
+    if(usec >= 1'000'000) {
+        div_t sec = div(usec, 1'000'000);
+        timeout.tv_sec = sec.quot;
+        timeout.tv_nsec = sec.rem * 1000;
+    }
 
-    usleep(usec);
+    struct pollfd canceled = {
+        .fd = self->canceled_eventfd,
+        .events = POLLIN,
+    };
+
+    ppoll(&canceled, 1, &timeout, NULL);
 }
 
 void thread_self_push_cancel_cleanup(Thread* self, ThreadCancelCleanupCb callback, void* context) {

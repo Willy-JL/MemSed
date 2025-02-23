@@ -770,8 +770,6 @@ static void* memory_search_update_callback(Thread* self, void* context) {
     }
 
     while(true) {
-        thread_self_quit_if_canceled(self);
-
         for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
             clock_t start = clock();
             MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
