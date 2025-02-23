@@ -52,8 +52,5 @@ add_library(dcimgui STATIC "${sources}")
 target_include_directories(dcimgui PUBLIC "${DCIMGUI_DIR}" "${DCIMGUI_DIR}/backends")
 target_include_directories(dcimgui PUBLIC "${IMGUI_DIR}" "${IMGUI_DIR}/backends")
 
-# Disable unavoidable warnings
-target_compile_options(dcimgui PRIVATE -Wno-macro-redefined)
-
 # Custom imconfig.h
 target_compile_definitions(dcimgui PUBLIC IMGUI_USER_CONFIG="dcimconfig.h")

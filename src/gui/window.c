@@ -217,7 +217,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             ImGui_TableNextColumn();
             ImVec2 text_pos = ImGui_GetCursorScreenPos();
             ImVec2 rect_pos = text_pos;
-            ImGui_Text("");
+            ImGui_TextUnformatted("");
             const char* text = "Too many results, no live updates!";
             ImVec2 text_size = ImGui_CalcTextSize(text);
             ImDrawList* foreground = ImGui_GetWindowDrawList();

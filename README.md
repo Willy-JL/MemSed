@@ -41,7 +41,7 @@ If your distro does not support `/usr/local/bin/` in PATH, try `/usr/bin/` inste
 
 ### Build Requirements
 
-- Clang
+- GCC
 - CMake 3.20+
 - GNU Make
 - Python 3.10+ (for dear_bindings and GLAD generation)
@@ -78,7 +78,7 @@ cmake --build -j $(nproc) --preset debug -t gdb
 
 ### IDE Support
 
-Configuration files are provided for VS Code
+Configuration files are provided for VS Code and they rely on `clangd`
 
 You will need to run a full build process atleast once before `clangd` picks up the compile DB
 

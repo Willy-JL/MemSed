@@ -20,7 +20,7 @@ set(IMGUI_DIR "${VENDOR_DIR}/imgui")
 set(DCIMGUI_DIR "${LIB_DIR}/dcimgui")
 set(DEARBINDINGS_DIR "${VENDOR_DIR}/dear_bindings")
 
-# Export Clang DB
+# Export compilation DB
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(CREATE_LINK "${CMAKE_CURRENT_BINARY_DIR}" "${BUILD_DIR}/current" SYMBOLIC)
 

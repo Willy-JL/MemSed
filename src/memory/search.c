@@ -103,7 +103,7 @@ void memory_search_set_params(MemorySearch* memory_search, MemorySearchParams pa
         params.region_flags = memory_search->params.region_flags;
     }
 
-    params.type = CLAMP(params.type, MemoryTypeMAX - 1, 0);
+    params.type = CLAMP(params.type, MemoryTypeMAX - 1u, 0u);
     params.alignment = MAX(params.alignment, 1);
     params.deviation = ABS(params.deviation);
     if(params.type <= MemoryTypeInteger) {
@@ -310,7 +310,7 @@ static void* memory_search_begin_callback(Thread* self, void* context) {
         MemoryAddress chunk_addr = 0;
         MemoryAddress chunk_end = 0;
         MemoryAddress chunk_end_max_type_margin = 0;
-        void* chunk_cur;
+        void* chunk_cur = chunk_buf;
         while(addr < region->end) {
             if(addr > chunk_end_max_type_margin) {
                 thread_self_quit_if_canceled(self);
@@ -956,6 +956,8 @@ MemorySearchResultBase* memory_search_get_result_base(MemorySearchResultSet* set
         return &set->results_128[i].base;
     }
     }
+
+    return NULL;
 }
 
 static MemorySearchValueDisplay
