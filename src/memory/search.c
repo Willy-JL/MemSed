@@ -2,7 +2,7 @@
 #include "../process/handle.h"
 #include "../thread/thread.h"
 
-const size_t chunk_size = 1024 * 1024;
+const size_t chunk_size = 128 * 1024;
 const size_t update_delay_mult = 20;
 const size_t memory_search_update_max_results = 100'000;
 
@@ -143,6 +143,7 @@ static bool memory_search_should_process_type(MemoryType param, flt128_t value, 
     }
 
     if(type == param) {
+        // FIXME: check with deviation
         switch(type) {
         case MemoryTypeU8:
             return value >= 0 && value <= UINT8_MAX;
