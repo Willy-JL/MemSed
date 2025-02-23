@@ -1,6 +1,5 @@
 #include "pid.h"
 
-#include <errno.h>
 #include <signal.h>
 
 bool process_pid_is_alive(ProcessPid pid) {

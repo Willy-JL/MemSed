@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include "thread.h"
 
-#include <errno.h>
+// Linux: pthreads, notify with eventfd, sleep with poll
 #include <poll.h>
 #include <pthread.h>
 #include <sys/eventfd.h>
@@ -11,7 +11,6 @@ typedef struct {
     void* context;
 } ThreadCancelCleanup;
 
-// Linux: pthreads
 struct Thread {
     pthread_t tid;
     ThreadCallback callback;
@@ -120,7 +119,7 @@ void thread_self_quit_if_canceled(Thread* self) {
     pthread_exit(PTHREAD_CANCELED);
 }
 
-void thread_self_usleep(Thread* self, useconds_t usec) {
+void thread_self_usleep(Thread* self, size_t usec) {
     thread_assert_self(self);
 
     struct timespec timeout = {

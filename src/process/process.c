@@ -1,8 +1,6 @@
 #include "process.h"
 
-#include <errno.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 typedef struct {
     uint32_t uid;
