@@ -25,6 +25,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 file(CREATE_LINK "${CMAKE_CURRENT_BINARY_DIR}" "${BUILD_DIR}/current" SYMBOLIC)
 
 # Global compiler flags
+add_compile_options(-fexceptions)  # Interop with C++ exceptions
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-O0)  # Better debugging experience
 endif()

@@ -231,7 +231,7 @@ static void memory_search_extend_results(MemorySearchResultSet* set, size_t* cap
     }
 }
 
-static void* memory_search_begin_callback(void* context) {
+static void* memory_search_begin_callback(Thread* self, void* context) {
     MemorySearch* memory_search = context;
     memory_search_stop_update(memory_search);
     if(memory_search->params.suspend_process) {
@@ -297,10 +297,10 @@ static void* memory_search_begin_callback(void* context) {
     memory_search->results.batches = batch;
     memory_search->results.batches_count++;
     memory_search->results.regions = regions;
-    thread_self_push_cancel_cleanup(memory_search_consolidate_results, memory_search);
+    thread_self_push_cancel_cleanup(self, memory_search_consolidate_results, memory_search);
 
     void* chunk_buf = malloc(chunk_size);
-    thread_self_push_cancel_cleanup(free, chunk_buf);
+    thread_self_push_cancel_cleanup(self, free, chunk_buf);
     ProcessHandle* handle = memory_search->handle;
     uint8_t alignment = memory_search->params.alignment;
     size_t regions_progress = 0;
@@ -313,7 +313,7 @@ static void* memory_search_begin_callback(void* context) {
         void* chunk_cur;
         while(addr < region->end) {
             if(addr > chunk_end_max_type_margin) {
-                thread_self_quit_if_canceled();
+                thread_self_quit_if_canceled(self);
                 memory_search->search_progress =
                     (flt32_t)(regions_progress + (addr - region->start)) / regions->total_size;
                 chunk_addr = addr;
@@ -492,13 +492,13 @@ static void* memory_search_begin_callback(void* context) {
         }
         regions_progress += region->end - region->start;
     }
-    thread_self_pop_cancel_cleanup(true); // free(chunk_buf)
+    thread_self_pop_cancel_cleanup(self, true); // free(chunk_buf)
 
-    thread_self_pop_cancel_cleanup(true); // memory_search_consolidate_results(memory_search)
+    thread_self_pop_cancel_cleanup(self, true); // memory_search_consolidate_results(memory_search)
     return NULL;
 }
 
-static void* memory_search_next_callback(void* context) {
+static void* memory_search_next_callback(Thread* self, void* context) {
     MemorySearch* memory_search = context;
     memory_search_stop_update(memory_search);
     if(memory_search->params.suspend_process) {
@@ -559,10 +559,10 @@ static void* memory_search_next_callback(void* context) {
     batch->sets = realloc(batch->sets, sizeof(MemorySearchResultSet) * batch->sets_count);
 
     memory_search->results.batches_count++;
-    thread_self_push_cancel_cleanup(memory_search_consolidate_results, memory_search);
+    thread_self_push_cancel_cleanup(self, memory_search_consolidate_results, memory_search);
 
     void* value_buf = malloc(max_type_size);
-    thread_self_push_cancel_cleanup(free, value_buf);
+    thread_self_push_cancel_cleanup(self, free, value_buf);
     ProcessHandle* handle = memory_search->handle;
     size_t results_progress = 0;
     size_t set_i = -1;
@@ -574,7 +574,7 @@ static void* memory_search_next_callback(void* context) {
         MemorySearchResultSet* set = &batch->sets[++set_i];
         for(size_t result_i = 0; result_i < last_set->results_count; result_i++) {
             // FIXME: check if these are slowing down the search and make it faster
-            thread_self_quit_if_canceled();
+            thread_self_quit_if_canceled(self);
             memory_search->search_progress =
                 (flt32_t)(results_progress + result_i) / last_batch->total_results_count;
 
@@ -747,14 +747,13 @@ static void* memory_search_next_callback(void* context) {
 
         results_progress += last_set->results_count;
     }
-    thread_self_pop_cancel_cleanup(true); // free(value_buf)
+    thread_self_pop_cancel_cleanup(self, true); // free(value_buf)
 
-    thread_self_pop_cancel_cleanup(true); // memory_search_consolidate_results(memory_search)
+    thread_self_pop_cancel_cleanup(self, true); // memory_search_consolidate_results(memory_search)
     return NULL;
 }
 
-static void* memory_search_update_callback(void* context) {
-    thread_self_enable_canceling();
+static void* memory_search_update_callback(Thread* self, void* context) {
     MemorySearch* memory_search = context;
 
     MemorySearchScratchpad* scratchpad = &memory_search->scratchpad;
@@ -771,6 +770,8 @@ static void* memory_search_update_callback(void* context) {
     }
 
     while(true) {
+        thread_self_quit_if_canceled(self);
+
         for(size_t item_i = 0; item_i < scratchpad->items_count; item_i++) {
             clock_t start = clock();
             MemorySearchScratchpadItem* item = &scratchpad->items[item_i];
@@ -783,7 +784,8 @@ static void* memory_search_update_callback(void* context) {
             }
             clock_t end = clock();
 
-            thread_self_usleep(CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
+            thread_self_usleep(self, CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
+            thread_self_quit_if_canceled(self);
         }
 
         if(batch == NULL || batch->total_results_count >= memory_search_update_max_results) {
@@ -801,7 +803,8 @@ static void* memory_search_update_callback(void* context) {
                 }
                 clock_t end = clock();
 
-                thread_self_usleep(CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
+                thread_self_usleep(self, CLOCKS_TO_USEC(MAX(end - start, 1)) * update_delay_mult);
+                thread_self_quit_if_canceled(self);
             }
         }
     }
