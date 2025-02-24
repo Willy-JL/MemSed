@@ -6,7 +6,6 @@
   - Endianness
   - Boundaries?
   - More value options?
-- Confirm dialog when detaching process with non-empty results/scratchpad
 - Add keyboard shortcuts
 - Optimize process picker with list clipper
 - Figure out SDL segfault when building as static exe

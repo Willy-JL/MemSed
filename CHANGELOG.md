@@ -1,5 +1,6 @@
 ### Added:
 - Drag click to select items in address list and scratchpad
+- Confirm dialog box when detaching process with an active search or addresses in scratchpad
 
 ### Updated:
 - Use custom `thread_cancel()` implementation that is more portable and works with `-fexceptions`

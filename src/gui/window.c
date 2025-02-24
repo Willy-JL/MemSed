@@ -129,21 +129,65 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
     }
 }
 
+static void gui_window_draw_detach_process_popup(Gui* gui) {
+    ImVec2 display = gui->io->DisplaySize;
+    ImGui_SetNextWindowPosEx(
+        (ImVec2){display.x / 2.0f, display.y / 2.0f},
+        ImGuiCond_Always,
+        (ImVec2){0.5f, 0.5f});
+    if(ImGui_BeginPopupModal(
+           detach_process,
+           NULL,
+           ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+               ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui_TextUnformatted("Are you sure you want to detach from the process?");
+        bool has_active_search = memory_search_get_results(gui->memory_search)->batches_count > 0;
+        bool has_scratchpad_items = memory_search_get_scratchpad(gui->memory_search)->items_count >
+                                    0;
+        ImGui_Text(
+            "You have %s%s%s.",
+            has_active_search ? "an active memory search" : "",
+            has_active_search && has_scratchpad_items ? " and " : "",
+            has_scratchpad_items ? "some addresses in the scratchpad" : "");
+        ImGui_Spacing();
+
+        if(ImGui_IsWindowAppearing()) {
+            ImGui_SetKeyboardFocusHere();
+        }
+        if(ImGui_Button(ok)) {
+            memory_search_process_detach(gui->memory_search);
+            ImGui_CloseCurrentPopup();
+        }
+
+        ImGui_SameLine();
+        if(ImGui_Button(cancel)) {
+            ImGui_CloseCurrentPopup();
+        }
+
+        ImGui_EndPopup();
+    }
+}
+
 static void gui_window_draw_toolbar(Gui* gui) {
     ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
     if(memory_search_process_is_attached(gui->memory_search)) {
         if(ImGui_Button(detach_process)) {
-            // FIXME: confirm button if search/scratchpad in use
-            memory_search_process_detach(gui->memory_search);
+            if(memory_search_get_results(gui->memory_search)->batches_count > 0 ||
+               memory_search_get_scratchpad(gui->memory_search)->items_count > 0) {
+                ImGui_OpenPopup(detach_process, ImGuiPopupFlags_None);
+            } else {
+                memory_search_process_detach(gui->memory_search);
+            }
         }
+        gui_window_draw_detach_process_popup(gui);
     } else {
         flt32_t width = ImGui_CalcTextSize(detach_process).x + gui->style->FramePadding.x * 2;
         if(ImGui_ButtonEx(attach_process, (ImVec2){width, 0.0f})) {
             ImGui_OpenPopup(attach_process, ImGuiPopupFlags_None);
         }
+        gui_window_draw_attach_process_popup(gui);
     }
     ImGui_EndDisabled();
-    gui_window_draw_attach_process_popup(gui);
 
     ImGui_SameLineEx(0.0f, pane_spacing_mult * gui->style->ItemSpacing.x);
 
