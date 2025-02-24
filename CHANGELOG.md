@@ -7,13 +7,13 @@
   - Type process name
   - Press Enter, select with Arrows, press Enter
   - Ctrl+F to focus Value field, type search Value
-  - Use Tab and Arrows to navigate and configure other options
+  - Use Arrows to navigate and configure other options
   - Ctrl+Enter to search
   - Ctrl+Space to stop Search, Ctrl+Z to undo/reset search
-  - Ctrl+A to focus Addresses list
+  - Ctrl+A or Tab to focus Addresses list
   - Arrows to navigate Addresses, Shift to select multiple
   - Enter to add to Scratchpad
-  - Ctrl+S to focus Scratchpad
+  - Ctrl+S or Tab to focus Scratchpad
   - Arrows to navigate Scratchpad, Shift to select multiple
   - Enter to set value
   - Delete to remove from Scratchpad

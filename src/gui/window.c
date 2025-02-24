@@ -482,7 +482,9 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     if(clip_i == last_focused) {
                         if(ImGui_Shortcut(
                                ImGuiMod_Ctrl | ImGuiKey_A,
-                               ImGuiInputFlags_RouteGlobal)) {
+                               ImGuiInputFlags_RouteGlobal) ||
+                           (!ImGui_IsWindowFocused(ImGuiFocusedFlags_None) &&
+                            ImGui_Shortcut(ImGuiKey_Tab, ImGuiInputFlags_RouteGlobal))) {
                             ImGui_SetKeyboardFocusHere();
                             ImGui_SetNavCursorVisible(true);
                         }
@@ -1079,7 +1081,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     if(clip_i == last_focused) {
                         if(ImGui_Shortcut(
                                ImGuiMod_Ctrl | ImGuiKey_S,
-                               ImGuiInputFlags_RouteGlobal)) {
+                               ImGuiInputFlags_RouteGlobal) ||
+                           (!ImGui_IsWindowFocused(ImGuiFocusedFlags_None) &&
+                            ImGui_Shortcut(ImGuiKey_Tab, ImGuiInputFlags_RouteGlobal))) {
                             ImGui_SetKeyboardFocusHere();
                             ImGui_SetNavCursorVisible(true);
                         }
