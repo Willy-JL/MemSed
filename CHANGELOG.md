@@ -2,7 +2,7 @@
 - Drag click to select items in address list and scratchpad
 - Confirm dialog box when detaching process / closing MemSed with an active search or addresses in scratchpad
 - Close popups with X buttons, pressing Escape, and clicking outside th popup
-- Good amount of keyboard shortcuts allowing for almost keyboard-only usage, for example:
+- Good amount of keyboard shortcuts allowing for keyboard-only usage, for example:
   - Ctrl+O to open process select
   - Type process name
   - Press Enter, select with Arrows, press Enter
@@ -10,6 +10,13 @@
   - Use Tab and Arrows to navigate and configure other options
   - Ctrl+Enter to search
   - Ctrl+Space to stop Search, Ctrl+Z to undo/reset search
+  - Ctrl+A to focus Addresses list
+  - Arrows to navigate Addresses, Shift to select multiple
+  - Enter to add to Scratchpad
+  - Ctrl+S to focus Scratchpad
+  - Arrows to navigate Scratchpad, Shift to select multiple
+  - Enter to set value
+  - Delete to remove from Scratchpad
   - Ctrl+D to Detach process
   - Ctrl+Q to Quit MemSed
 

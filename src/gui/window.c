@@ -366,6 +366,10 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             if(dragging != -1 && !ImGui_IsMouseDown(ImGuiMouseButton_Left)) {
                 dragging = -1;
             }
+            if(ImGui_Shortcut(ImGuiKey_Escape, ImGuiInputFlags_None)) {
+                selected[0] = -1;
+            }
+            bool first_item = true;
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     ImGui_PushIDInt(clip_i);
@@ -473,6 +477,15 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     active_col.w *= 0.25;
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
+                    if(first_item) {
+                        first_item = false;
+                        if(ImGui_Shortcut(
+                               ImGuiMod_Ctrl | ImGuiKey_A,
+                               ImGuiInputFlags_RouteGlobal)) {
+                            ImGui_SetKeyboardFocusHere();
+                            ImGui_SetNavCursorVisible(true);
+                        }
+                    }
                     ImGui_SelectableBoolPtr(
                         "###hitbox",
                         &is_selected,
@@ -502,9 +515,13 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         ImGui_PopFont();
                         ImGui_EndPopup();
                     } else if(
-                        ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
-                        ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        memcpy(selected, doubleclick_selected, sizeof(selected));
+                        (ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                         ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
+                        (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
+                        if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                           ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            memcpy(selected, doubleclick_selected, sizeof(selected));
+                        }
                         is_selected = false;
                         for(uint8_t i = 0; i < COUNT_OF(selected) && selected[i] != -1; i++) {
                             if(selected[i] == clip_i) {
@@ -529,12 +546,23 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                                     add_set->type);
                             }
                         }
-                    } else if(ImGui_IsItemClicked()) {
+                    } else if(
+                        ImGui_IsItemClicked() ||
+                        (ImGui_IsItemFocused() && ImGui_IsKeyDown(ImGuiMod_Shift) &&
+                         (ImGui_IsKeyPressed(ImGuiKey_DownArrow) ||
+                          ImGui_IsKeyPressed(ImGuiKey_UpArrow)))) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
                             next_i++;
                         }
                         if(ImGui_IsKeyDown(ImGuiMod_Shift)) {
+                            if(ImGui_IsItemFocused()) {
+                                if(ImGui_IsKeyPressed(ImGuiKey_DownArrow)) {
+                                    last_selected = clip_i + 1;
+                                } else if(ImGui_IsKeyPressed(ImGuiKey_UpArrow)) {
+                                    last_selected = clip_i - 1;
+                                }
+                            }
                             if(last_selected != -1) {
                                 int32_t range_min = clip_i > last_selected ? last_selected :
                                                                              clip_i;
@@ -917,8 +945,14 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
             if(dragging != -1 && !ImGui_IsMouseDown(ImGuiMouseButton_Left)) {
                 dragging = -1;
             }
+            if(ImGui_Shortcut(ImGuiKey_Escape, ImGuiInputFlags_None)) {
+                selected[0] = -1;
+            }
+            bool first_item = true;
             while(ImGuiListClipper_Step(&clipper)) {
-                for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
+                for(int32_t clip_i = clipper.DisplayStart;
+                    clip_i < clipper.DisplayEnd && (size_t)clip_i < scratchpad->items_count;
+                    clip_i++) {
                     MemorySearchScratchpadItem* item = &scratchpad->items[clip_i];
                     ImGui_PushIDInt(clip_i);
                     bool is_selected = false;
@@ -1032,6 +1066,15 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     active_col.w *= 0.25;
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
+                    if(first_item) {
+                        first_item = false;
+                        if(ImGui_Shortcut(
+                               ImGuiMod_Ctrl | ImGuiKey_S,
+                               ImGuiInputFlags_RouteGlobal)) {
+                            ImGui_SetKeyboardFocusHere();
+                            ImGui_SetNavCursorVisible(true);
+                        }
+                    }
                     ImGui_SelectableBoolPtrEx(
                         "###hitbox",
                         &is_selected,
@@ -1063,17 +1106,53 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         }
                         ImGui_PopFont();
                         ImGui_EndPopup();
+                    } else if(ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Delete)) {
+                        if(!is_selected) {
+                            memory_search_scratchpad_del(gui->memory_search, item);
+                        } else {
+                            for(uint8_t del_i = 0;
+                                del_i < COUNT_OF(selected) && selected[del_i] != -1;
+                                del_i++) {
+                                memory_search_scratchpad_del(
+                                    gui->memory_search,
+                                    &scratchpad->items[selected[del_i]]);
+                                for(uint8_t fix_i = del_i + 1;
+                                    fix_i < COUNT_OF(selected) && selected[fix_i] != -1;
+                                    fix_i++) {
+                                    if(selected[fix_i] > selected[del_i]) {
+                                        selected[fix_i]--;
+                                    }
+                                }
+                            }
+                            selected[0] = -1;
+                            last_selected = -1;
+                        }
                     } else if(
-                        ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
-                        ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                        (ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                         ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
+                        (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
+                        if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                           ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            memcpy(selected, doubleclick_selected, sizeof(selected));
+                        }
                         editing = clip_i;
-                        memcpy(selected, doubleclick_selected, sizeof(selected));
-                    } else if(ImGui_IsItemClicked()) {
+                    } else if(
+                        ImGui_IsItemClicked() ||
+                        (ImGui_IsItemFocused() && ImGui_IsKeyDown(ImGuiMod_Shift) &&
+                         (ImGui_IsKeyPressed(ImGuiKey_DownArrow) ||
+                          ImGui_IsKeyPressed(ImGuiKey_UpArrow)))) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
                             next_i++;
                         }
                         if(ImGui_IsKeyDown(ImGuiMod_Shift)) {
+                            if(ImGui_IsItemFocused()) {
+                                if(ImGui_IsKeyPressed(ImGuiKey_DownArrow)) {
+                                    last_selected = clip_i + 1;
+                                } else if(ImGui_IsKeyPressed(ImGuiKey_UpArrow)) {
+                                    last_selected = clip_i - 1;
+                                }
+                            }
                             if(last_selected != -1) {
                                 int32_t range_min = clip_i > last_selected ? last_selected :
                                                                              clip_i;
