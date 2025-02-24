@@ -43,9 +43,10 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         (ImVec2){display.x / 2.0f, display.y / 2.0f},
         ImGuiCond_Always,
         (ImVec2){0.5f, 0.5f});
+    bool popup_still_open = true;
     if(ImGui_BeginPopupModal(
            attach_process,
-           NULL,
+           &popup_still_open,
            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_AlwaysAutoResize)) {
         static ProcessList* list = NULL;
@@ -119,7 +120,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         ImGui_EndDisabled();
 
         ImGui_SameLine();
-        if(ImGui_Button(cancel)) {
+        if(ImGui_Button(cancel) || !popup_still_open) {
             process_list_free(list);
             list = NULL;
             ImGui_CloseCurrentPopup();
@@ -135,9 +136,10 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
         (ImVec2){display.x / 2.0f, display.y / 2.0f},
         ImGuiCond_Always,
         (ImVec2){0.5f, 0.5f});
+    bool popup_still_open = true;
     if(ImGui_BeginPopupModal(
            detach_process,
-           NULL,
+           &popup_still_open,
            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui_TextUnformatted("Are you sure you want to detach from the process?");
@@ -160,7 +162,7 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
         }
 
         ImGui_SameLine();
-        if(ImGui_Button(cancel)) {
+        if(ImGui_Button(cancel) || !popup_still_open) {
             ImGui_CloseCurrentPopup();
         }
 
