@@ -19,6 +19,7 @@ typedef struct {
     } fonts;
     ImVec2 prev_size;
     ImVec2 scroll_energy;
+    bool requested_close;
     bool should_close;
 
     MemorySearch* memory_search;

@@ -75,6 +75,7 @@ bool gui_backend_init(Gui* gui, const char* title, uint32_t width, uint32_t heig
 
 void gui_backend_process_events(Gui* gui) {
     SDL_Event event;
+    bool requested_close = false;
     while(SDL_PollEvent(&event)) {
         if(event.type == SDL_EVENT_MOUSE_WHEEL &&
            event.window.windowID == SDL_GetWindowID(gui->window)) {
@@ -94,12 +95,28 @@ void gui_backend_process_events(Gui* gui) {
             ImGui_ImplSDL3_ProcessEvent(&event);
         }
 
+        // QUIT is sent after WINDOW_CLOSE_REQUESTED for window closing
+        // Only QUIT is sent when trying to terminate the process
+        // For terminating process, close right away
+        // For window close, register request and handle later
         if(event.type == SDL_EVENT_QUIT) {
-            gui->should_close = true;
+            if(!requested_close) {
+                gui->should_close = true;
+            }
         }
         if(event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
            event.window.windowID == SDL_GetWindowID(gui->window)) {
+            requested_close = true;
+        }
+    }
+
+    // If window close was requested, save it and handle in draw in case confirmation is needed
+    // If requested a second time, just close anyway
+    if(requested_close) {
+        if(gui->requested_close) {
             gui->should_close = true;
+        } else {
+            gui->requested_close = true;
         }
     }
 }

@@ -5,6 +5,7 @@ const char* ok = mdi_check " Ok";
 const char* cancel = mdi_cancel " Cancel";
 const char* attach_process = mdi_application_import " Attach Process";
 const char* detach_process = mdi_exit_run " Detach Process";
+const char* quit_memsed = mdi_exit_run " Quit Memsed";
 const char* add_to_scratchpad = mdi_plus_box_multiple " Add to Scratchpad";
 const char* remove_from_scratchpad = mdi_minus_box_multiple " Remove from Scratchpad";
 const char* first_search = mdi_magnify_plus " First Search";
@@ -163,7 +164,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
     }
 }
 
-static void gui_window_draw_detach_process_popup(Gui* gui) {
+static void gui_window_draw_detach_process_popup(Gui* gui, const char* type) {
     ImVec2 display = gui->io->DisplaySize;
     ImGui_SetNextWindowPosEx(
         (ImVec2){display.x / 2.0f, display.y / 2.0f},
@@ -171,11 +172,13 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
         (ImVec2){0.5f, 0.5f});
     bool popup_still_open = true;
     if(ImGui_BeginPopupModal(
-           detach_process,
+           type,
            &popup_still_open,
            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
                ImGuiWindowFlags_AlwaysAutoResize)) {
-        ImGui_TextUnformatted("Are you sure you want to detach from the process?");
+        ImGui_Text(
+            "Are you sure you want to %s?",
+            type == quit_memsed ? "quit MemSed" : "detach from the process");
         bool has_active_search = memory_search_get_results(gui->memory_search)->batches_count > 0;
         bool has_scratchpad_items = memory_search_get_scratchpad(gui->memory_search)->items_count >
                                     0;
@@ -190,12 +193,19 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
             ImGui_SetKeyboardFocusHere();
         }
         if(ImGui_Button(ok)) {
-            memory_search_process_detach(gui->memory_search);
+            if(type == quit_memsed) {
+                gui->should_close = true;
+            } else {
+                memory_search_process_detach(gui->memory_search);
+            }
             ImGui_CloseCurrentPopup();
         }
 
         ImGui_SameLine();
         if(ImGui_Button(cancel) || !popup_still_open || imgui_should_close_weak_modal()) {
+            if(type == quit_memsed) {
+                gui->requested_close = false;
+            }
             ImGui_CloseCurrentPopup();
         }
 
@@ -217,7 +227,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
                 memory_search_process_detach(gui->memory_search);
             }
         }
-        gui_window_draw_detach_process_popup(gui);
+        gui_window_draw_detach_process_popup(gui, detach_process);
     } else {
         flt32_t width = ImGui_CalcTextSize(detach_process).x + gui->style->FramePadding.x * 2;
         ImGui_SetNextItemShortcut(
@@ -1183,6 +1193,17 @@ void gui_window_draw(Gui* gui) {
             ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoScrollWithMouse);
     ImGui_PopStyleVar();
+
+    if(ImGui_Shortcut(ImGuiMod_Ctrl | ImGuiKey_Q, ImGuiInputFlags_RouteGlobal) ||
+       gui->requested_close) {
+        if(memory_search_get_results(gui->memory_search)->batches_count > 0 ||
+           memory_search_get_scratchpad(gui->memory_search)->items_count > 0) {
+            ImGui_OpenPopup(quit_memsed, ImGuiPopupFlags_None);
+        } else {
+            gui->should_close = true;
+        }
+    }
+    gui_window_draw_detach_process_popup(gui, quit_memsed);
 
     // Toolbar
     gui_window_draw_toolbar(gui);

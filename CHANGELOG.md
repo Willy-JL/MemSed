@@ -1,6 +1,6 @@
 ### Added:
 - Drag click to select items in address list and scratchpad
-- Confirm dialog box when detaching process with an active search or addresses in scratchpad
+- Confirm dialog box when detaching process / closing MemSed with an active search or addresses in scratchpad
 - Close popups with X buttons, pressing Escape, and clicking outside th popup
 - Good amount of keyboard shortcuts allowing for almost keyboard-only usage, for example:
   - Ctrl+O to open process select
@@ -11,6 +11,7 @@
   - Ctrl+Enter to search
   - Ctrl+Space to stop Search, Ctrl+Z to undo/reset search
   - Ctrl+D to Detach process
+  - Ctrl+Q to Quit MemSed
 
 ### Updated:
 - Use custom `thread_cancel()` implementation that is more portable and works with `-fexceptions`
