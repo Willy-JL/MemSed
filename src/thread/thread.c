@@ -103,7 +103,7 @@ void thread_join(Thread* thread, void** result) {
 }
 
 static void thread_assert_self(Thread* self) {
-    UNUSED(self); // Assert is optimized-out on Releae builds
+    UNUSED(self); // Assert is optimized-out on Release builds
     assert(pthread_equal(self->tid, pthread_self()));
 }
 
