@@ -554,8 +554,8 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         ImGui_IsItemClicked() ||
                         (ImGui_IsItemFocused() && ImGui_IsKeyDown(ImGuiMod_Shift) &&
-                         (ImGui_IsKeyPressed(ImGuiKey_DownArrow) ||
-                          ImGui_IsKeyPressed(ImGuiKey_UpArrow)))) {
+                         (ImGui_IsKeyDown(ImGuiKey_DownArrow) ||
+                          ImGui_IsKeyDown(ImGuiKey_UpArrow)))) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
                             next_i++;
@@ -564,8 +564,12 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                             if(ImGui_IsItemFocused()) {
                                 if(ImGui_IsKeyPressed(ImGuiKey_DownArrow)) {
                                     last_selected = clip_i + 1;
+                                } else if(ImGui_IsKeyDown(ImGuiKey_DownArrow)) {
+                                    last_selected = clip_i - 1;
                                 } else if(ImGui_IsKeyPressed(ImGuiKey_UpArrow)) {
                                     last_selected = clip_i - 1;
+                                } else if(ImGui_IsKeyDown(ImGuiKey_UpArrow)) {
+                                    last_selected = clip_i + 1;
                                 }
                             }
                             if(last_selected != -1) {
@@ -1150,8 +1154,8 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         ImGui_IsItemClicked() ||
                         (ImGui_IsItemFocused() && ImGui_IsKeyDown(ImGuiMod_Shift) &&
-                         (ImGui_IsKeyPressed(ImGuiKey_DownArrow) ||
-                          ImGui_IsKeyPressed(ImGuiKey_UpArrow)))) {
+                         (ImGui_IsKeyDown(ImGuiKey_DownArrow) ||
+                          ImGui_IsKeyDown(ImGuiKey_UpArrow)))) {
                         uint8_t next_i = 0;
                         while(next_i < COUNT_OF(selected) && selected[next_i] != -1) {
                             next_i++;
@@ -1160,8 +1164,12 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                             if(ImGui_IsItemFocused()) {
                                 if(ImGui_IsKeyPressed(ImGuiKey_DownArrow)) {
                                     last_selected = clip_i + 1;
+                                } else if(ImGui_IsKeyDown(ImGuiKey_DownArrow)) {
+                                    last_selected = clip_i - 1;
                                 } else if(ImGui_IsKeyPressed(ImGuiKey_UpArrow)) {
                                     last_selected = clip_i - 1;
+                                } else if(ImGui_IsKeyDown(ImGuiKey_UpArrow)) {
+                                    last_selected = clip_i + 1;
                                 }
                             }
                             if(last_selected != -1) {
