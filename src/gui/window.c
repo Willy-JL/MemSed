@@ -189,9 +189,7 @@ static void gui_window_draw_detach_process_popup(Gui* gui, const char* type) {
             has_scratchpad_items ? "some addresses in the scratchpad" : "");
         ImGui_Spacing();
 
-        if(ImGui_IsWindowAppearing()) {
-            ImGui_SetKeyboardFocusHere();
-        }
+        ImGui_SetNextItemShortcut(ImGuiKey_Enter, ImGuiInputFlags_None);
         if(ImGui_Button(ok)) {
             if(type == quit_memsed) {
                 gui->should_close = true;
