@@ -42,7 +42,7 @@ static bool imgui_should_close_weak_modal() {
     if(!imgui_is_topmost()) {
         return false;
     }
-    if(ImGui_IsKeyPressed(ImGuiKey_Escape)) {
+    if(ImGui_Shortcut(ImGuiKey_Escape, ImGuiInputFlags_None)) {
         return true;
     }
     if(ImGui_IsMouseClicked(ImGuiMouseButton_Left)) {
@@ -130,7 +130,8 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
                 }
                 if((ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                     ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
-                   (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
+                   (ImGui_IsItemFocused() &&
+                    ImGui_Shortcut(ImGuiKey_Enter, ImGuiInputFlags_None))) {
                     selected = process->pid;
                     confirmed = true;
                 }
@@ -517,7 +518,8 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         (ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                          ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
-                        (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
+                        (ImGui_IsItemFocused() &&
+                         ImGui_Shortcut(ImGuiKey_Enter, ImGuiInputFlags_None))) {
                         if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                            ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                             memcpy(selected, doubleclick_selected, sizeof(selected));
@@ -1106,7 +1108,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         }
                         ImGui_PopFont();
                         ImGui_EndPopup();
-                    } else if(ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Delete)) {
+                    } else if(
+                        ImGui_IsItemFocused() &&
+                        ImGui_Shortcut(ImGuiKey_Delete, ImGuiInputFlags_None)) {
                         if(!is_selected) {
                             memory_search_scratchpad_del(gui->memory_search, item);
                         } else {
@@ -1130,7 +1134,8 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     } else if(
                         (ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                          ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
-                        (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
+                        (ImGui_IsItemFocused() &&
+                         ImGui_Shortcut(ImGuiKey_Enter, ImGuiInputFlags_None))) {
                         if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
                            ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                             memcpy(selected, doubleclick_selected, sizeof(selected));
