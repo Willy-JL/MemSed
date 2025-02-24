@@ -33,6 +33,30 @@ static int32_t imgui_input_text_resize_callback(ImGuiInputTextCallbackData* data
     return 0;
 }
 
+static bool imgui_is_topmost() {
+    return !ImGui_IsPopupOpen("", ImGuiPopupFlags_AnyPopupId);
+}
+
+static bool imgui_should_close_weak_modal() {
+    if(!imgui_is_topmost()) {
+        return false;
+    }
+    if(ImGui_IsKeyPressed(ImGuiKey_Escape)) {
+        return true;
+    }
+    if(ImGui_IsMouseClicked(ImGuiMouseButton_Left)) {
+        ImVec2 window_pos = ImGui_GetWindowPos();
+        ImVec2 window_size = ImGui_GetWindowSize();
+        if(!ImGui_IsMouseHoveringRectEx(
+               window_pos,
+               (ImVec2){window_pos.x + window_size.x, window_pos.y + window_size.y},
+               false)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void gui_window_draw_attach_process_popup(Gui* gui) {
     ImVec2 display = gui->io->DisplaySize;
     ImVec2 size = display;
@@ -120,7 +144,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         ImGui_EndDisabled();
 
         ImGui_SameLine();
-        if(ImGui_Button(cancel) || !popup_still_open) {
+        if(ImGui_Button(cancel) || !popup_still_open || imgui_should_close_weak_modal()) {
             process_list_free(list);
             list = NULL;
             ImGui_CloseCurrentPopup();
@@ -162,7 +186,7 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
         }
 
         ImGui_SameLine();
-        if(ImGui_Button(cancel) || !popup_still_open) {
+        if(ImGui_Button(cancel) || !popup_still_open || imgui_should_close_weak_modal()) {
             ImGui_CloseCurrentPopup();
         }
 
