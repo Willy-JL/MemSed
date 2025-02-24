@@ -355,12 +355,14 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             MemorySearchResultSet* prev_set = (void*)-1;
             static int32_t dragging = -1;
             static size_t last_total = 0;
+            static int32_t last_focused = 0;
             static int32_t last_selected = -1;
             static int32_t selected[UINT8_MAX] = {-1};
             static int32_t doubleclick_selected[UINT8_MAX] = {-1};
             if(last_total != batch->total_results_count) {
                 dragging = -1;
                 selected[0] = -1;
+                last_focused = 0;
                 last_selected = -1;
                 last_total = batch->total_results_count;
             }
@@ -370,7 +372,6 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
             if(ImGui_Shortcut(ImGuiKey_Escape, ImGuiInputFlags_None)) {
                 selected[0] = -1;
             }
-            bool first_item = true;
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart; clip_i < clipper.DisplayEnd; clip_i++) {
                     ImGui_PushIDInt(clip_i);
@@ -478,8 +479,7 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                     active_col.w *= 0.25;
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
-                    if(first_item) {
-                        first_item = false;
+                    if(clip_i == last_focused) {
                         if(ImGui_Shortcut(
                                ImGuiMod_Ctrl | ImGuiKey_A,
                                ImGuiInputFlags_RouteGlobal)) {
@@ -491,6 +491,9 @@ static void gui_window_draw_addresses_pane(Gui* gui, ImVec2 size) {
                         "###hitbox",
                         &is_selected,
                         ImGuiSelectableFlags_SpanAllColumns);
+                    if(ImGui_IsItemFocused()) {
+                        last_focused = clip_i;
+                    }
                     if(ImGui_BeginPopupContextItem()) {
                         ImGui_PushFont(gui->fonts.base);
                         if(ImGui_Selectable(add_to_scratchpad)) {
@@ -935,12 +938,14 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                 ImGui_GetFrameHeightWithSpacing());
             static int32_t dragging = -1;
             static size_t last_total = 0;
+            static int32_t last_focused = 0;
             static int32_t last_selected = -1;
             static int32_t selected[UINT8_MAX] = {-1};
             static int32_t doubleclick_selected[UINT8_MAX] = {-1};
             if(last_total != scratchpad->items_count) {
                 dragging = -1;
                 selected[0] = -1;
+                last_focused = 0;
                 last_selected = -1;
                 last_total = scratchpad->items_count;
             }
@@ -950,7 +955,6 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
             if(ImGui_Shortcut(ImGuiKey_Escape, ImGuiInputFlags_None)) {
                 selected[0] = -1;
             }
-            bool first_item = true;
             while(ImGuiListClipper_Step(&clipper)) {
                 for(int32_t clip_i = clipper.DisplayStart;
                     clip_i < clipper.DisplayEnd && (size_t)clip_i < scratchpad->items_count;
@@ -1068,8 +1072,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     active_col.w *= 0.25;
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderHovered, hover_col);
                     ImGui_PushStyleColorImVec4(ImGuiCol_HeaderActive, active_col);
-                    if(first_item) {
-                        first_item = false;
+                    if(clip_i == last_focused) {
                         if(ImGui_Shortcut(
                                ImGuiMod_Ctrl | ImGuiKey_S,
                                ImGuiInputFlags_RouteGlobal)) {
@@ -1082,6 +1085,9 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                         &is_selected,
                         ImGuiSelectableFlags_SpanAllColumns,
                         (ImVec2){0.0f, ImGui_GetFrameHeight()});
+                    if(ImGui_IsItemFocused()) {
+                        last_focused = clip_i;
+                    }
                     if(ImGui_BeginPopupContextItem()) {
                         ImGui_PushFont(gui->fonts.base);
                         if(ImGui_Selectable(remove_from_scratchpad)) {
