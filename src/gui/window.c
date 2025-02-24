@@ -85,12 +85,15 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         if(ImGui_IsWindowAppearing()) {
             ImGui_SetKeyboardFocusHere();
         }
-        ImGui_InputTextWithHint(
-            "###search",
-            "Search...",
-            search,
-            sizeof(search),
-            ImGuiInputTextFlags_None);
+        bool search_pressed_enter = false;
+        if(ImGui_InputTextWithHint(
+               "###search",
+               "Search...",
+               search,
+               sizeof(search),
+               ImGuiInputTextFlags_EnterReturnsTrue)) {
+            search_pressed_enter = true;
+        }
 
         ImVec2 avail = ImGui_GetContentRegionAvail();
         avail.y -= ImGui_GetFrameHeightWithSpacing();
@@ -116,11 +119,17 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
                 }
                 ImGui_PushIDInt(process->pid);
                 bool is_selected = process->pid == selected;
+                if(search_pressed_enter) {
+                    ImGui_SetKeyboardFocusHere();
+                    ImGui_SetNavCursorVisible(true);
+                    search_pressed_enter = false;
+                }
                 if(ImGui_SelectableBoolPtr(label, &is_selected, ImGuiSelectableFlags_None)) {
                     selected = process->pid;
                 }
-                if(ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
-                   ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                if((ImGui_IsItemHovered(ImGuiHoveredFlags_None) &&
+                    ImGui_IsMouseDoubleClicked(ImGuiMouseButton_Left)) ||
+                   (ImGui_IsItemFocused() && ImGui_IsKeyPressed(ImGuiKey_Enter))) {
                     selected = process->pid;
                     confirmed = true;
                 }
@@ -197,6 +206,9 @@ static void gui_window_draw_detach_process_popup(Gui* gui) {
 static void gui_window_draw_toolbar(Gui* gui) {
     ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
     if(memory_search_process_is_attached(gui->memory_search)) {
+        ImGui_SetNextItemShortcut(
+            ImGuiMod_Ctrl | ImGuiKey_D,
+            ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
         if(ImGui_Button(detach_process)) {
             if(memory_search_get_results(gui->memory_search)->batches_count > 0 ||
                memory_search_get_scratchpad(gui->memory_search)->items_count > 0) {
@@ -208,6 +220,9 @@ static void gui_window_draw_toolbar(Gui* gui) {
         gui_window_draw_detach_process_popup(gui);
     } else {
         flt32_t width = ImGui_CalcTextSize(detach_process).x + gui->style->FramePadding.x * 2;
+        ImGui_SetNextItemShortcut(
+            ImGuiMod_Ctrl | ImGuiKey_O,
+            ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
         if(ImGui_ButtonEx(attach_process, (ImVec2){width, 0.0f})) {
             ImGui_OpenPopup(attach_process, ImGuiPopupFlags_None);
         }
@@ -620,10 +635,16 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
         if(results->batches_count == 0) {
+            ImGui_SetNextItemShortcut(
+                ImGuiMod_Ctrl | ImGuiKey_Enter,
+                ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
             if(ImGui_Button(first_search)) {
                 memory_search_begin(gui->memory_search);
             }
         } else {
+            ImGui_SetNextItemShortcut(
+                ImGuiMod_Ctrl | ImGuiKey_Enter,
+                ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
             ImGui_BeginDisabled(results->current_results_count == 0);
             if(ImGui_Button(next_search)) {
                 memory_search_next(gui->memory_search);
@@ -636,11 +657,17 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         if(memory_search_is_searching(gui->memory_search)) {
             flt32_t width = ImGui_CalcTextSize(undo_search).x + gui->style->FramePadding.x * 2;
+            ImGui_SetNextItemShortcut(
+                ImGuiMod_Ctrl | ImGuiKey_Space,
+                ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
             if(ImGui_ButtonEx(stop_search, (ImVec2){width, 0.0f})) {
                 memory_search_stop(gui->memory_search);
             }
         } else {
             ImGui_BeginDisabled(results->batches_count < 2);
+            ImGui_SetNextItemShortcut(
+                ImGuiMod_Ctrl | ImGuiKey_Z,
+                ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
             if(ImGui_Button(undo_search)) {
                 memory_search_undo(gui->memory_search);
             }
@@ -651,6 +678,9 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
 
         ImGui_BeginDisabled(memory_search_is_searching(gui->memory_search));
         ImGui_BeginDisabled(results->batches_count < 1);
+        ImGui_SetNextItemShortcut(
+            ImGuiMod_Ctrl | ImGuiKey_Z,
+            ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
         if(ImGui_Button(reset_search)) {
             memory_search_reset(gui->memory_search);
         }
@@ -683,6 +713,9 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
                 ImGui_GetFrameHeightWithSpacing() - pane_spacing_mult * gui->style->ItemSpacing.x -
                 gui->style->FrameBorderSize);
             ImGui_PushFont(gui->fonts.mono);
+            ImGui_SetNextItemShortcut(
+                ImGuiMod_Ctrl | ImGuiKey_F,
+                ImGuiInputFlags_Tooltip | ImGuiInputFlags_RouteGlobal);
             if(ImGui_InputText(
                    "###value",
                    temp_str,
