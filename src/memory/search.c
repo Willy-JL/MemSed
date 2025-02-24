@@ -554,6 +554,9 @@ static void* memory_search_next_callback(Thread* self, void* context) {
         if(last_set->results_count == 0) {
             continue;
         }
+        if(!memory_search_should_process_type(last_set->type, value, deviation, last_set->type)) {
+            continue;
+        }
         MemorySearchResultSet* set = &batch->sets[batch->sets_count];
         MemoryType type = last_set->type;
         set->type = type;
@@ -572,13 +575,13 @@ static void* memory_search_next_callback(Thread* self, void* context) {
     thread_self_push_cancel_cleanup(self, free, value_buf);
     ProcessHandle* handle = memory_search->handle;
     size_t results_progress = 0;
-    size_t set_i = -1;
+    size_t set_i = 0;
     for(size_t last_set_i = 0; last_set_i < last_batch->sets_count; last_set_i++) {
         MemorySearchResultSet* last_set = &last_batch->sets[last_set_i];
-        if(last_set->results_count == 0) {
+        MemorySearchResultSet* set = &batch->sets[set_i];
+        if(set->type != last_set->type) {
             continue;
         }
-        MemorySearchResultSet* set = &batch->sets[++set_i];
         for(size_t result_i = 0; result_i < last_set->results_count; result_i++) {
             // FIXME: check if these are slowing down the search and make it faster
             thread_self_quit_if_canceled(self);
@@ -751,6 +754,7 @@ static void* memory_search_next_callback(Thread* self, void* context) {
                 unreachable();
             }
         }
+        set_i++;
 
         results_progress += last_set->results_count;
     }
