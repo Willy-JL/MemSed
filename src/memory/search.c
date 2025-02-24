@@ -133,7 +133,11 @@ static size_t memory_search_get_result_size(MemoryType type) {
     unreachable();
 }
 
-static bool memory_search_should_process_type(MemoryType param, flt128_t value, MemoryType type) {
+static bool memory_search_should_process_type(
+    MemoryType param,
+    flt128_t value,
+    flt128_t deviation,
+    MemoryType type) {
     if(type >= MemoryTypeMAX) {
         return false;
     }
@@ -143,30 +147,33 @@ static bool memory_search_should_process_type(MemoryType param, flt128_t value, 
     }
 
     if(type == param) {
-        // FIXME: check with deviation
+        flt128_t flt_min = value - deviation;
+        flt128_t flt_max = value + deviation;
+        flt128_t int_min = round(flt_min);
+        flt128_t int_max = round(flt_max);
         switch(type) {
         case MemoryTypeU8:
-            return value >= 0 && value <= UINT8_MAX;
+            return int_max >= 0 && int_min <= UINT8_MAX;
         case MemoryTypeU16:
-            return value >= 0 && value <= UINT16_MAX;
+            return int_max >= 0 && int_min <= UINT16_MAX;
         case MemoryTypeU32:
-            return value >= 0 && value <= UINT32_MAX;
+            return int_max >= 0 && int_min <= UINT32_MAX;
         case MemoryTypeU64:
-            return value >= 0 && value <= UINT64_MAX;
+            return int_max >= 0 && int_min <= UINT64_MAX;
         case MemoryTypeI8:
-            return value >= INT8_MIN && value <= INT8_MAX;
+            return int_max >= INT8_MIN && int_min <= INT8_MAX;
         case MemoryTypeI16:
-            return value >= INT16_MIN && value <= INT16_MAX;
+            return int_max >= INT16_MIN && int_min <= INT16_MAX;
         case MemoryTypeI32:
-            return value >= INT32_MIN && value <= INT32_MAX;
+            return int_max >= INT32_MIN && int_min <= INT32_MAX;
         case MemoryTypeI64:
-            return value >= INT64_MIN && value <= INT64_MAX;
+            return int_max >= INT64_MIN && int_min <= INT64_MAX;
         case MemoryTypeF32:
-            return value >= FLT_MIN && value <= FLT_MAX;
+            return flt_max >= FLT_MIN && flt_min <= FLT_MAX;
         case MemoryTypeF64:
-            return value >= DBL_MIN && value <= DBL_MAX;
+            return flt_max >= DBL_MIN && flt_min <= DBL_MAX;
         case MemoryTypeF128:
-            return value >= LDBL_MIN && value <= LDBL_MAX;
+            return flt_max >= LDBL_MIN && flt_min <= LDBL_MAX;
         default:
             unreachable();
         }
@@ -175,27 +182,27 @@ static bool memory_search_should_process_type(MemoryType param, flt128_t value, 
     switch(param) {
     case MemoryTypeUnsigned:
         if(type < MemoryTypeUnsigned) {
-            return memory_search_should_process_type(type, value, type);
+            return memory_search_should_process_type(type, value, deviation, type);
         }
         return false;
     case MemoryTypeSigned:
         if(type < MemoryTypeSigned && type > MemoryTypeUnsigned) {
-            return memory_search_should_process_type(type, value, type);
+            return memory_search_should_process_type(type, value, deviation, type);
         }
         return false;
     case MemoryTypeInteger:
         if(type < MemoryTypeInteger) {
-            return memory_search_should_process_type(type, value, type);
+            return memory_search_should_process_type(type, value, deviation, type);
         }
         return false;
     case MemoryTypeFloating:
         if(type < MemoryTypeFloating && type > MemoryTypeInteger) {
-            return memory_search_should_process_type(type, value, type);
+            return memory_search_should_process_type(type, value, deviation, type);
         }
         return false;
     case MemoryTypeNumber:
         if(type < MemoryTypeNumber) {
-            return memory_search_should_process_type(type, value, type);
+            return memory_search_should_process_type(type, value, deviation, type);
         }
         return false;
     default:
@@ -281,7 +288,7 @@ static void* memory_search_begin_callback(Thread* self, void* context) {
     flt64_t value_f64_max = value_f128_max;
 
     for(MemoryType type = MemoryTypeMAX - 1; type < MemoryTypeMAX; type--) {
-        if(!memory_search_should_process_type(memory_search->params.type, value, type)) {
+        if(!memory_search_should_process_type(memory_search->params.type, value, deviation, type)) {
             continue;
         }
         MemorySearchResultSet* set = &batch->sets[batch->sets_count];
