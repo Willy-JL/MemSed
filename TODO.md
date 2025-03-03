@@ -8,5 +8,4 @@
   - More value options?
 - Optimize process picker with list clipper
 - Manually add custom address to scratchpad
-- Figure out SDL segfault when building as static exe
 - Sleep GUI when inactive/minimized
