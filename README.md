@@ -30,7 +30,7 @@ Then, run from terminal with `sudo memsed`.
 
 Will work on most Linux distros, needs to be updated manually.
 ```bash
-curl -Lo memsed https://github.com/Willy-JL/MemSed/releases/latest/download/memsed
+curl -Lo memsed https://github.com/WillyJL/MemSed/releases/latest/download/memsed
 sudo install memsed -D -t /usr/local/bin/
 rm memsed
 ```
@@ -49,7 +49,7 @@ If your distro does not support `/usr/local/bin/` in PATH, try `/usr/bin/` inste
 ### Build Instructions
 
 ```console
-git clone -j $(nproc) --recursive https://github.com/Willy-JL/MemSed
+git clone -j $(nproc) --recursive https://github.com/WillyJL/MemSed
 cd MemSed
 cmake --preset release
 cmake --build -j $(nproc) --preset release
