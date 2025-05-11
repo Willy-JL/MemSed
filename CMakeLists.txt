@@ -92,7 +92,7 @@ add_subdirectory("${FONTS_DIR}")
 target_link_libraries(memsed PRIVATE fonts)
 
 # Build as (almost) static executable
-# Adding -static causes a segfault in SDL_CreateWindow()
+# Adding -static prevents loading OpenGL (or any other) shared libraries at runtime
 target_link_libraries(memsed PRIVATE -static-libgcc -static-libstdc++)
 
 # Add run targets
