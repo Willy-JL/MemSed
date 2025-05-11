@@ -180,19 +180,24 @@ CIMGUI_API ImU32 cimgui::ImAlphaBlendColors(ImU32 col_a, ImU32 col_b)
     return ::ImAlphaBlendColors(col_a, col_b);
 }
 
-CIMGUI_API bool cimgui::ImIsPowerOfTwo(int v)
+CIMGUI_API bool         cimgui::ImIsPowerOfTwo(int v)
 {
     return ::ImIsPowerOfTwo(v);
 }
 
-CIMGUI_API bool cimgui::ImIsPowerOfTwoImU64(ImU64 v)
+CIMGUI_API bool         cimgui::ImIsPowerOfTwoImU64(ImU64 v)
 {
     return ::ImIsPowerOfTwo(v);
 }
 
-CIMGUI_API int  cimgui::ImUpperPowerOfTwo(int v)
+CIMGUI_API int          cimgui::ImUpperPowerOfTwo(int v)
 {
     return ::ImUpperPowerOfTwo(v);
+}
+
+CIMGUI_API unsigned int cimgui::ImCountSetBits(unsigned int v)
+{
+    return ::ImCountSetBits(v);
 }
 
 CIMGUI_API int         cimgui::ImStricmp(const char* str1, const char* str2)
@@ -896,9 +901,9 @@ CIMGUI_API void cimgui::ImDrawListSharedData_SetCircleTessellationMaxError(cimgu
     reinterpret_cast<::ImDrawListSharedData*>(self)->SetCircleTessellationMaxError(max_error);
 }
 
-CIMGUI_API void* cimgui::ImGuiDataVarInfo_GetVarPtr(const cimgui::ImGuiDataVarInfo* self, void* parent)
+CIMGUI_API void* cimgui::ImGuiStyleVarInfo_GetVarPtr(const cimgui::ImGuiStyleVarInfo* self, void* parent)
 {
-    return reinterpret_cast<const ::ImGuiDataVarInfo*>(self)->GetVarPtr(parent);
+    return reinterpret_cast<const ::ImGuiStyleVarInfo*>(self)->GetVarPtr(parent);
 }
 
 CIMGUI_API void  cimgui::ImGuiMenuColumns_Update(cimgui::ImGuiMenuColumns* self, float spacing, bool window_reappearing)
@@ -1136,9 +1141,14 @@ CIMGUI_API cimgui::ImGuiTableColumnSettings* cimgui::ImGuiTableSettings_GetColum
     return reinterpret_cast<::cimgui::ImGuiTableColumnSettings*>(reinterpret_cast<::ImGuiTableSettings*>(self)->GetColumnSettings());
 }
 
-CIMGUI_API cimgui::ImGuiIO* cimgui::ImGui_GetIOEx(cimgui::ImGuiContext* ctx)
+CIMGUI_API cimgui::ImGuiIO* cimgui::ImGui_GetIOImGuiContextPtr(cimgui::ImGuiContext* ctx)
 {
-    return reinterpret_cast<::cimgui::ImGuiIO*>(&::ImGui::GetIOEx(reinterpret_cast<::ImGuiContext*>(ctx)));
+    return reinterpret_cast<::cimgui::ImGuiIO*>(&::ImGui::GetIO(reinterpret_cast<::ImGuiContext*>(ctx)));
+}
+
+CIMGUI_API cimgui::ImGuiPlatformIO* cimgui::ImGui_GetPlatformIOImGuiContextPtr(cimgui::ImGuiContext* ctx)
+{
+    return reinterpret_cast<::cimgui::ImGuiPlatformIO*>(&::ImGui::GetPlatformIO(reinterpret_cast<::ImGuiContext*>(ctx)));
 }
 
 CIMGUI_API cimgui::ImGuiWindow* cimgui::ImGui_GetCurrentWindowRead(void)
@@ -1161,87 +1171,87 @@ CIMGUI_API cimgui::ImGuiWindow* cimgui::ImGui_FindWindowByName(const char* name)
     return reinterpret_cast<::cimgui::ImGuiWindow*>(::ImGui::FindWindowByName(name));
 }
 
-CIMGUI_API void         cimgui::ImGui_UpdateWindowParentAndRootLinks(cimgui::ImGuiWindow* window, ImGuiWindowFlags flags, cimgui::ImGuiWindow* parent_window)
+CIMGUI_API void             cimgui::ImGui_UpdateWindowParentAndRootLinks(cimgui::ImGuiWindow* window, ImGuiWindowFlags flags, cimgui::ImGuiWindow* parent_window)
 {
     ::ImGui::UpdateWindowParentAndRootLinks(reinterpret_cast<::ImGuiWindow*>(window), flags, reinterpret_cast<::ImGuiWindow*>(parent_window));
 }
 
-CIMGUI_API void         cimgui::ImGui_UpdateWindowSkipRefresh(cimgui::ImGuiWindow* window)
+CIMGUI_API void             cimgui::ImGui_UpdateWindowSkipRefresh(cimgui::ImGuiWindow* window)
 {
     ::ImGui::UpdateWindowSkipRefresh(reinterpret_cast<::ImGuiWindow*>(window));
 }
 
-CIMGUI_API cimgui::ImVec2 cimgui::ImGui_CalcWindowNextAutoFitSize(cimgui::ImGuiWindow* window)
+CIMGUI_API cimgui::ImVec2   cimgui::ImGui_CalcWindowNextAutoFitSize(cimgui::ImGuiWindow* window)
 {
     return ConvertFromCPP_ImVec2(::ImGui::CalcWindowNextAutoFitSize(reinterpret_cast<::ImGuiWindow*>(window)));
 }
 
-CIMGUI_API bool         cimgui::ImGui_IsWindowChildOf(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* potential_parent, bool popup_hierarchy)
+CIMGUI_API bool             cimgui::ImGui_IsWindowChildOf(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* potential_parent, bool popup_hierarchy)
 {
     return ::ImGui::IsWindowChildOf(reinterpret_cast<::ImGuiWindow*>(window), reinterpret_cast<::ImGuiWindow*>(potential_parent), popup_hierarchy);
 }
 
-CIMGUI_API bool         cimgui::ImGui_IsWindowWithinBeginStackOf(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* potential_parent)
+CIMGUI_API bool             cimgui::ImGui_IsWindowWithinBeginStackOf(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* potential_parent)
 {
     return ::ImGui::IsWindowWithinBeginStackOf(reinterpret_cast<::ImGuiWindow*>(window), reinterpret_cast<::ImGuiWindow*>(potential_parent));
 }
 
-CIMGUI_API bool         cimgui::ImGui_IsWindowAbove(cimgui::ImGuiWindow* potential_above, cimgui::ImGuiWindow* potential_below)
+CIMGUI_API bool             cimgui::ImGui_IsWindowAbove(cimgui::ImGuiWindow* potential_above, cimgui::ImGuiWindow* potential_below)
 {
     return ::ImGui::IsWindowAbove(reinterpret_cast<::ImGuiWindow*>(potential_above), reinterpret_cast<::ImGuiWindow*>(potential_below));
 }
 
-CIMGUI_API bool         cimgui::ImGui_IsWindowNavFocusable(cimgui::ImGuiWindow* window)
+CIMGUI_API bool             cimgui::ImGui_IsWindowNavFocusable(cimgui::ImGuiWindow* window)
 {
     return ::ImGui::IsWindowNavFocusable(reinterpret_cast<::ImGuiWindow*>(window));
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowPosImGuiWindowPtr(cimgui::ImGuiWindow* window, cimgui::ImVec2 pos, ImGuiCond cond)
+CIMGUI_API void             cimgui::ImGui_SetWindowPosImGuiWindowPtr(cimgui::ImGuiWindow* window, cimgui::ImVec2 pos, ImGuiCond cond)
 {
     ::ImGui::SetWindowPos(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImVec2(pos), cond);
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowSizeImGuiWindowPtr(cimgui::ImGuiWindow* window, cimgui::ImVec2 size, ImGuiCond cond)
+CIMGUI_API void             cimgui::ImGui_SetWindowSizeImGuiWindowPtr(cimgui::ImGuiWindow* window, cimgui::ImVec2 size, ImGuiCond cond)
 {
     ::ImGui::SetWindowSize(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImVec2(size), cond);
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowCollapsedImGuiWindowPtr(cimgui::ImGuiWindow* window, bool collapsed, ImGuiCond cond)
+CIMGUI_API void             cimgui::ImGui_SetWindowCollapsedImGuiWindowPtr(cimgui::ImGuiWindow* window, bool collapsed, ImGuiCond cond)
 {
     ::ImGui::SetWindowCollapsed(reinterpret_cast<::ImGuiWindow*>(window), collapsed, cond);
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowHitTestHole(cimgui::ImGuiWindow* window, cimgui::ImVec2 pos, cimgui::ImVec2 size)
+CIMGUI_API void             cimgui::ImGui_SetWindowHitTestHole(cimgui::ImGuiWindow* window, cimgui::ImVec2 pos, cimgui::ImVec2 size)
 {
     ::ImGui::SetWindowHitTestHole(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImVec2(pos), ConvertToCPP_ImVec2(size));
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowHiddenAndSkipItemsForCurrentFrame(cimgui::ImGuiWindow* window)
+CIMGUI_API void             cimgui::ImGui_SetWindowHiddenAndSkipItemsForCurrentFrame(cimgui::ImGuiWindow* window)
 {
     ::ImGui::SetWindowHiddenAndSkipItemsForCurrentFrame(reinterpret_cast<::ImGuiWindow*>(window));
 }
 
-CIMGUI_API void         cimgui::ImGui_SetWindowParentWindowForFocusRoute(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* parent_window)
+CIMGUI_API void             cimgui::ImGui_SetWindowParentWindowForFocusRoute(cimgui::ImGuiWindow* window, cimgui::ImGuiWindow* parent_window)
 {
     ::ImGui::SetWindowParentWindowForFocusRoute(reinterpret_cast<::ImGuiWindow*>(window), reinterpret_cast<::ImGuiWindow*>(parent_window));
 }
 
-CIMGUI_API cimgui::ImRect cimgui::ImGui_WindowRectAbsToRel(cimgui::ImGuiWindow* window, cimgui::ImRect r)
+CIMGUI_API cimgui::ImRect   cimgui::ImGui_WindowRectAbsToRel(cimgui::ImGuiWindow* window, cimgui::ImRect r)
 {
     return ConvertFromCPP_ImRect(::ImGui::WindowRectAbsToRel(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImRect(r)));
 }
 
-CIMGUI_API cimgui::ImRect cimgui::ImGui_WindowRectRelToAbs(cimgui::ImGuiWindow* window, cimgui::ImRect r)
+CIMGUI_API cimgui::ImRect   cimgui::ImGui_WindowRectRelToAbs(cimgui::ImGuiWindow* window, cimgui::ImRect r)
 {
     return ConvertFromCPP_ImRect(::ImGui::WindowRectRelToAbs(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImRect(r)));
 }
 
-CIMGUI_API cimgui::ImVec2 cimgui::ImGui_WindowPosAbsToRel(cimgui::ImGuiWindow* window, cimgui::ImVec2 p)
+CIMGUI_API cimgui::ImVec2   cimgui::ImGui_WindowPosAbsToRel(cimgui::ImGuiWindow* window, cimgui::ImVec2 p)
 {
     return ConvertFromCPP_ImVec2(::ImGui::WindowPosAbsToRel(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImVec2(p)));
 }
 
-CIMGUI_API cimgui::ImVec2 cimgui::ImGui_WindowPosRelToAbs(cimgui::ImGuiWindow* window, cimgui::ImVec2 p)
+CIMGUI_API cimgui::ImVec2   cimgui::ImGui_WindowPosRelToAbs(cimgui::ImGuiWindow* window, cimgui::ImVec2 p)
 {
     return ConvertFromCPP_ImVec2(::ImGui::WindowPosRelToAbs(reinterpret_cast<::ImGuiWindow*>(window), ConvertToCPP_ImVec2(p)));
 }
@@ -1631,17 +1641,17 @@ CIMGUI_API void   cimgui::ImGui_ShrinkWidths(cimgui::ImGuiShrinkWidthItem* items
     ::ImGui::ShrinkWidths(reinterpret_cast<::ImGuiShrinkWidthItem*>(items), count, width_excess);
 }
 
-CIMGUI_API const cimgui::ImGuiDataVarInfo* cimgui::ImGui_GetStyleVarInfo(ImGuiStyleVar idx)
+CIMGUI_API const cimgui::ImGuiStyleVarInfo* cimgui::ImGui_GetStyleVarInfo(ImGuiStyleVar idx)
 {
-    return reinterpret_cast<const ::cimgui::ImGuiDataVarInfo*>(::ImGui::GetStyleVarInfo(idx));
+    return reinterpret_cast<const ::cimgui::ImGuiStyleVarInfo*>(::ImGui::GetStyleVarInfo(idx));
 }
 
-CIMGUI_API void                    cimgui::ImGui_BeginDisabledOverrideReenable(void)
+CIMGUI_API void                     cimgui::ImGui_BeginDisabledOverrideReenable(void)
 {
     ::ImGui::BeginDisabledOverrideReenable();
 }
 
-CIMGUI_API void                    cimgui::ImGui_EndDisabledOverrideReenable(void)
+CIMGUI_API void                     cimgui::ImGui_EndDisabledOverrideReenable(void)
 {
     ::ImGui::EndDisabledOverrideReenable();
 }
@@ -1684,6 +1694,11 @@ CIMGUI_API bool cimgui::ImGui_BeginChildEx(const char* name, ImGuiID id, cimgui:
 CIMGUI_API bool         cimgui::ImGui_BeginPopupEx(ImGuiID id, ImGuiWindowFlags extra_window_flags)
 {
     return ::ImGui::BeginPopupEx(id, extra_window_flags);
+}
+
+CIMGUI_API bool         cimgui::ImGui_BeginPopupMenuEx(ImGuiID id, const char* label, ImGuiWindowFlags extra_window_flags)
+{
+    return ::ImGui::BeginPopupMenuEx(id, label, extra_window_flags);
 }
 
 CIMGUI_API void         cimgui::ImGui_OpenPopupEx(ImGuiID id)
@@ -3010,6 +3025,11 @@ CIMGUI_API void cimgui::ImGui_SetNextItemRefVal(ImGuiDataType data_type, void* p
     ::ImGui::SetNextItemRefVal(data_type, p_data);
 }
 
+CIMGUI_API bool cimgui::ImGui_IsItemActiveAsInputText(void)
+{
+    return ::ImGui::IsItemActiveAsInputText();
+}
+
 CIMGUI_API void cimgui::ImGui_ColorTooltip(const char* text, const float* col, ImGuiColorEditFlags flags)
 {
     ::ImGui::ColorTooltip(text, col, flags);
@@ -3279,9 +3299,9 @@ CIMGUI_API const cimgui::ImFontBuilderIO* cimgui::ImFontAtlasGetBuilderForStbTru
 
 #endif // #ifdef IMGUI_ENABLE_STB_TRUETYPE
 
-CIMGUI_API void cimgui::ImFontAtlasUpdateConfigDataPointers(cimgui::ImFontAtlas* atlas)
+CIMGUI_API void cimgui::ImFontAtlasUpdateSourcesPointers(cimgui::ImFontAtlas* atlas)
 {
-    ::ImFontAtlasUpdateConfigDataPointers(reinterpret_cast<::ImFontAtlas*>(atlas));
+    ::ImFontAtlasUpdateSourcesPointers(reinterpret_cast<::ImFontAtlas*>(atlas));
 }
 
 CIMGUI_API void cimgui::ImFontAtlasBuildInit(cimgui::ImFontAtlas* atlas)
@@ -3289,9 +3309,9 @@ CIMGUI_API void cimgui::ImFontAtlasBuildInit(cimgui::ImFontAtlas* atlas)
     ::ImFontAtlasBuildInit(reinterpret_cast<::ImFontAtlas*>(atlas));
 }
 
-CIMGUI_API void cimgui::ImFontAtlasBuildSetupFont(cimgui::ImFontAtlas* atlas, cimgui::ImFont* font, cimgui::ImFontConfig* font_config, float ascent, float descent)
+CIMGUI_API void cimgui::ImFontAtlasBuildSetupFont(cimgui::ImFontAtlas* atlas, cimgui::ImFont* font, cimgui::ImFontConfig* src, float ascent, float descent)
 {
-    ::ImFontAtlasBuildSetupFont(reinterpret_cast<::ImFontAtlas*>(atlas), reinterpret_cast<::ImFont*>(font), reinterpret_cast<::ImFontConfig*>(font_config), ascent, descent);
+    ::ImFontAtlasBuildSetupFont(reinterpret_cast<::ImFontAtlas*>(atlas), reinterpret_cast<::ImFont*>(font), reinterpret_cast<::ImFontConfig*>(src), ascent, descent);
 }
 
 CIMGUI_API void cimgui::ImFontAtlasBuildPackCustomRects(cimgui::ImFontAtlas* atlas, void* stbrp_context_opaque)
@@ -3324,9 +3344,20 @@ CIMGUI_API void cimgui::ImFontAtlasBuildMultiplyRectAlpha8(const unsigned char t
     ::ImFontAtlasBuildMultiplyRectAlpha8(table, pixels, x, y, w, h, stride);
 }
 
-CIMGUI_API void cimgui::ImFontAtlasBuildGetOversampleFactors(const cimgui::ImFontConfig* cfg, int* out_oversample_h, int* out_oversample_v)
+CIMGUI_API void cimgui::ImFontAtlasBuildGetOversampleFactors(const cimgui::ImFontConfig* src, int* out_oversample_h, int* out_oversample_v)
 {
-    ::ImFontAtlasBuildGetOversampleFactors(reinterpret_cast<const ::ImFontConfig*>(cfg), out_oversample_h, out_oversample_v);
+    ::ImFontAtlasBuildGetOversampleFactors(reinterpret_cast<const ::ImFontConfig*>(src), out_oversample_h, out_oversample_v);
+}
+
+CIMGUI_API bool cimgui::ImFontAtlasGetMouseCursorTexData(cimgui::ImFontAtlas* atlas, ImGuiMouseCursor cursor_type, cimgui::ImVec2* out_offset, cimgui::ImVec2* out_size, cimgui::ImVec2 out_uv_border[2], cimgui::ImVec2 out_uv_fill[2])
+{
+    ::ImVec2 out_uv_border_converted_array[2];
+    for (int i=0; i<2; i++)
+        out_uv_border_converted_array[i] = ConvertToCPP_ImVec2(out_uv_border[i]);
+    ::ImVec2 out_uv_fill_converted_array[2];
+    for (int i=0; i<2; i++)
+        out_uv_fill_converted_array[i] = ConvertToCPP_ImVec2(out_uv_fill[i]);
+    return ::ImFontAtlasGetMouseCursorTexData(reinterpret_cast<::ImFontAtlas*>(atlas), cursor_type, reinterpret_cast<::ImVec2*>(out_offset), reinterpret_cast<::ImVec2*>(out_size), out_uv_border_converted_array, out_uv_fill_converted_array);
 }
 
 #ifdef IMGUI_ENABLE_TEST_ENGINE

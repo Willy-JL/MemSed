@@ -1,12 +1,12 @@
-[submodule "lib/vendor/dear_bindings"]
-	path = lib/vendor/dear_bindings
-	url = https://github.com/dearimgui/dear_bindings.git
 [submodule "lib/vendor/imgui"]
 	path = lib/vendor/imgui
 	url = https://github.com/ocornut/imgui.git
 [submodule "lib/vendor/sdl3"]
 	path = lib/vendor/sdl3
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "lib/vendor/dear_bindings"]
+	path = lib/vendor/dear_bindings
+	url = https://github.com/dearimgui/dear_bindings.git
 [submodule "lib/vendor/glad"]
 	path = lib/vendor/glad
 	url = https://github.com/Dav1dde/glad.git
