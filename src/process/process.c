@@ -11,7 +11,7 @@ static UidUsername* uid_usernames = NULL;
 static size_t uid_usernames_count = 0;
 
 static void load_uid_usernames(void) {
-    char temp_str[257];
+    char temp_str[256];
     size_t capacity = 1;
     size_t count = 0;
     UidUsername* new_uid_usernames = malloc(sizeof(UidUsername) * capacity);
@@ -60,7 +60,7 @@ static void load_uid_usernames(void) {
 }
 
 static char* process_read_proc_file(Process* process, const char* name) {
-    char temp_str[257];
+    char temp_str[256];
 
     snprintf(temp_str, sizeof(temp_str), "/proc/%i/%s", process->pid, name);
     FILE* file = fopen(temp_str, "r");
@@ -101,9 +101,12 @@ Process* process_init(ProcessPid pid) {
         strlcpy(process->name, name, sizeof(process->name));
         free(name);
     }
+    process->command[0] = '\0';
+    process->executable[0] = '\0';
+    process->user[0] = '\0';
 
     snprintf(temp_str, sizeof(temp_str), "/proc/%i/exe", process->pid);
-    char executable[257];
+    char executable[256];
     res = readlink(temp_str, executable, sizeof(executable));
     if(res < 0) {
         if(res == -1) {
@@ -122,13 +125,20 @@ Process* process_init(ProcessPid pid) {
         res--;
     }
     if(res == 0) {
-        process->executable = NULL;
+        process->executable[0] = '\0';
     } else {
         executable[res] = '\0';
-        process->executable = strdup(executable);
+        strlcpy(process->executable, executable, sizeof(process->executable));
     }
 
-    process->command = process_read_proc_file(process, "cmdline");
+    char* cmdline = process_read_proc_file(process, "cmdline");
+    if(cmdline == NULL) {
+        strlcpy(process->command, "<cannot read cmdline>", sizeof(process->command));
+    } else {
+        strlcpy(process->command, cmdline, sizeof(process->command));
+        free(cmdline);
+    }
+    process->command[sizeof(process->command) - 1] = '\0';
 
     snprintf(temp_str, sizeof(temp_str), "/proc/%i", process->pid);
     struct stat process_stat;
@@ -146,33 +156,17 @@ Process* process_init(ProcessPid pid) {
     }
     for(size_t i = 0; i < uid_usernames_count; i++) {
         if(uid_usernames[i].uid == process_stat.st_uid) {
-            process->user = strdup(uid_usernames[i].username);
+            snprintf(process->user, sizeof(process->user), "%s", uid_usernames[i].username);
             break;
         }
     }
-    if(process->user == NULL) {
-        snprintf(temp_str, sizeof(temp_str), "%i", process_stat.st_uid);
-        process->user = strdup(temp_str);
+    if(!*process->user) {
+        snprintf(process->user, sizeof(process->user), "%i", process_stat.st_uid);
     }
 
     return process;
 }
 
 void process_free(Process* process) {
-    char* executable = process->executable;
-    char* command = process->command;
-    char* user = process->user;
-    process->executable = NULL;
-    process->command = NULL;
-    process->user = NULL;
-    if(executable != NULL) {
-        free(executable);
-    }
-    if(command != NULL) {
-        free(command);
-    }
-    if(user != NULL) {
-        free(user);
-    }
     free(process);
 }

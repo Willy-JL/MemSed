@@ -6,8 +6,8 @@
 #include "type.h"
 
 typedef struct {
-    char address_str[19]; // (64bit = 8byte) * 2hexchars + "0x" + '\0'
-    char value_str[33]; // i64 = 20digit, floats could be more but 32chars are good enough
+    char address_str[32]; // (64bit = 8byte) * 2hexchars + "0x" + '\0'
+    char value_str[32]; // i64 = 20digit, floats could be more but 32chars are good enough
 } MemorySearchValueDisplay;
 
 typedef struct __attribute__((packed)) {

@@ -79,7 +79,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
             list = process_list_init();
         }
         static ProcessPid selected = 0;
-        static char search[129] = "";
+        static char search[128] = "";
         bool any_selected = false;
 
         ImGui_SetNextItemWidth(-FLT_MIN);
@@ -102,19 +102,19 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         bool confirmed = false;
         if(ImGui_BeginListBox("###processes", avail)) {
             // FIXME: use clipper
-            char label[257];
+            char label[1500];
             for(size_t i = 0; i < list->processes_count; i++) {
-                Process* process = list->processes[i];
+                const Process* process = list->processes[i];
                 snprintf(
                     label,
                     sizeof(label),
                     "%s (%i, %s, %s)%s%s",
                     process->name[0] ? process->name : "unknown process",
                     process->pid,
-                    process->user ? process->user : "unknown user",
-                    process->executable ? process->executable : "unknown exe",
-                    process->command ? ": " : "",
-                    process->command ? process->command : "");
+                    process->user,
+                    process->executable,
+                    process->command,
+                    process->command);
                 if(search[0] != '\0' && strcasestr(label, search) == NULL) {
                     continue;
                 }
@@ -250,7 +250,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
         snprintf(progress_str, sizeof(progress_str), "%.0f%%", progress * 100);
         ImGui_ProgressBar(progress, progressbar_size, progress_str);
     } else {
-        char label[257] = "No Process Selected";
+        char label[1024] = "No Process Selected";
         const char* command = NULL;
         if(memory_search_process_is_attached(gui->memory_search)) {
             Process* process = memory_search_get_process(gui->memory_search);
@@ -261,8 +261,8 @@ static void gui_window_draw_toolbar(Gui* gui) {
                     "%s (%i, %s, %s)",
                     process->name[0] ? process->name : "unknown process",
                     process->pid,
-                    process->user ? process->user : "unknown user",
-                    process->executable ? process->executable : "unknown exe");
+                    process->user,
+                    process->executable);
                 command = process->command;
             }
         }
@@ -746,7 +746,7 @@ static void gui_window_draw_options_pane(Gui* gui, ImVec2 size) {
             ImGui_TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed);
             ImGui_TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
             int32_t temp_int;
-            char temp_str[33];
+            char temp_str[32];
 
             // Value
             ImGui_TableNextRow();
@@ -1024,7 +1024,7 @@ static void gui_window_draw_scratchpad_pane(Gui* gui, ImVec2 size) {
                     ImGui_TableNextColumn();
                     static int32_t editing = -1;
                     if(clip_i == editing) {
-                        char temp_str[33];
+                        char temp_str[32];
                         strlcpy(temp_str, display.value_str, sizeof(temp_str));
                         ImGui_SetNextItemWidth(-FLT_MIN);
                         ImGui_SetKeyboardFocusHere();
