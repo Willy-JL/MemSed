@@ -5,9 +5,9 @@
 typedef struct {
     ProcessPid pid;
     char name[16];
-    char* executable;
-    char* command;
-    char* user;
+    char executable[256];
+    char command[256];
+    char user[256];
 } Process;
 
 Process* process_init(ProcessPid pid);
