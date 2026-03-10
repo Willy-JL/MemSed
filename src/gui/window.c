@@ -109,12 +109,12 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
                     label,
                     sizeof(label),
                     "%s (%i, %s, %s): %s",
-                    process->name[0] ? process->name : "unknown process",
+                    *process->name ? process->name : "unknown process",
                     process->pid,
                     process->user,
                     process->executable,
                     process->command);
-                if(search[0] != '\0' && strcasestr(label, search) == NULL) {
+                if(*search && strcasestr(label, search) == NULL) {
                     continue;
                 }
                 ImGui_PushIDInt(process->pid);
@@ -258,7 +258,7 @@ static void gui_window_draw_toolbar(Gui* gui) {
                     label,
                     sizeof(label),
                     "%s (%i, %s, %s)",
-                    process->name[0] ? process->name : "unknown process",
+                    *process->name ? process->name : "unknown process",
                     process->pid,
                     process->user,
                     process->executable);
