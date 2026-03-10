@@ -108,12 +108,11 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
                 snprintf(
                     label,
                     sizeof(label),
-                    "%s (%i, %s, %s)%s%s",
+                    "%s (%i, %s, %s): %s",
                     process->name[0] ? process->name : "unknown process",
                     process->pid,
                     process->user,
                     process->executable,
-                    process->command,
                     process->command);
                 if(search[0] != '\0' && strcasestr(label, search) == NULL) {
                     continue;
