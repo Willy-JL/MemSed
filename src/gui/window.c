@@ -102,7 +102,7 @@ static void gui_window_draw_attach_process_popup(Gui* gui) {
         bool confirmed = false;
         if(ImGui_BeginListBox("###processes", avail)) {
             // FIXME: use clipper
-            char label[1500];
+            char label[1024];
             for(size_t i = 0; i < list->processes_count; i++) {
                 const Process* process = list->processes[i];
                 snprintf(
