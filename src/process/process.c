@@ -138,7 +138,6 @@ Process* process_init(ProcessPid pid) {
         strlcpy(process->command, cmdline, sizeof(process->command));
         free(cmdline);
     }
-    process->command[sizeof(process->command) - 1] = '\0';
 
     snprintf(temp_str, sizeof(temp_str), "/proc/%i", process->pid);
     struct stat process_stat;
@@ -156,7 +155,7 @@ Process* process_init(ProcessPid pid) {
     }
     for(size_t i = 0; i < uid_usernames_count; i++) {
         if(uid_usernames[i].uid == process_stat.st_uid) {
-            snprintf(process->user, sizeof(process->user), "%s", uid_usernames[i].username);
+            strlcpy(process->user, uid_usernames[i].username, sizeof(process->user));
             break;
         }
     }
